@@ -1,0 +1,6 @@
+{
+  "name": "Career Legend: Pro Footballer Career RPG",
+  "description": "An immersive deep football player career simulation featuring authentic pro contracts, agent negotiations, tactical match decisions, and legacy progression.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
