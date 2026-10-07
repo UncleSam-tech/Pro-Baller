@@ -13,6 +13,7 @@ import type {
   FootballWorldRuntimeState,
   FootballWorldStaticContext,
   WorldFixtureParticipation,
+  WorldFixtureMatchDetail,
   WorldFootballPosition,
   WorldPlayerFootballState,
 } from './types';
@@ -32,6 +33,7 @@ import {
   computeClubReferenceLineupQuality,
   computeLineupStrengthModifiers,
 } from './lineupStrength';
+import { generateFixtureMatchDetail } from './matchEvents';
 
 // ============================================================================
 // SIMULATION CONSTANTS
@@ -60,7 +62,7 @@ export const MAX_EXPECTED_GOALS = 4.5;
 /**
  * 32-bit FNV-1a string hashing function.
  */
-function hashString(str: string): number {
+export function hashString(str: string): number {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
     h ^= str.charCodeAt(i);
@@ -72,7 +74,7 @@ function hashString(str: string): number {
 /**
  * Mulberry32 32-bit deterministic uniform PRNG returning [0, 1).
  */
-function createRng(seed: number): () => number {
+export function createRng(seed: number): () => number {
   let s = seed >>> 0;
   return () => {
     s = (s + 0x6d2b79f5) >>> 0;
@@ -525,6 +527,10 @@ export function advanceFootballWorldStep(
     (state.playerFootballStates ?? []).map((p) => [p.playerId, { ...p }])
   );
   const newlySimulatedParticipations: WorldFixtureParticipation[] = [];
+  const newlySimulatedMatchDetails: WorldFixtureMatchDetail[] = [];
+  const existingDetailFixtureIds = new Set(
+    (state.fixtureMatchDetails ?? []).map((d) => d.fixtureId)
+  );
   const clubReferenceQualities = new Map<string, LineupQuality>();
 
   // Chronological day-by-day progression
@@ -581,9 +587,8 @@ export function advanceFootballWorldStep(
       const benchSize = compBenchSizes.get(compId) ?? 9;
 
       // Deterministic stable RNG seed (independent of caller nextDate)
-      const seed = hashString(
-        `${state.dataPackId}:${entry.compState.seasonLabel}:${compId}:${fixture.id}:${calendarDate}`
-      );
+      const baseFixtureKey = `${state.dataPackId}:${entry.compState.seasonLabel}:${compId}:${fixture.id}:${calendarDate}`;
+      const seed = hashString(baseFixtureKey);
       const rng = createRng(seed);
 
       // Squad selection using player states at the beginning of this date
@@ -667,6 +672,27 @@ export function advanceFootballWorldStep(
         awaySelection
       );
       newlySimulatedParticipations.push(participation);
+
+      if (!existingDetailFixtureIds.has(fixture.id)) {
+        const matchDetail = generateFixtureMatchDetail({
+          fixture: {
+            id: fixture.id,
+            homeTeamId: fixture.homeTeamId,
+            awayTeamId: fixture.awayTeamId,
+          },
+          homeGoals,
+          awayGoals,
+          homeSelection,
+          awaySelection,
+          playerStates: beginningOfDayPlayerStates,
+          playerPositions,
+          baseFixtureSeedKey: baseFixtureKey,
+        });
+        if (matchDetail) {
+          newlySimulatedMatchDetails.push(matchDetail);
+          existingDetailFixtureIds.add(fixture.id);
+        }
+      }
 
       // Determine team match results
       let homeResult: 'win' | 'draw' | 'loss' = 'draw';
@@ -799,6 +825,10 @@ export function advanceFootballWorldStep(
     fixtureParticipations: [
       ...(state.fixtureParticipations ?? []),
       ...newlySimulatedParticipations,
+    ],
+    fixtureMatchDetails: [
+      ...(state.fixtureMatchDetails ?? []),
+      ...newlySimulatedMatchDetails,
     ],
   };
 

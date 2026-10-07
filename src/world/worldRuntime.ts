@@ -15,6 +15,7 @@ import type {
   FootballWorldDataPack,
   FootballWorldRuntimeState,
   FootballWorldStaticContext,
+  WorldFixtureMatchDetail,
   WorldFootballPosition,
 } from './types';
 import { validateFootballWorldDataPack } from './worldDataPack';
@@ -180,6 +181,7 @@ export function bootstrapFootballWorld(
       managerAssignments,
       playerFootballStates,
       fixtureParticipations: [],
+      fixtureMatchDetails: [],
     },
   };
 }
@@ -243,6 +245,16 @@ export {
   getWorldPlayerAppearances,
   getWorldPlayerMinutes,
 } from './matchSquadSelection';
+
+/**
+ * Retrieves the WorldFixtureMatchDetail for a given fixture ID, or undefined if not simulated/historical.
+ */
+export function getWorldFixtureMatchDetail(
+  state: FootballWorldRuntimeState,
+  fixtureId: string
+): WorldFixtureMatchDetail | undefined {
+  return state.fixtureMatchDetails?.find(d => d.fixtureId === fixtureId);
+}
 
 /**
  * Creates an immutable, zero-overhead static context from a FootballWorldDataPack

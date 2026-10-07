@@ -231,6 +231,41 @@ export interface WorldFixtureParticipation {
   playerAppearances: WorldPlayerMatchAppearance[];
 }
 
+// ============================================================================
+// PART 11.6 — MATCH EVENTS & RATINGS (PHASE 3M)
+// ============================================================================
+
+export type WorldMatchEventType = 'GOAL' | 'YELLOW_CARD';
+
+export interface WorldGoalEvent {
+  type: 'GOAL';
+  teamId: string;
+  playerId: string;
+  assistPlayerId?: string;
+  minute: number;
+}
+
+export interface WorldYellowCardEvent {
+  type: 'YELLOW_CARD';
+  teamId: string;
+  playerId: string;
+  minute: number;
+}
+
+export type WorldMatchEvent = WorldGoalEvent | WorldYellowCardEvent;
+
+export interface WorldPlayerMatchRating {
+  playerId: string;
+  teamId: string;
+  rating: number;
+}
+
+export interface WorldFixtureMatchDetail {
+  fixtureId: string;
+  events: WorldMatchEvent[];
+  playerRatings: WorldPlayerMatchRating[];
+}
+
 export interface FootballWorldRuntimeState {
   dataPackId: string;
   dataPackVersion: number;
@@ -250,6 +285,8 @@ export interface FootballWorldRuntimeState {
   playerFootballStates: WorldPlayerFootballState[];
 
   fixtureParticipations: WorldFixtureParticipation[];
+
+  fixtureMatchDetails?: WorldFixtureMatchDetail[];
 }
 
 export interface FootballWorldBootstrapResult {
