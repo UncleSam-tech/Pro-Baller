@@ -527,3 +527,64 @@ export interface CompetitionHierarchyValidation {
   valid: boolean;
   errors: string[];
 }
+
+export interface DomesticLeagueMembershipState {
+  countryId: string;
+
+  seasonLabel: string;
+
+  competitionTeamIds: Record<string, string[]>;
+}
+
+export interface DomesticLeagueMembershipValidation {
+  valid: boolean;
+  errors: string[];
+}
+
+export type CompetitionMovementSource =
+  | 'DIRECT_SEASON_OUTCOME'
+  | 'PLAYOFF_RESULT';
+
+export interface ResolvedCompetitionClubMovement {
+  teamId: string;
+
+  countryId: string;
+
+  sourceCompetitionId: string;
+  destinationCompetitionId: string;
+
+  movementType: CompetitionMovementType;
+
+  relationshipId: string;
+
+  source: CompetitionMovementSource;
+
+  sourceFinalPosition?: number;
+}
+
+export interface DirectCompetitionMovementDerivationResult {
+  accepted: boolean;
+
+  movements?: ResolvedCompetitionClubMovement[];
+
+  error?: string;
+}
+
+export interface DomesticLeagueMembershipTransition {
+  countryId: string;
+
+  fromSeasonLabel: string;
+  toSeasonLabel: string;
+
+  movements: ResolvedCompetitionClubMovement[];
+
+  nextState: DomesticLeagueMembershipState;
+}
+
+export interface DomesticLeagueMembershipTransitionResult {
+  accepted: boolean;
+
+  transition?: DomesticLeagueMembershipTransition;
+
+  error?: string;
+}
