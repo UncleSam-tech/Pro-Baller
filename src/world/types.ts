@@ -4,6 +4,8 @@ import type {
   CompetitionMovementRelationship,
   CompetitionRuleSet,
   CompetitionSchedule,
+  CompetitionSeasonState,
+  DomesticLeagueMembershipState,
 } from '../competition/types';
 
 // ============================================================================
@@ -188,4 +190,33 @@ export interface FootballWorldDataPackValidation {
   valid: boolean;
 
   errors: string[];
+}
+
+// ============================================================================
+// PART 11 — RUNTIME WORLD STATE
+// ============================================================================
+
+export interface FootballWorldRuntimeState {
+  dataPackId: string;
+  dataPackVersion: number;
+
+  seasonLabel: string;
+
+  currentDate: string;
+
+  domesticLeagueMembershipStates: DomesticLeagueMembershipState[];
+
+  competitionSeasonStates: CompetitionSeasonState[];
+
+  squadAssignments: WorldClubSquadSeed[];
+
+  managerAssignments: WorldClubManagerSeed[];
+}
+
+export interface FootballWorldBootstrapResult {
+  accepted: boolean;
+
+  state?: FootballWorldRuntimeState;
+
+  error?: string;
 }
