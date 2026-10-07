@@ -314,3 +314,53 @@ export interface SubstitutionSummary {
   registeredBenchSize: number;
 }
 
+export interface ScheduledCompetitionFixture {
+  id: string;
+
+  competitionId: string;
+  seasonLabel: string;
+  ruleSetId: string;
+
+  round: number;
+
+  homeTeamId: string;
+  awayTeamId: string;
+
+  leg: 1 | 2;
+}
+
+export interface CompetitionRoundSchedule {
+  round: number;
+
+  fixtures: ScheduledCompetitionFixture[];
+
+  byeTeamIds: string[];
+}
+
+export interface CompetitionSchedule {
+  competitionId: string;
+  seasonLabel: string;
+  ruleSetId: string;
+
+  formatType:
+    | 'SINGLE_ROUND_ROBIN'
+    | 'DOUBLE_ROUND_ROBIN';
+
+  participantTeamIds: string[];
+
+  rounds: CompetitionRoundSchedule[];
+}
+
+export interface CompetitionScheduleGenerationResult {
+  accepted: boolean;
+
+  schedule?: CompetitionSchedule;
+
+  error?: string;
+}
+
+export interface CompetitionScheduleValidation {
+  valid: boolean;
+  errors: string[];
+}
+
