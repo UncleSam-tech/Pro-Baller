@@ -204,6 +204,8 @@ export interface WorldPlayerFootballState {
   playerId: string;
 
   ability: number;
+  potential: number;
+  developmentProgress?: number;
 
   fitness: number;
   sharpness: number;
@@ -287,6 +289,8 @@ export interface FootballWorldRuntimeState {
   fixtureParticipations: WorldFixtureParticipation[];
 
   fixtureMatchDetails?: WorldFixtureMatchDetail[];
+
+  lastDevelopmentDate?: string;
 }
 
 export interface FootballWorldBootstrapResult {
@@ -302,7 +306,7 @@ export interface FootballWorldBootstrapResult {
 // ============================================================================
 
 export interface FootballWorldStaticContext {
-  players?: Array<{ id: string; primaryPosition?: WorldFootballPosition }>;
+  players?: Array<{ id: string; primaryPosition?: WorldFootballPosition; dateOfBirth?: string; [key: string]: any }>;
   playerPositions?:
     | Map<string, WorldFootballPosition>
     | Record<string, WorldFootballPosition>;

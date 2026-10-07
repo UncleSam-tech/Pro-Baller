@@ -257,6 +257,17 @@ export function getWorldFixtureMatchDetail(
 }
 
 /**
+ * Retrieves the potential for a given player ID, or undefined.
+ */
+export function getWorldPlayerPotential(
+  state: FootballWorldRuntimeState,
+  playerId: string
+): number | undefined {
+  const p = state.playerFootballStates.find(s => s.playerId === playerId);
+  return p?.potential;
+}
+
+/**
  * Creates an immutable, zero-overhead static context from a FootballWorldDataPack
  * for progression calls.
  */
@@ -277,6 +288,7 @@ export function createFootballWorldStaticContext(
     playerPositions,
     ruleSets,
     competitionRuleSets: pack.competitionRuleSets,
+    players: pack.players,
   };
 }
 

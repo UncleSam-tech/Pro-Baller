@@ -34,6 +34,10 @@ import {
   computeLineupStrengthModifiers,
 } from './lineupStrength';
 import { generateFixtureMatchDetail } from './matchEvents';
+import {
+  isDevelopmentCheckpointDate,
+  applyMonthlyWorldPlayerDevelopment,
+} from './playerDevelopment';
 
 // ============================================================================
 // SIMULATION CONSTANTS
@@ -533,8 +537,62 @@ export function advanceFootballWorldStep(
   );
   const clubReferenceQualities = new Map<string, LineupQuality>();
 
+  // Pre-index fixture scheduled dates across all competitions
+  const allFixtureDateMap = new Map<string, string>();
+  for (const compState of state.competitionSeasonStates) {
+    const dMap = buildCompetitionFixtureDateMap(compState, state.currentDate);
+    for (const [fId, dt] of dMap.entries()) {
+      allFixtureDateMap.set(fId, dt);
+    }
+  }
+
+  let currentLastDevDate = state.lastDevelopmentDate;
+
   // Chronological day-by-day progression
   for (const calendarDate of calendarDates) {
+    // 0. MONTHLY DEVELOPMENT CHECKPOINT (1st of each calendar month)
+    if (isDevelopmentCheckpointDate(calendarDate) && currentLastDevDate !== calendarDate) {
+      const windowStartDate = currentLastDevDate ?? '2026-10-07';
+
+      // Gather participations within [windowStartDate, calendarDate)
+      const allPastParts = [
+        ...(state.fixtureParticipations ?? []),
+        ...newlySimulatedParticipations,
+      ];
+      const participationsInWindow = allPastParts.filter((p) => {
+        const dt = allFixtureDateMap.get(p.fixtureId);
+        return dt !== undefined && dt >= windowStartDate && dt < calendarDate;
+      });
+
+      // Gather match details within [windowStartDate, calendarDate)
+      const allPastDetails = [
+        ...(state.fixtureMatchDetails ?? []),
+        ...newlySimulatedMatchDetails,
+      ];
+      const matchDetailsInWindow = new Map<string, WorldFixtureMatchDetail>();
+      for (const d of allPastDetails) {
+        const dt = allFixtureDateMap.get(d.fixtureId);
+        if (dt !== undefined && dt >= windowStartDate && dt < calendarDate) {
+          matchDetailsInWindow.set(d.fixtureId, d);
+        }
+      }
+
+      const updated = applyMonthlyWorldPlayerDevelopment({
+        playerStates: currentPlayerStatesMap,
+        players: context.players ?? [],
+        playerPositions,
+        participationsInWindow,
+        matchDetailsInWindow,
+        checkpointDate: calendarDate,
+      });
+
+      for (const [pId, pState] of updated.entries()) {
+        currentPlayerStatesMap.set(pId, pState);
+      }
+
+      currentLastDevDate = calendarDate;
+    }
+
     const fixturesOnDate = fixturesByDate.get(calendarDate) ?? [];
 
     if (fixturesOnDate.length === 0) {
@@ -830,6 +888,7 @@ export function advanceFootballWorldStep(
       ...(state.fixtureMatchDetails ?? []),
       ...newlySimulatedMatchDetails,
     ],
+    ...(currentLastDevDate !== undefined ? { lastDevelopmentDate: currentLastDevDate } : {}),
   };
 
   return {

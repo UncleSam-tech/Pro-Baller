@@ -4,6 +4,7 @@ import type {
   FootballWorldRuntimeState,
   WorldPlayerFootballState,
 } from './types';
+import { computeInitialPotential } from './playerDevelopment';
 
 // ============================================================================
 // SIMULATION BALANCING & GAME DESIGN CONSTANTS
@@ -251,13 +252,21 @@ export function initializeWorldPlayerFootballStates(
       : DEFAULT_COMPETITION_BASELINE_ABILITY;
     const clubAdj = clubId ? (clubAdjustmentMap.get(clubId) ?? 0) : 0;
     const playerVar = getPlayerDeterministicVariation(player.id);
-
     const rawAbility = baseline + clubAdj + playerVar;
     const ability = Math.max(MIN_PLAYER_ABILITY, Math.min(MAX_PLAYER_ABILITY, rawAbility));
+
+    const potential = computeInitialPotential(
+      ability,
+      player.id,
+      player.dateOfBirth,
+      pack.snapshotDate ?? '2026-10-07'
+    );
 
     playerStates.push({
       playerId: player.id,
       ability,
+      potential,
+      developmentProgress: 0,
       fitness: DEFAULT_PLAYER_FITNESS,
       sharpness: DEFAULT_PLAYER_SHARPNESS,
       form: DEFAULT_PLAYER_FORM,
@@ -311,6 +320,28 @@ export function validateWorldPlayerFootballStates(
     ) {
       errors.push(
         `Player '${s.playerId}' ability ${s.ability} is outside valid range [${MIN_PLAYER_ABILITY}, ${MAX_PLAYER_ABILITY}].`
+      );
+    }
+    if (
+      typeof s.potential !== 'number' ||
+      isNaN(s.potential) ||
+      s.potential < MIN_PLAYER_ABILITY ||
+      s.potential > MAX_PLAYER_ABILITY ||
+      s.potential < s.ability
+    ) {
+      errors.push(
+        `Player '${s.playerId}' potential ${s.potential} is outside valid range [${MIN_PLAYER_ABILITY}, ${MAX_PLAYER_ABILITY}] or below ability ${s.ability}.`
+      );
+    }
+    if (
+      s.developmentProgress !== undefined &&
+      (typeof s.developmentProgress !== 'number' ||
+        isNaN(s.developmentProgress) ||
+        s.developmentProgress <= -2.0 ||
+        s.developmentProgress >= 2.0)
+    ) {
+      errors.push(
+        `Player '${s.playerId}' developmentProgress ${s.developmentProgress} is outside valid fractional bounds.`
       );
     }
     if (

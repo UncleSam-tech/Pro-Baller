@@ -42,12 +42,8 @@ export function applyDailyRecovery(
   player: WorldPlayerFootballState
 ): WorldPlayerFootballState {
   return {
-    playerId: player.playerId,
-    ability: player.ability, // strictly immutable
+    ...player,
     fitness: clampCondition(player.fitness + DAILY_FITNESS_RECOVERY),
-    sharpness: player.sharpness,
-    form: player.form,
-    morale: player.morale,
   };
 }
 
@@ -99,8 +95,7 @@ export function applyMatchConditionEffects(
   const nextMorale = clampCondition(player.morale + moraleDelta);
 
   return {
-    playerId: player.playerId,
-    ability: player.ability, // strictly immutable
+    ...player,
     fitness: nextFitness,
     sharpness: nextSharpness,
     form: nextForm,

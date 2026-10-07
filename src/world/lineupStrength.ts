@@ -153,8 +153,7 @@ export function computeClubReferenceLineupQuality(
     const s = playerStatesMap.get(id);
     if (s) {
       neutralStatesMap.set(id, {
-        playerId: s.playerId,
-        ability: s.ability,
+        ...s,
         fitness: NEUTRAL_FITNESS,
         sharpness: NEUTRAL_SHARPNESS,
         form: NEUTRAL_FORM,
