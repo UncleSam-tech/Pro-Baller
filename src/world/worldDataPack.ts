@@ -20,6 +20,7 @@ const VALID_FOOTBALL_POSITIONS = new Set<WorldFootballPosition>([
   'CDM',
   'CM',
   'CAM',
+  'AM',
   'RM',
   'LM',
   'RW',
@@ -420,9 +421,9 @@ export function validateFootballWorldDataPack(
           `Rule set '${seed.ruleSetId}' competitionId '${ruleSet.competitionId}' does not match season seed competitionId '${seed.competitionId}'.`
         );
       }
-      if (ruleSet.seasonLabel !== pack.seasonLabel) {
+      if (ruleSet.seasonLabel !== seed.schedule.seasonLabel) {
         errors.push(
-          `Rule set '${seed.ruleSetId}' seasonLabel '${ruleSet.seasonLabel}' does not match pack seasonLabel '${pack.seasonLabel}'.`
+          `Rule set '${seed.ruleSetId}' seasonLabel '${ruleSet.seasonLabel}' does not match schedule seasonLabel '${seed.schedule.seasonLabel}'.`
         );
       }
     }
@@ -438,11 +439,6 @@ export function validateFootballWorldDataPack(
         `Schedule ruleSetId '${seed.schedule.ruleSetId}' does not match season seed ruleSetId '${seed.ruleSetId}'.`
       );
     }
-    if (seed.schedule.seasonLabel !== pack.seasonLabel) {
-      errors.push(
-        `Schedule seasonLabel '${seed.schedule.seasonLabel}' does not match pack seasonLabel '${pack.seasonLabel}'.`
-      );
-    }
 
     // Reuse competition schedule validation
     const schedVal = validateCompetitionSchedule(seed.schedule);
@@ -453,7 +449,7 @@ export function validateFootballWorldDataPack(
     // Reuse competition season state validation
     const seasonState: CompetitionSeasonState = {
       competitionId: seed.competitionId,
-      seasonLabel: pack.seasonLabel,
+      seasonLabel: seed.schedule.seasonLabel,
       ruleSetId: seed.ruleSetId,
       schedule: seed.schedule,
       results: seed.results,

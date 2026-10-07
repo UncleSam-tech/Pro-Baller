@@ -25,6 +25,7 @@ export type WorldFootballPosition =
   | 'CDM'
   | 'CM'
   | 'CAM'
+  | 'AM'
   | 'RM'
   | 'LM'
   | 'RW'

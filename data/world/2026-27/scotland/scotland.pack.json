@@ -1,0 +1,6087 @@
+{
+  "id": "scotland-2026-27",
+  "version": 1,
+  "seasonLabel": "2026-27",
+  "snapshotDate": "2026-10-07",
+  "countries": [
+    {
+      "id": "scotland",
+      "name": "Scotland",
+      "code": "SCO",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "latvia",
+      "name": "Latvia",
+      "code": "LVA",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "netherlands",
+      "name": "Netherlands",
+      "code": "NED",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "ireland",
+      "name": "Ireland",
+      "code": "IRE",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "england",
+      "name": "England",
+      "code": "ENG",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "morocco",
+      "name": "Morocco",
+      "code": "MAR",
+      "confederationId": "caf"
+    },
+    {
+      "id": "belgium",
+      "name": "Belgium",
+      "code": "BEL",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "germany",
+      "name": "Germany",
+      "code": "GER",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "northern-ireland",
+      "name": "Northern Ireland",
+      "code": "NIR",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "austria",
+      "name": "Austria",
+      "code": "AUT",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "france",
+      "name": "France",
+      "code": "FRA",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "croatia",
+      "name": "Croatia",
+      "code": "CRO",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "nigeria",
+      "name": "Nigeria",
+      "code": "NGA",
+      "confederationId": "caf"
+    },
+    {
+      "id": "canada",
+      "name": "Canada",
+      "code": "CAN",
+      "confederationId": "concacaf"
+    },
+    {
+      "id": "switzerland",
+      "name": "Switzerland",
+      "code": "SUI",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "usa",
+      "name": "United States",
+      "code": "USA",
+      "confederationId": "concacaf"
+    },
+    {
+      "id": "portugal",
+      "name": "Portugal",
+      "code": "POR",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "sweden",
+      "name": "Sweden",
+      "code": "SWE",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "denmark",
+      "name": "Denmark",
+      "code": "DEN",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "colombia",
+      "name": "Colombia",
+      "code": "COL",
+      "confederationId": "conmebol"
+    },
+    {
+      "id": "tunisia",
+      "name": "Tunisia",
+      "code": "TUN",
+      "confederationId": "caf"
+    },
+    {
+      "id": "wales",
+      "name": "Wales",
+      "code": "WAL",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "finland",
+      "name": "Finland",
+      "code": "FIN",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "south-korea",
+      "name": "South Korea",
+      "code": "KOR",
+      "confederationId": "afc"
+    },
+    {
+      "id": "egypt",
+      "name": "Egypt",
+      "code": "EGY",
+      "confederationId": "caf"
+    },
+    {
+      "id": "slovenia",
+      "name": "Slovenia",
+      "code": "SVN",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "moldova",
+      "name": "Moldova",
+      "code": "MDA",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "romania",
+      "name": "Romania",
+      "code": "ROU",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "iraq",
+      "name": "Iraq",
+      "code": "IRQ",
+      "confederationId": "afc"
+    },
+    {
+      "id": "australia",
+      "name": "Australia",
+      "code": "AUS",
+      "confederationId": "afc"
+    },
+    {
+      "id": "togo",
+      "name": "Togo",
+      "code": "TOG",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "ghana",
+      "name": "Ghana",
+      "code": "GHA",
+      "confederationId": "caf"
+    },
+    {
+      "id": "algeria",
+      "name": "Algeria",
+      "code": "ALG",
+      "confederationId": "caf"
+    },
+    {
+      "id": "guinea-bissau",
+      "name": "Guinea-Bissau",
+      "code": "GUI",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "new-zealand",
+      "name": "New Zealand",
+      "code": "NZL",
+      "confederationId": "ofc"
+    },
+    {
+      "id": "cote-divoire",
+      "name": "Côte d'Ivoire",
+      "code": "CÔT",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "norway",
+      "name": "Norway",
+      "code": "NOR",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "burkina-faso",
+      "name": "Burkina Faso",
+      "code": "BUR",
+      "confederationId": "caf"
+    },
+    {
+      "id": "albania",
+      "name": "Albania",
+      "code": "ALB",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "uganda",
+      "name": "Uganda",
+      "code": "UGA",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "brazil",
+      "name": "Brazil",
+      "code": "BRA",
+      "confederationId": "conmebol"
+    },
+    {
+      "id": "faroe-islands",
+      "name": "Faroe Islands",
+      "code": "FAR",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "iceland",
+      "name": "Iceland",
+      "code": "ISL",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "serbia",
+      "name": "Serbia",
+      "code": "SRB",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "dr-congo",
+      "name": "DR Congo",
+      "code": "COD",
+      "confederationId": "caf"
+    },
+    {
+      "id": "zambia",
+      "name": "Zambia",
+      "code": "ZAM",
+      "confederationId": "caf"
+    },
+    {
+      "id": "sierra-leone",
+      "name": "Sierra Leone",
+      "code": "SIE",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "estonia",
+      "name": "Estonia",
+      "code": "EST",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "suriname",
+      "name": "Suriname",
+      "code": "SUR",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "poland",
+      "name": "Poland",
+      "code": "POL",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "grenada",
+      "name": "Grenada",
+      "code": "GRE",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "zimbabwe",
+      "name": "Zimbabwe",
+      "code": "ZIM",
+      "confederationId": "caf"
+    },
+    {
+      "id": "south-africa",
+      "name": "South Africa",
+      "code": "RSA",
+      "confederationId": "caf"
+    },
+    {
+      "id": "japan",
+      "name": "Japan",
+      "code": "JPN",
+      "confederationId": "afc"
+    },
+    {
+      "id": "venezuela",
+      "name": "Venezuela",
+      "code": "VEN",
+      "confederationId": "conmebol"
+    },
+    {
+      "id": "czechia",
+      "name": "Czechia",
+      "code": "CZE",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "north-macedonia",
+      "name": "North Macedonia",
+      "code": "MKD",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "ecuador",
+      "name": "Ecuador",
+      "code": "ECU",
+      "confederationId": "conmebol"
+    },
+    {
+      "id": "mauritania",
+      "name": "Mauritania",
+      "code": "MAU",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "bosnia-and-herzegovina",
+      "name": "Bosnia & Herzegovina",
+      "code": "BOS",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "spain",
+      "name": "Spain",
+      "code": "ESP",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "jamaica",
+      "name": "Jamaica",
+      "code": "JAM",
+      "confederationId": "concacaf"
+    },
+    {
+      "id": "cyprus",
+      "name": "Cyprus",
+      "code": "CYP",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "kenya",
+      "name": "Kenya",
+      "code": "KEN",
+      "confederationId": "caf"
+    },
+    {
+      "id": "slovakia",
+      "name": "Slovakia",
+      "code": "SVK",
+      "confederationId": "uefa"
+    },
+    {
+      "id": "saint-kitts-and-nevis",
+      "name": "Saint Kitts and Nevis",
+      "code": "SAI",
+      "confederationId": "uefa"
+    }
+  ],
+  "competitionDefinitions": [
+    {
+      "id": "scotland-premiership",
+      "name": "Scottish Premiership",
+      "shortName": "Premiership",
+      "countryId": "scotland",
+      "confederationId": "UEFA",
+      "category": "DOMESTIC_LEAGUE",
+      "level": 1
+    }
+  ],
+  "competitionRuleSets": [
+    {
+      "id": "scotland-premiership:2026-27:v1",
+      "competitionId": "scotland-premiership",
+      "seasonLabel": "2026-27",
+      "ruleVersion": 1,
+      "verificationStatus": "NEEDS_OFFICIAL_VERIFICATION",
+      "format": {
+        "type": "DOUBLE_ROUND_ROBIN",
+        "expectedClubCount": 12,
+        "rounds": 22,
+        "pointsForWin": 3,
+        "pointsForDraw": 1,
+        "pointsForLoss": 0,
+        "standingsTieBreakers": [
+          "GOAL_DIFFERENCE",
+          "GOALS_FOR",
+          "TEAM_ID"
+        ]
+      },
+      "standings": {
+        "pointsForWin": 3,
+        "pointsForDraw": 1,
+        "pointsForLoss": 0,
+        "tieBreakers": [
+          "GOAL_DIFFERENCE",
+          "GOALS_FOR",
+          "TEAM_ID"
+        ]
+      },
+      "substitutions": {
+        "maxSubsRegulation": 5,
+        "maxStoppageWindows": 3,
+        "benchSize": 9,
+        "halfTimeCountsAsWindow": false,
+        "extraTimeExtraSub": 0
+      },
+      "discipline": {
+        "yellowThresholds": [
+          {
+            "cards": 5,
+            "suspensionMatches": 1
+          }
+        ],
+        "straightRedDefaultMatches": 3,
+        "secondYellowRedMatches": 1,
+        "policyName": "Scottish Premiership Disciplinary Code"
+      },
+      "technology": {
+        "varEnabled": true
+      },
+      "modifiers": {
+        "reputationMultiplier": 1
+      },
+      "presentation": {
+        "primaryColor": "#002B49",
+        "matchBall": "Scottish Premiership Match Ball"
+      }
+    }
+  ],
+  "competitionMovementRelationships": [],
+  "clubs": [
+    {
+      "id": "aberdeen",
+      "name": "Aberdeen",
+      "shortName": "Aberdeen",
+      "countryId": "scotland"
+    },
+    {
+      "id": "celtic",
+      "name": "Celtic",
+      "shortName": "Celtic",
+      "countryId": "scotland"
+    },
+    {
+      "id": "dundee-fc",
+      "name": "Dundee FC",
+      "shortName": "Dundee",
+      "countryId": "scotland"
+    },
+    {
+      "id": "dundee-united",
+      "name": "Dundee United",
+      "shortName": "Dundee Utd",
+      "countryId": "scotland"
+    },
+    {
+      "id": "falkirk-fc",
+      "name": "Falkirk FC",
+      "shortName": "Falkirk",
+      "countryId": "scotland"
+    },
+    {
+      "id": "heart-of-midlothian",
+      "name": "Heart of Midlothian",
+      "shortName": "Hearts",
+      "countryId": "scotland"
+    },
+    {
+      "id": "hibernian",
+      "name": "Hibernian",
+      "shortName": "Hibernian",
+      "countryId": "scotland"
+    },
+    {
+      "id": "kilmarnock",
+      "name": "Kilmarnock",
+      "shortName": "Kilmarnock",
+      "countryId": "scotland"
+    },
+    {
+      "id": "motherwell",
+      "name": "Motherwell",
+      "shortName": "Motherwell",
+      "countryId": "scotland"
+    },
+    {
+      "id": "rangers",
+      "name": "Rangers",
+      "shortName": "Rangers",
+      "countryId": "scotland"
+    },
+    {
+      "id": "st-johnstone",
+      "name": "St. Johnstone",
+      "shortName": "St. Johnstone",
+      "countryId": "scotland"
+    },
+    {
+      "id": "st-mirren",
+      "name": "St. Mirren",
+      "shortName": "St Mirren",
+      "countryId": "scotland"
+    }
+  ],
+  "players": [
+    {
+      "id": "player-nicky-devlin-19931017",
+      "firstName": "Nicky",
+      "lastName": "Devlin",
+      "dateOfBirth": "1993-10-17",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-mitchel-frame-20060125",
+      "firstName": "Mitchel",
+      "lastName": "Frame",
+      "dateOfBirth": "2006-01-25",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-kristers-tobers-20001213",
+      "firstName": "Kristers",
+      "lastName": "Tobers",
+      "dateOfBirth": "2000-12-13",
+      "nationalityCountryIds": [
+        "latvia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-mats-knoester-19981119",
+      "firstName": "Mats",
+      "lastName": "Knoester",
+      "dateOfBirth": "1998-11-19",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-gavin-molloy-20011019",
+      "firstName": "Gavin",
+      "lastName": "Molloy",
+      "dateOfBirth": "2001-10-19",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jack-milne-20030210",
+      "firstName": "Jack",
+      "lastName": "Milne",
+      "dateOfBirth": "2003-02-10",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-lewis-mayo-20000319",
+      "firstName": "Lewis",
+      "lastName": "Mayo",
+      "dateOfBirth": "2000-03-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-nesta-guinness-walker-19990914",
+      "firstName": "Nesta",
+      "lastName": "Guinness-Walker",
+      "dateOfBirth": "1999-09-14",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-daniel-happe-19980928",
+      "firstName": "Daniel",
+      "lastName": "Happe",
+      "dateOfBirth": "1998-09-28",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-ayoub-mouloua-20020930",
+      "firstName": "Ayoub",
+      "lastName": "Mouloua",
+      "dateOfBirth": "2002-09-30",
+      "nationalityCountryIds": [
+        "morocco"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-lewis-smith-20000316",
+      "firstName": "Lewis",
+      "lastName": "Smith",
+      "dateOfBirth": "2000-03-16",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-kevin-nisbet-19970308",
+      "firstName": "Kevin",
+      "lastName": "Nisbet",
+      "dateOfBirth": "1997-03-08",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-toyosi-olusanya-19971013",
+      "firstName": "Toyosi",
+      "lastName": "Olusanya",
+      "dateOfBirth": "1997-10-13",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-mitchy-ntelo-20010504",
+      "firstName": "Mitchy",
+      "lastName": "Ntelo",
+      "dateOfBirth": "2001-05-04",
+      "nationalityCountryIds": [
+        "belgium"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-andrew-fasanya",
+      "firstName": "Andrew",
+      "lastName": "Fasanya",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-marius-muller-19930712",
+      "firstName": "Marius",
+      "lastName": "Müller",
+      "dateOfBirth": "1993-07-12",
+      "nationalityCountryIds": [
+        "germany"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-daniel-klein-20010313",
+      "firstName": "Daniel",
+      "lastName": "Klein",
+      "dateOfBirth": "2001-03-13",
+      "nationalityCountryIds": [
+        "germany"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-tony-yogane-20050924",
+      "firstName": "Tony",
+      "lastName": "Yogane",
+      "dateOfBirth": "2005-09-24",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-bradley-lyons-19970526",
+      "firstName": "Bradley",
+      "lastName": "Lyons",
+      "dateOfBirth": "1997-05-26",
+      "nationalityCountryIds": [
+        "northern-ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-alexander-briedl-20020421",
+      "firstName": "Alexander",
+      "lastName": "Briedl",
+      "dateOfBirth": "2002-04-21",
+      "nationalityCountryIds": [
+        "austria"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-hicham-mahou-19990702",
+      "firstName": "Hicham",
+      "lastName": "Mahou",
+      "dateOfBirth": "1999-07-02",
+      "nationalityCountryIds": [
+        "france"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-stuart-armstrong-19920330",
+      "firstName": "Stuart",
+      "lastName": "Armstrong",
+      "dateOfBirth": "1992-03-30",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ante-palaversa-20000406",
+      "firstName": "Ante",
+      "lastName": "Palaversa",
+      "dateOfBirth": "2000-04-06",
+      "nationalityCountryIds": [
+        "croatia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-connor-ronan-19980306",
+      "firstName": "Connor",
+      "lastName": "Ronan",
+      "dateOfBirth": "1998-03-06",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-chris-cadden-19960919",
+      "firstName": "Chris",
+      "lastName": "Cadden",
+      "dateOfBirth": "1996-09-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-aremu-afeez-19991003",
+      "firstName": "Aremu",
+      "lastName": "Afeez",
+      "dateOfBirth": "1999-10-03",
+      "nationalityCountryIds": [
+        "nigeria"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-findlay-marshall-20060417",
+      "firstName": "Findlay",
+      "lastName": "Marshall",
+      "dateOfBirth": "2006-04-17",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-cooper-masson-20081110",
+      "firstName": "Cooper",
+      "lastName": "Masson",
+      "dateOfBirth": "2008-11-10",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-emmanuel-gyamfi-20040723",
+      "firstName": "Emmanuel",
+      "lastName": "Gyamfi",
+      "dateOfBirth": "2004-07-23",
+      "nationalityCountryIds": [
+        "germany"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-alistair-johnston-19981008",
+      "firstName": "Alistair",
+      "lastName": "Johnston",
+      "dateOfBirth": "1998-10-08",
+      "nationalityCountryIds": [
+        "canada"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jordan-lotomba-19980929",
+      "firstName": "Jordan",
+      "lastName": "Lotomba",
+      "dateOfBirth": "1998-09-29",
+      "nationalityCountryIds": [
+        "switzerland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-liam-scales-19980808",
+      "firstName": "Liam",
+      "lastName": "Scales",
+      "dateOfBirth": "1998-08-08",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-auston-trusty-19980812",
+      "firstName": "Auston",
+      "lastName": "Trusty",
+      "dateOfBirth": "1998-08-12",
+      "nationalityCountryIds": [
+        "usa"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-cameron-carter-vickers-19971231",
+      "firstName": "Cameron",
+      "lastName": "Carter-Vickers",
+      "dateOfBirth": "1997-12-31",
+      "nationalityCountryIds": [
+        "usa"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-dane-murray-20030626",
+      "firstName": "Dane",
+      "lastName": "Murray",
+      "dateOfBirth": "2003-06-26",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-colby-donovan-20060906",
+      "firstName": "Colby",
+      "lastName": "Donovan",
+      "dateOfBirth": "2006-09-06",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-tony-ralston-19981116",
+      "firstName": "Tony",
+      "lastName": "Ralston",
+      "dateOfBirth": "1998-11-16",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-kieran-tierney-19970605",
+      "firstName": "Kieran",
+      "lastName": "Tierney",
+      "dateOfBirth": "1997-06-05",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jota-19990330",
+      "firstName": "Jota",
+      "lastName": "",
+      "dateOfBirth": "1999-03-30",
+      "nationalityCountryIds": [
+        "portugal"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-benjamin-nygren-20010708",
+      "firstName": "Benjamin",
+      "lastName": "Nygren",
+      "dateOfBirth": "2001-07-08",
+      "nationalityCountryIds": [
+        "sweden"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-kasper-h-gh-20001206",
+      "firstName": "Kasper",
+      "lastName": "Høgh",
+      "dateOfBirth": "2000-12-06",
+      "nationalityCountryIds": [
+        "denmark"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-camilo-duran-20020210",
+      "firstName": "Camilo",
+      "lastName": "Durán",
+      "dateOfBirth": "2002-02-10",
+      "nationalityCountryIds": [
+        "colombia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-sebastian-tounekti-20020713",
+      "firstName": "Sebastian",
+      "lastName": "Tounekti",
+      "dateOfBirth": "2002-07-13",
+      "nationalityCountryIds": [
+        "tunisia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-callum-osmand-20051108",
+      "firstName": "Callum",
+      "lastName": "Osmand",
+      "dateOfBirth": "2005-11-08",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-shumaira-mheuka-20071020",
+      "firstName": "Shumaira",
+      "lastName": "Mheuka",
+      "dateOfBirth": "2007-10-20",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-viljami-sinisalo-20011011",
+      "firstName": "Viljami",
+      "lastName": "Sinisalo",
+      "dateOfBirth": "2001-10-11",
+      "nationalityCountryIds": [
+        "finland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-sam-johnstone-19930325",
+      "firstName": "Sam",
+      "lastName": "Johnstone",
+      "dateOfBirth": "1993-03-25",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-ross-doohan-19980329",
+      "firstName": "Ross",
+      "lastName": "Doohan",
+      "dateOfBirth": "1998-03-29",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-marcus-gill-20070511",
+      "firstName": "Marcus",
+      "lastName": "Gill",
+      "dateOfBirth": "2007-05-11",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-yang-hyun-jun-20020525",
+      "firstName": "Yang",
+      "lastName": "Hyun-Jun",
+      "dateOfBirth": "2002-05-25",
+      "nationalityCountryIds": [
+        "south-korea"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-luke-mccowan-19971209",
+      "firstName": "Luke",
+      "lastName": "McCowan",
+      "dateOfBirth": "1997-12-09",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-oliver-s-rensen-20020310",
+      "firstName": "Oliver",
+      "lastName": "Sørensen",
+      "dateOfBirth": "2002-03-10",
+      "nationalityCountryIds": [
+        "denmark"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-alex-oxlade-chamberlain-19930815",
+      "firstName": "Alex",
+      "lastName": "Oxlade-Chamberlain",
+      "dateOfBirth": "1993-08-15",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-mika-baur-20040709",
+      "firstName": "Mika",
+      "lastName": "Baur",
+      "dateOfBirth": "2004-07-09",
+      "nationalityCountryIds": [
+        "germany"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-haissem-hassan-20020208",
+      "firstName": "Haissem",
+      "lastName": "Hassan",
+      "dateOfBirth": "2002-02-08",
+      "nationalityCountryIds": [
+        "egypt"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-sean-mcardle-20070826",
+      "firstName": "Sean",
+      "lastName": "McArdle",
+      "dateOfBirth": "2007-08-26",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-joel-van-den-berg-20070211",
+      "firstName": "Joel Van Den",
+      "lastName": "Berg",
+      "dateOfBirth": "2007-02-11",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-callum-mcgregor-19930614",
+      "firstName": "Callum",
+      "lastName": "McGregor",
+      "dateOfBirth": "1993-06-14",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-james-forrest-19910707",
+      "firstName": "James",
+      "lastName": "Forrest",
+      "dateOfBirth": "1991-07-07",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-landon-emenalo-20080118",
+      "firstName": "Landon",
+      "lastName": "Emenalo",
+      "dateOfBirth": "2008-01-18",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-liam-kennedy-20090117",
+      "firstName": "Liam",
+      "lastName": "Kennedy",
+      "dateOfBirth": "2009-01-17",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-idris-odutayo-20021026",
+      "firstName": "Idris",
+      "lastName": "Odutayo",
+      "dateOfBirth": "2002-10-26",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-ryan-astley-20011004",
+      "firstName": "Ryan",
+      "lastName": "Astley",
+      "dateOfBirth": "2001-10-04",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-owen-bevan-20031026",
+      "firstName": "Owen",
+      "lastName": "Bevan",
+      "dateOfBirth": "2003-10-26",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-matai-akinmboni-20061017",
+      "firstName": "Matai",
+      "lastName": "Akinmboni",
+      "dateOfBirth": "2006-10-17",
+      "nationalityCountryIds": [
+        "usa"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-drey-wright-19940430",
+      "firstName": "Drey",
+      "lastName": "Wright",
+      "dateOfBirth": "1994-04-30",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-imari-samuels-20030205",
+      "firstName": "Imari",
+      "lastName": "Samuels",
+      "dateOfBirth": "2003-02-05",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-joe-wright-19950226",
+      "firstName": "Joe",
+      "lastName": "Wright",
+      "dateOfBirth": "1995-02-26",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-bobby-wales-20050623",
+      "firstName": "Bobby",
+      "lastName": "Wales",
+      "dateOfBirth": "2005-06-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ashley-hay-20030710",
+      "firstName": "Ashley",
+      "lastName": "Hay",
+      "dateOfBirth": "2003-07-10",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-simon-murray-19920315",
+      "firstName": "Simon",
+      "lastName": "Murray",
+      "dateOfBirth": "1992-03-15",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-joe-westley-20041018",
+      "firstName": "Joe",
+      "lastName": "Westley",
+      "dateOfBirth": "2004-10-18",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-bradley-fink-20030417",
+      "firstName": "Bradley",
+      "lastName": "Fink",
+      "dateOfBirth": "2003-04-17",
+      "nationalityCountryIds": [
+        "switzerland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-joe-bevan-20040715",
+      "firstName": "Joe",
+      "lastName": "Bevan",
+      "dateOfBirth": "2004-07-15",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ryan-bland-20090704",
+      "firstName": "Ryan",
+      "lastName": "Bland",
+      "dateOfBirth": "2009-07-04",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-owen-goodman-20031127",
+      "firstName": "Owen",
+      "lastName": "Goodman",
+      "dateOfBirth": "2003-11-27",
+      "nationalityCountryIds": [
+        "canada"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-kieran-ohara-19960422",
+      "firstName": "Kieran",
+      "lastName": "O'Hara",
+      "dateOfBirth": "1996-04-22",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-harrison-sharp-20010404",
+      "firstName": "Harrison",
+      "lastName": "Sharp",
+      "dateOfBirth": "2001-04-04",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-brad-halliday-19950710",
+      "firstName": "Brad",
+      "lastName": "Halliday",
+      "dateOfBirth": "1995-07-10",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ryan-finnigan-20030923",
+      "firstName": "Ryan",
+      "lastName": "Finnigan",
+      "dateOfBirth": "2003-09-23",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-finlay-robertson-20021112",
+      "firstName": "Finlay",
+      "lastName": "Robertson",
+      "dateOfBirth": "2002-11-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-alan-forrest-19960909",
+      "firstName": "Alan",
+      "lastName": "Forrest",
+      "dateOfBirth": "1996-09-09",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jack-moorhouse-20051129",
+      "firstName": "Jack",
+      "lastName": "Moorhouse",
+      "dateOfBirth": "2005-11-29",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-zan-besir-20001017",
+      "firstName": "Žan",
+      "lastName": "Bešir",
+      "dateOfBirth": "2000-10-17",
+      "nationalityCountryIds": [
+        "slovenia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-charlie-reilly-20011205",
+      "firstName": "Charlie",
+      "lastName": "Reilly",
+      "dateOfBirth": "2001-12-05",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-callum-jones-20010405",
+      "firstName": "Callum",
+      "lastName": "Jones",
+      "dateOfBirth": "2001-04-05",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ashton-leiper-20071021",
+      "firstName": "Ashton",
+      "lastName": "Leiper",
+      "dateOfBirth": "2007-10-21",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ethan-hamilton-19981018",
+      "firstName": "Ethan",
+      "lastName": "Hamilton",
+      "dateOfBirth": "1998-10-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-bert-esselink-19990916",
+      "firstName": "Bert",
+      "lastName": "Esselink",
+      "dateOfBirth": "1999-09-16",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-iurie-iovu-20020706",
+      "firstName": "Iurie",
+      "lastName": "Iovu",
+      "dateOfBirth": "2002-07-06",
+      "nationalityCountryIds": [
+        "moldova"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-ross-graham-20010220",
+      "firstName": "Ross",
+      "lastName": "Graham",
+      "dateOfBirth": "2001-02-20",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-michael-forbes-20040429",
+      "firstName": "Michael",
+      "lastName": "Forbes",
+      "dateOfBirth": "2004-04-29",
+      "nationalityCountryIds": [
+        "northern-ireland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-kevin-ciubotaru-20040202",
+      "firstName": "Kevin",
+      "lastName": "Ciubotaru",
+      "dateOfBirth": "2004-02-02",
+      "nationalityCountryIds": [
+        "romania"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-dario-naamo-20050514",
+      "firstName": "Dario",
+      "lastName": "Naamo",
+      "dateOfBirth": "2005-05-14",
+      "nationalityCountryIds": [
+        "iraq"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-joshua-rawlins-20040423",
+      "firstName": "Joshua",
+      "lastName": "Rawlins",
+      "dateOfBirth": "2004-04-23",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-zachary-sapsford-20020816",
+      "firstName": "Zachary",
+      "lastName": "Sapsford",
+      "dateOfBirth": "2002-08-16",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-lachlan-rose-19990510",
+      "firstName": "Lachlan",
+      "lastName": "Rose",
+      "dateOfBirth": "1999-05-10",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-neil-farrugia-19990519",
+      "firstName": "Neil",
+      "lastName": "Farrugia",
+      "dateOfBirth": "1999-05-19",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-daniel-bennie-20060413",
+      "firstName": "Daniel",
+      "lastName": "Bennie",
+      "dateOfBirth": "2006-04-13",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-idjessi-metsoko-20020314",
+      "firstName": "Idjessi",
+      "lastName": "Metsoko",
+      "dateOfBirth": "2002-03-14",
+      "nationalityCountryIds": [
+        "togo"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-jack-james-walton-19980423",
+      "firstName": "Jack James",
+      "lastName": "Walton",
+      "dateOfBirth": "1998-04-23",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-jordan-amissah-20010802",
+      "firstName": "Jordan",
+      "lastName": "Amissah",
+      "dateOfBirth": "2001-08-02",
+      "nationalityCountryIds": [
+        "ghana"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-mehdi-merghem-19970719",
+      "firstName": "Mehdi",
+      "lastName": "Merghem",
+      "dateOfBirth": "1997-07-19",
+      "nationalityCountryIds": [
+        "algeria"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-panutche-camara-19970228",
+      "firstName": "Panutche",
+      "lastName": "Camará",
+      "dateOfBirth": "1997-02-28",
+      "nationalityCountryIds": [
+        "guinea-bissau"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-dylan-tait-20011201",
+      "firstName": "Dylan",
+      "lastName": "Tait",
+      "dateOfBirth": "2001-12-01",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-william-ferry-20001207",
+      "firstName": "William",
+      "lastName": "Ferry",
+      "dateOfBirth": "2000-12-07",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-emmanuel-agyei-20041103",
+      "firstName": "Emmanuel",
+      "lastName": "Agyei",
+      "dateOfBirth": "2004-11-03",
+      "nationalityCountryIds": [
+        "ghana"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-zidane-iqbal-20030427",
+      "firstName": "Zidane",
+      "lastName": "Iqbal",
+      "dateOfBirth": "2003-04-27",
+      "nationalityCountryIds": [
+        "iraq"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-lyall-cameron-20021010",
+      "firstName": "Lyall",
+      "lastName": "Cameron",
+      "dateOfBirth": "2002-10-10",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jesse-randall-20020819",
+      "firstName": "Jesse",
+      "lastName": "Randall",
+      "dateOfBirth": "2002-08-19",
+      "nationalityCountryIds": [
+        "new-zealand"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-abdoulaye-yoro-20061212",
+      "firstName": "Abdoulaye",
+      "lastName": "Yoro",
+      "dateOfBirth": "2006-12-12",
+      "nationalityCountryIds": [
+        "cote-divoire"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-keir-gilligan-20080606",
+      "firstName": "Keir",
+      "lastName": "Gilligan",
+      "dateOfBirth": "2008-06-06",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jack-anderson-20090427",
+      "firstName": "Jack",
+      "lastName": "Anderson",
+      "dateOfBirth": "2009-04-27",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-keelan-adams-20011112",
+      "firstName": "Keelan",
+      "lastName": "Adams",
+      "dateOfBirth": "2001-11-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-leon-mccann-20000316",
+      "firstName": "Leon",
+      "lastName": "McCann",
+      "dateOfBirth": "2000-03-16",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-liam-henderson-19960823",
+      "firstName": "Liam",
+      "lastName": "Henderson",
+      "dateOfBirth": "1996-08-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-coll-donaldson-19950409",
+      "firstName": "Coll",
+      "lastName": "Donaldson",
+      "dateOfBirth": "1995-04-09",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-lewis-neilson-20030515",
+      "firstName": "Lewis",
+      "lastName": "Neilson",
+      "dateOfBirth": "2003-05-15",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-scott-tanser-19941023",
+      "firstName": "Scott",
+      "lastName": "Tanser",
+      "dateOfBirth": "1994-10-23",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-connor-allan-20040110",
+      "firstName": "Connor",
+      "lastName": "Allan",
+      "dateOfBirth": "2004-01-10",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-deniss-melniks-20020907",
+      "firstName": "Deniss",
+      "lastName": "Melniks",
+      "dateOfBirth": "2002-09-07",
+      "nationalityCountryIds": [
+        "latvia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-ben-parkinson-20050310",
+      "firstName": "Ben",
+      "lastName": "Parkinson",
+      "dateOfBirth": "2005-03-10",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ross-maclver-19990228",
+      "firstName": "Ross",
+      "lastName": "Maclver",
+      "dateOfBirth": "1999-02-28",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ethan-laidlaw-20050102",
+      "firstName": "Ethan",
+      "lastName": "Laidlaw",
+      "dateOfBirth": "2005-01-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ethan-ross-20010815",
+      "firstName": "Ethan",
+      "lastName": "Ross",
+      "dateOfBirth": "2001-08-15",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-jacob-murrell-20040329",
+      "firstName": "Jacob",
+      "lastName": "Murrell",
+      "dateOfBirth": "2004-03-29",
+      "nationalityCountryIds": [
+        "usa"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-alfie-agyeman-20000315",
+      "firstName": "Alfie",
+      "lastName": "Agyeman",
+      "dateOfBirth": "2000-03-15",
+      "nationalityCountryIds": [
+        "ghana"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-kai-brown-20091007",
+      "firstName": "Kai",
+      "lastName": "Brown",
+      "dateOfBirth": "2009-10-07",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-nicky-hogarth-20010704",
+      "firstName": "Nicky",
+      "lastName": "Hogarth",
+      "dateOfBirth": "2001-07-04",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-scott-bain-19911122",
+      "firstName": "Scott",
+      "lastName": "Bain",
+      "dateOfBirth": "1991-11-22",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-jack-mcmillan-19971218",
+      "firstName": "Jack",
+      "lastName": "McMillan",
+      "dateOfBirth": "1997-12-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-brad-spencer-19960516",
+      "firstName": "Brad",
+      "lastName": "Spencer",
+      "dateOfBirth": "1996-05-16",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-craig-sibbald-19950518",
+      "firstName": "Craig",
+      "lastName": "Sibbald",
+      "dateOfBirth": "1995-05-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-paul-mcgovern-20080109",
+      "firstName": "Paul",
+      "lastName": "McGovern",
+      "dateOfBirth": "2008-01-09",
+      "nationalityCountryIds": [
+        "northern-ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-finn-yeats-20040419",
+      "firstName": "Finn",
+      "lastName": "Yeats",
+      "dateOfBirth": "2004-04-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-finley-barbrook-20041204",
+      "firstName": "Finley",
+      "lastName": "Barbrook",
+      "dateOfBirth": "2004-12-04",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-joe-gardner-20050606",
+      "firstName": "Joe",
+      "lastName": "Gardner",
+      "dateOfBirth": "2005-06-06",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ryan-strain-19970402",
+      "firstName": "Ryan",
+      "lastName": "Strain",
+      "dateOfBirth": "1997-04-02",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-aidan-nesbitt-19970205",
+      "firstName": "Aidan",
+      "lastName": "Nesbitt",
+      "dateOfBirth": "1997-02-05",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-connor-mcleod-20061215",
+      "firstName": "Connor",
+      "lastName": "McLeod",
+      "dateOfBirth": "2006-12-15",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ben-krauhaus-20041012",
+      "firstName": "Ben",
+      "lastName": "Krauhaus",
+      "dateOfBirth": "2004-10-12",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-owen-eames-20061101",
+      "firstName": "Owen",
+      "lastName": "Eames",
+      "dateOfBirth": "2006-11-01",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-aodhan-doherty-20060503",
+      "firstName": "Aodhan",
+      "lastName": "Doherty",
+      "dateOfBirth": "2006-05-03",
+      "nationalityCountryIds": [
+        "northern-ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-calvin-fodrey-20040210",
+      "firstName": "Calvin",
+      "lastName": "Fodrey",
+      "dateOfBirth": "2004-02-10",
+      "nationalityCountryIds": [
+        "usa"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-christian-borchgrevink-19990511",
+      "firstName": "Christian",
+      "lastName": "Borchgrevink",
+      "dateOfBirth": "1999-05-11",
+      "nationalityCountryIds": [
+        "norway"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-mj-kamson-kamara-20060214",
+      "firstName": "MJ",
+      "lastName": "Kamson-Kamara",
+      "dateOfBirth": "2006-02-14",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-stephen-kingsley-19940723",
+      "firstName": "Stephen",
+      "lastName": "Kingsley",
+      "dateOfBirth": "1994-07-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-craig-halkett-19950529",
+      "firstName": "Craig",
+      "lastName": "Halkett",
+      "dateOfBirth": "1995-05-29",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jamie-mccart-19970620",
+      "firstName": "Jamie",
+      "lastName": "McCart",
+      "dateOfBirth": "1997-06-20",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-oisin-mcentee-20010105",
+      "firstName": "Oisin",
+      "lastName": "McEntee",
+      "dateOfBirth": "2001-01-05",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-josh-williams-19880418",
+      "firstName": "Josh",
+      "lastName": "Williams",
+      "dateOfBirth": "1988-04-18",
+      "nationalityCountryIds": [
+        "usa"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-stuart-findlay-19950914",
+      "firstName": "Stuart",
+      "lastName": "Findlay",
+      "dateOfBirth": "1995-09-14",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-harry-milne-19961029",
+      "firstName": "Harry",
+      "lastName": "Milne",
+      "dateOfBirth": "1996-10-29",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jordi-altena-20031204",
+      "firstName": "Jordi",
+      "lastName": "Altena",
+      "dateOfBirth": "2003-12-04",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-malachi-fagan-walcott-20020311",
+      "firstName": "Malachi",
+      "lastName": "Fagan-Walcott",
+      "dateOfBirth": "2002-03-11",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jerome-williams-19980104",
+      "firstName": "Jerome",
+      "lastName": "Williams",
+      "dateOfBirth": "1998-01-04",
+      "nationalityCountryIds": [
+        "usa"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-claudio-braga-19991028",
+      "firstName": "Cláudio",
+      "lastName": "Braga",
+      "dateOfBirth": "1999-10-28",
+      "nationalityCountryIds": [
+        "portugal"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-pierre-landry-kabore-20010705",
+      "firstName": "Pierre Landry",
+      "lastName": "Kaboré",
+      "dateOfBirth": "2001-07-05",
+      "nationalityCountryIds": [
+        "burkina-faso"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-severin-sabri-guendouz-20000209",
+      "firstName": "Severin Sabri",
+      "lastName": "Guendouz",
+      "dateOfBirth": "2000-02-09",
+      "nationalityCountryIds": [
+        "france"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-elton-kabangu-19980208",
+      "firstName": "Elton",
+      "lastName": "Kabangu",
+      "dateOfBirth": "1998-02-08",
+      "nationalityCountryIds": [
+        "belgium"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-james-wilson-20070306",
+      "firstName": "James",
+      "lastName": "Wilson",
+      "dateOfBirth": "2007-03-06",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-finlay-pollock-20040627",
+      "firstName": "Finlay",
+      "lastName": "Pollock",
+      "dateOfBirth": "2004-06-27",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-sabah-kerjota-20010814",
+      "firstName": "Sabah",
+      "lastName": "Kerjota",
+      "dateOfBirth": "2001-08-14",
+      "nationalityCountryIds": [
+        "albania"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-rogers-mato-20031010",
+      "firstName": "Rogers",
+      "lastName": "Mato",
+      "dateOfBirth": "2003-10-10",
+      "nationalityCountryIds": [
+        "uganda"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-amadou-ba-sy-20010608",
+      "firstName": "Amadou",
+      "lastName": "Ba-Sy",
+      "dateOfBirth": "2001-06-08",
+      "nationalityCountryIds": [
+        "france"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-beau-reus-20011030",
+      "firstName": "Beau",
+      "lastName": "Reus",
+      "dateOfBirth": "2001-10-30",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-zander-clark-19920626",
+      "firstName": "Zander",
+      "lastName": "Clark",
+      "dateOfBirth": "1992-06-26",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-ryan-fulton-19960523",
+      "firstName": "Ryan",
+      "lastName": "Fulton",
+      "dateOfBirth": "1996-05-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-kieran-wright-19990401",
+      "firstName": "Kieran",
+      "lastName": "Wright",
+      "dateOfBirth": "1999-04-01",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-aiden-duncan-20100504",
+      "firstName": "Aiden",
+      "lastName": "Duncan",
+      "dateOfBirth": "2010-05-04",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-calvin-miller-19980109",
+      "firstName": "Calvin",
+      "lastName": "Miller",
+      "dateOfBirth": "1998-01-09",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ageu-20020202",
+      "firstName": "Ageu",
+      "lastName": "",
+      "dateOfBirth": "2002-02-02",
+      "nationalityCountryIds": [
+        "brazil"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-tom-renaud-20001119",
+      "firstName": "Tom",
+      "lastName": "Renaud",
+      "dateOfBirth": "2000-11-19",
+      "nationalityCountryIds": [
+        "france"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-josh-mcpake-20010831",
+      "firstName": "Josh",
+      "lastName": "McPake",
+      "dateOfBirth": "2001-08-31",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-blair-spittal-19951219",
+      "firstName": "Blair",
+      "lastName": "Spittal",
+      "dateOfBirth": "1995-12-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-aron-benjaminsen-20071102",
+      "firstName": "Aron",
+      "lastName": "Benjaminsen",
+      "dateOfBirth": "2007-11-02",
+      "nationalityCountryIds": [
+        "faroe-islands"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-leart-kabashi-20071127",
+      "firstName": "Leart",
+      "lastName": "Kabashi",
+      "dateOfBirth": "2007-11-27",
+      "nationalityCountryIds": [
+        "switzerland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-tomas-magnusson-20020814",
+      "firstName": "Tomas",
+      "lastName": "Magnusson",
+      "dateOfBirth": "2002-08-14",
+      "nationalityCountryIds": [
+        "iceland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-yan-dhanda-19981214",
+      "firstName": "Yan",
+      "lastName": "Dhanda",
+      "dateOfBirth": "1998-12-14",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-laurent-mendy-19970326",
+      "firstName": "Laurent",
+      "lastName": "Mendy",
+      "dateOfBirth": "1997-03-26",
+      "nationalityCountryIds": [
+        "france"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-grant-hanley-19911120",
+      "firstName": "Grant",
+      "lastName": "Hanley",
+      "dateOfBirth": "1991-11-20",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jason-kerr-19970206",
+      "firstName": "Jason",
+      "lastName": "Kerr",
+      "dateOfBirth": "1997-02-06",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-marko-ivezic-20011202",
+      "firstName": "Marko",
+      "lastName": "Ivezić",
+      "dateOfBirth": "2001-12-02",
+      "nationalityCountryIds": [
+        "serbia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-alex-williams-20050102",
+      "firstName": "Alex",
+      "lastName": "Williams",
+      "dateOfBirth": "2005-01-02",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jack-iredale-19960502",
+      "firstName": "Jack",
+      "lastName": "Iredale",
+      "dateOfBirth": "1996-05-02",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jordan-obita-19931208",
+      "firstName": "Jordan",
+      "lastName": "Obita",
+      "dateOfBirth": "1993-12-08",
+      "nationalityCountryIds": [
+        "uganda"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-rocky-bushiri-19991130",
+      "firstName": "Rocky",
+      "lastName": "Bushiri",
+      "dateOfBirth": "1999-11-30",
+      "nationalityCountryIds": [
+        "dr-congo"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-joseph-mcgrath-20070312",
+      "firstName": "Joseph",
+      "lastName": "Mcgrath",
+      "dateOfBirth": "2007-03-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-owen-elding-20060307",
+      "firstName": "Owen",
+      "lastName": "Elding",
+      "dateOfBirth": "2006-03-07",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-nathan-lowe-20050918",
+      "firstName": "Nathan",
+      "lastName": "Lowe",
+      "dateOfBirth": "2005-09-18",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-martin-boyle-19930425",
+      "firstName": "Martin",
+      "lastName": "Boyle",
+      "dateOfBirth": "1993-04-25",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-thibault-klidje-20010710",
+      "firstName": "Thibault",
+      "lastName": "Klidjé",
+      "dateOfBirth": "2001-07-10",
+      "nationalityCountryIds": [
+        "togo"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ante-suto-20000619",
+      "firstName": "Ante",
+      "lastName": "Šuto",
+      "dateOfBirth": "2000-06-19",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-raphael-sallinger-19951208",
+      "firstName": "Raphael",
+      "lastName": "Sallinger",
+      "dateOfBirth": "1995-12-08",
+      "nationalityCountryIds": [
+        "austria"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-jordan-smith-19941208",
+      "firstName": "Jordan",
+      "lastName": "Smith",
+      "dateOfBirth": "1994-12-08",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-freddie-owens-20050928",
+      "firstName": "Freddie",
+      "lastName": "Owens",
+      "dateOfBirth": "2005-09-28",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-adam-mayor-20050409",
+      "firstName": "Adam",
+      "lastName": "Mayor",
+      "dateOfBirth": "2005-04-09",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-josh-mulligan-20021112",
+      "firstName": "Josh",
+      "lastName": "Mulligan",
+      "dateOfBirth": "2002-11-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-joe-newell-19930315",
+      "firstName": "Joe",
+      "lastName": "Newell",
+      "dateOfBirth": "1993-03-15",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-miguel-changa-chaiwa-20040407",
+      "firstName": "Miguel Changa",
+      "lastName": "Chaiwa",
+      "dateOfBirth": "2004-04-07",
+      "nationalityCountryIds": [
+        "zambia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jamie-mcgrath-19960930",
+      "firstName": "Jamie",
+      "lastName": "McGrath",
+      "dateOfBirth": "1996-09-30",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-nicky-cadden-19960919",
+      "firstName": "Nicky",
+      "lastName": "Cadden",
+      "dateOfBirth": "1996-09-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-callum-wright-20000502",
+      "firstName": "Callum",
+      "lastName": "Wright",
+      "dateOfBirth": "2000-05-02",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jacob-devaney-20070611",
+      "firstName": "Jacob",
+      "lastName": "Devaney",
+      "dateOfBirth": "2007-06-11",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-felix-passlack-19980529",
+      "firstName": "Felix",
+      "lastName": "Passlack",
+      "dateOfBirth": "1998-05-29",
+      "nationalityCountryIds": [
+        "germany"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-kanayochukwu-megwa-20040305",
+      "firstName": "Kanayochukwu",
+      "lastName": "Megwa",
+      "dateOfBirth": "2004-03-05",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-azeem-abdulai-20021209",
+      "firstName": "Azeem",
+      "lastName": "Abdulai",
+      "dateOfBirth": "2002-12-09",
+      "nationalityCountryIds": [
+        "sierra-leone"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-mouad-el-fanis-20031231",
+      "firstName": "Mouad El",
+      "lastName": "Fanis",
+      "dateOfBirth": "2003-12-31",
+      "nationalityCountryIds": [
+        "belgium"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jackson-thomson-20100311",
+      "firstName": "Jackson",
+      "lastName": "Thomson",
+      "dateOfBirth": "2010-03-11",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jamie-brandon-19980205",
+      "firstName": "Jamie",
+      "lastName": "Brandon",
+      "dateOfBirth": "1998-02-05",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-michael-john-kamara-20060831",
+      "firstName": "Michael John",
+      "lastName": "Kamara",
+      "dateOfBirth": "2006-08-31",
+      "nationalityCountryIds": [
+        "sierra-leone"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-cathal-mccarthy-20060831",
+      "firstName": "Cathal",
+      "lastName": "McCarthy",
+      "dateOfBirth": "2006-08-31",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-robbie-deas-20000227",
+      "firstName": "Robbie",
+      "lastName": "Deas",
+      "dateOfBirth": "2000-02-27",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-george-stanger-20000815",
+      "firstName": "George",
+      "lastName": "Stanger",
+      "dateOfBirth": "2000-08-15",
+      "nationalityCountryIds": [
+        "new-zealand"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-johnly-yfeko-20030623",
+      "firstName": "Johnly",
+      "lastName": "Yfeko",
+      "dateOfBirth": "2003-06-23",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jonathan-meier-19991111",
+      "firstName": "Jonathan",
+      "lastName": "Meier",
+      "dateOfBirth": "1999-11-11",
+      "nationalityCountryIds": [
+        "germany"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-michael-schj-nning-larsen-20010202",
+      "firstName": "Michael",
+      "lastName": "Schjønning-Larsen",
+      "dateOfBirth": "2001-02-02",
+      "nationalityCountryIds": [
+        "estonia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-euan-bowie-20070701",
+      "firstName": "Euan",
+      "lastName": "Bowie",
+      "dateOfBirth": "2007-07-01",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-joe-hugill-20031019",
+      "firstName": "Joe",
+      "lastName": "Hugill",
+      "dateOfBirth": "2003-10-19",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-tyreece-john-jules-20010214",
+      "firstName": "Tyreece",
+      "lastName": "John-Jules",
+      "dateOfBirth": "2001-02-14",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ieuan-owen-20060520",
+      "firstName": "Ieuan",
+      "lastName": "Owen",
+      "dateOfBirth": "2006-05-20",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-djenairo-daniels-20020107",
+      "firstName": "Djenairo",
+      "lastName": "Daniels",
+      "dateOfBirth": "2002-01-07",
+      "nationalityCountryIds": [
+        "suriname"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-max-stryjek-19960718",
+      "firstName": "Max",
+      "lastName": "Stryjek",
+      "dateOfBirth": "1996-07-18",
+      "nationalityCountryIds": [
+        "poland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-calum-ferrie-19980619",
+      "firstName": "Calum",
+      "lastName": "Ferrie",
+      "dateOfBirth": "1998-06-19",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-corey-armour-20060712",
+      "firstName": "Corey",
+      "lastName": "Armour",
+      "dateOfBirth": "2006-07-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-mark-ohara-19951212",
+      "firstName": "Mark",
+      "lastName": "O'Hara",
+      "dateOfBirth": "1995-12-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-rory-mckenzie-19931007",
+      "firstName": "Rory",
+      "lastName": "McKenzie",
+      "dateOfBirth": "1993-10-07",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-erik-ring-20020424",
+      "firstName": "Erik",
+      "lastName": "Ring",
+      "dateOfBirth": "2002-04-24",
+      "nationalityCountryIds": [
+        "sweden"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-greg-kiltie-19970118",
+      "firstName": "Greg",
+      "lastName": "Kiltie",
+      "dateOfBirth": "1997-01-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-tom-lowery-19971231",
+      "firstName": "Tom",
+      "lastName": "Lowery",
+      "dateOfBirth": "1997-12-31",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-nicky-clescenco-20010723",
+      "firstName": "Nicky",
+      "lastName": "Cleșcenco",
+      "dateOfBirth": "2001-07-23",
+      "nationalityCountryIds": [
+        "moldova"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-roshaun-mathurin-20040123",
+      "firstName": "Roshaun",
+      "lastName": "Mathurin",
+      "dateOfBirth": "2004-01-23",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-aaron-tshibola-19941231",
+      "firstName": "Aaron",
+      "lastName": "Tshibola",
+      "dateOfBirth": "1994-12-31",
+      "nationalityCountryIds": [
+        "dr-congo"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-cole-burke-20080729",
+      "firstName": "Cole",
+      "lastName": "Burke",
+      "dateOfBirth": "2008-07-29",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-bailey-rice-20061004",
+      "firstName": "Bailey",
+      "lastName": "Rice",
+      "dateOfBirth": "2006-10-04",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-stephen-odonnell-19920511",
+      "firstName": "Stephen",
+      "lastName": "O'Donnell",
+      "dateOfBirth": "1992-05-11",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jake-girdwood-reich-20040526",
+      "firstName": "Jake",
+      "lastName": "Girdwood-Reich",
+      "dateOfBirth": "2004-05-26",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jamie-knight-lebel-20041224",
+      "firstName": "Jamie",
+      "lastName": "Knight-Lebel",
+      "dateOfBirth": "2004-12-24",
+      "nationalityCountryIds": [
+        "canada"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-martin-moormann-20010430",
+      "firstName": "Martin",
+      "lastName": "Moormann",
+      "dateOfBirth": "2001-04-30",
+      "nationalityCountryIds": [
+        "austria"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jordan-mcghee-19960724",
+      "firstName": "Jordan",
+      "lastName": "McGhee",
+      "dateOfBirth": "1996-07-24",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-tom-sparrow-20030203",
+      "firstName": "Tom",
+      "lastName": "Sparrow",
+      "dateOfBirth": "2003-02-03",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-paul-mcginn-19901022",
+      "firstName": "Paul",
+      "lastName": "McGinn",
+      "dateOfBirth": "1990-10-22",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-johnny-koutroumbis-19980306",
+      "firstName": "Johnny",
+      "lastName": "Koutroumbis",
+      "dateOfBirth": "1998-03-06",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-ewan-wilson-20041119",
+      "firstName": "Ewan",
+      "lastName": "Wilson",
+      "dateOfBirth": "2004-11-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-scott-williamson-20070312",
+      "firstName": "Scott",
+      "lastName": "Williamson",
+      "dateOfBirth": "2007-03-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jon-joe-friel-20080202",
+      "firstName": "Jon-Joe",
+      "lastName": "Friel",
+      "dateOfBirth": "2008-02-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jay-gillies-20080502",
+      "firstName": "Jay",
+      "lastName": "Gillies",
+      "dateOfBirth": "2008-05-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-emmanuel-longelo-20001227",
+      "firstName": "Emmanuel",
+      "lastName": "Longelo",
+      "dateOfBirth": "2000-12-27",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-jack-dalziel-20090307",
+      "firstName": "Jack",
+      "lastName": "Dalziel",
+      "dateOfBirth": "2009-03-07",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-eythor-bj-rgolfsson-20000825",
+      "firstName": "Eythor",
+      "lastName": "Bjørgolfsson",
+      "dateOfBirth": "2000-08-25",
+      "nationalityCountryIds": [
+        "norway"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-regan-charles-cook-19970301",
+      "firstName": "Regan",
+      "lastName": "Charles-Cook",
+      "dateOfBirth": "1997-03-01",
+      "nationalityCountryIds": [
+        "grenada"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-tawanda-maswanhise-20021120",
+      "firstName": "Tawanda",
+      "lastName": "Maswanhise",
+      "dateOfBirth": "2002-11-20",
+      "nationalityCountryIds": [
+        "zimbabwe"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-lucas-weir-20090628",
+      "firstName": "Lucas",
+      "lastName": "Weir",
+      "dateOfBirth": "2009-06-28",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-sebastian-palmer-houlden-20040512",
+      "firstName": "Sebastian",
+      "lastName": "Palmer-Houlden",
+      "dateOfBirth": "2004-05-12",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-callum-hendry-19971208",
+      "firstName": "Callum",
+      "lastName": "Hendry",
+      "dateOfBirth": "1997-12-08",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-willy-vogt-20020601",
+      "firstName": "Willy",
+      "lastName": "Vogt",
+      "dateOfBirth": "2002-06-01",
+      "nationalityCountryIds": [
+        "switzerland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-alex-paulsen-20020704",
+      "firstName": "Alex",
+      "lastName": "Paulsen",
+      "dateOfBirth": "2002-07-04",
+      "nationalityCountryIds": [
+        "new-zealand"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-matty-connelly-20030302",
+      "firstName": "Matty",
+      "lastName": "Connelly",
+      "dateOfBirth": "2003-03-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-jack-mcconnell-20080620",
+      "firstName": "Jack",
+      "lastName": "McConnell",
+      "dateOfBirth": "2008-06-20",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-lukas-fadinger-20000927",
+      "firstName": "Lukas",
+      "lastName": "Fadinger",
+      "dateOfBirth": "2000-09-27",
+      "nationalityCountryIds": [
+        "austria"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-alex-lowry-20030623",
+      "firstName": "Alex",
+      "lastName": "Lowry",
+      "dateOfBirth": "2003-06-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-oscar-priestman-20030325",
+      "firstName": "Oscar",
+      "lastName": "Priestman",
+      "dateOfBirth": "2003-03-25",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jardell-kanga-20051213",
+      "firstName": "Jardell",
+      "lastName": "Kanga",
+      "dateOfBirth": "2005-12-13",
+      "nationalityCountryIds": [
+        "sweden"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ibrahim-said-20020615",
+      "firstName": "Ibrahim",
+      "lastName": "Said",
+      "dateOfBirth": "2002-06-15",
+      "nationalityCountryIds": [
+        "nigeria"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-dylan-williams-20030912",
+      "firstName": "Dylan",
+      "lastName": "Williams",
+      "dateOfBirth": "2003-09-12",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-mikey-booth-20070102",
+      "firstName": "Mikey",
+      "lastName": "Booth",
+      "dateOfBirth": "2007-01-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-aaron-buchanan-20090602",
+      "firstName": "Aaron",
+      "lastName": "Buchanan",
+      "dateOfBirth": "2009-06-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-robbie-hunter-20091029",
+      "firstName": "Robbie",
+      "lastName": "Hunter",
+      "dateOfBirth": "2009-10-29",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-blane-watson-20090805",
+      "firstName": "Blane",
+      "lastName": "Watson",
+      "dateOfBirth": "2009-08-05",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-rocco-mccolm-20080629",
+      "firstName": "Rocco",
+      "lastName": "McColm",
+      "dateOfBirth": "2008-06-29",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-dylan-levitt-20001117",
+      "firstName": "Dylan",
+      "lastName": "Levitt",
+      "dateOfBirth": "2000-11-17",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-joe-hodge-20020914",
+      "firstName": "Joe",
+      "lastName": "Hodge",
+      "dateOfBirth": "2002-09-14",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ben-godfrey-19980115",
+      "firstName": "Ben",
+      "lastName": "Godfrey",
+      "dateOfBirth": "1998-01-15",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-john-souttar-19960925",
+      "firstName": "John",
+      "lastName": "Souttar",
+      "dateOfBirth": "1996-09-25",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-kosta-nedeljkovic-20051216",
+      "firstName": "Kosta",
+      "lastName": "Nedeljković",
+      "dateOfBirth": "2005-12-16",
+      "nationalityCountryIds": [
+        "serbia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-dujon-sterling-19991024",
+      "firstName": "Dujon",
+      "lastName": "Sterling",
+      "dateOfBirth": "1999-10-24",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-olwethu-makhanya-20040430",
+      "firstName": "Olwethu",
+      "lastName": "Makhanya",
+      "dateOfBirth": "2004-04-30",
+      "nationalityCountryIds": [
+        "south-africa"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-tuur-rommens-20030326",
+      "firstName": "Tuur",
+      "lastName": "Rommens",
+      "dateOfBirth": "2003-03-26",
+      "nationalityCountryIds": [
+        "belgium"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-james-penrice-19981222",
+      "firstName": "James",
+      "lastName": "Penrice",
+      "dateOfBirth": "1998-12-22",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-emmanuel-fernandez-20011120",
+      "firstName": "Emmanuel",
+      "lastName": "Fernandez",
+      "dateOfBirth": "2001-11-20",
+      "nationalityCountryIds": [
+        "nigeria"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-zander-hutton-20060731",
+      "firstName": "Zander",
+      "lastName": "Hutton",
+      "dateOfBirth": "2006-07-31",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-arran-kerr-20070610",
+      "firstName": "Arran",
+      "lastName": "Kerr",
+      "dateOfBirth": "2007-06-10",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-lawrence-shankland-19950810",
+      "firstName": "Lawrence",
+      "lastName": "Shankland",
+      "dateOfBirth": "1995-08-10",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-youssef-chermiti-20040524",
+      "firstName": "Youssef",
+      "lastName": "Chermiti",
+      "dateOfBirth": "2004-05-24",
+      "nationalityCountryIds": [
+        "portugal"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-min-su-kim-20060119",
+      "firstName": "Min-su",
+      "lastName": "Kim",
+      "dateOfBirth": "2006-01-19",
+      "nationalityCountryIds": [
+        "south-korea"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-daisuke-yokota-20000610",
+      "firstName": "Daisuke",
+      "lastName": "Yokota",
+      "dateOfBirth": "2000-06-10",
+      "nationalityCountryIds": [
+        "japan"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-kevin-kelsy-20040727",
+      "firstName": "Kevin",
+      "lastName": "Kelsy",
+      "dateOfBirth": "2004-07-27",
+      "nationalityCountryIds": [
+        "venezuela"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ryan-don-naderi-20030710",
+      "firstName": "Ryan Don",
+      "lastName": "Naderi",
+      "dateOfBirth": "2003-07-10",
+      "nationalityCountryIds": [
+        "czechia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-bojan-miovski-19990624",
+      "firstName": "Bojan",
+      "lastName": "Miovski",
+      "dateOfBirth": "1999-06-24",
+      "nationalityCountryIds": [
+        "north-macedonia"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ivor-pandur-20000325",
+      "firstName": "Ivor",
+      "lastName": "Pandur",
+      "dateOfBirth": "2000-03-25",
+      "nationalityCountryIds": [
+        "croatia"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-liam-kelly-19960123",
+      "firstName": "Liam",
+      "lastName": "Kelly",
+      "dateOfBirth": "1996-01-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-rydnn-mcguire-20080101",
+      "firstName": "Rydnn",
+      "lastName": "Mcguire",
+      "dateOfBirth": "2008-01-01",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-ross-mccrorie-19980318",
+      "firstName": "Ross",
+      "lastName": "McCrorie",
+      "dateOfBirth": "1998-03-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-dan-neil-20011130",
+      "firstName": "Dan",
+      "lastName": "Neil",
+      "dateOfBirth": "2001-11-30",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-cameron-devlin-19980607",
+      "firstName": "Cameron",
+      "lastName": "Devlin",
+      "dateOfBirth": "1998-06-07",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jose-cifuentes-19990312",
+      "firstName": "José",
+      "lastName": "Cifuentes",
+      "dateOfBirth": "1999-03-12",
+      "nationalityCountryIds": [
+        "ecuador"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-vanja-dragojevic-20060111",
+      "firstName": "Vanja",
+      "lastName": "Dragojević",
+      "dateOfBirth": "2006-01-11",
+      "nationalityCountryIds": [
+        "serbia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-djeidi-gassama-20030910",
+      "firstName": "Djeidi",
+      "lastName": "Gassama",
+      "dateOfBirth": "2003-09-10",
+      "nationalityCountryIds": [
+        "mauritania"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-badredine-bouanani-20041208",
+      "firstName": "Badredine",
+      "lastName": "Bouanani",
+      "dateOfBirth": "2004-12-08",
+      "nationalityCountryIds": [
+        "algeria"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-tochi-chukwuani-20030324",
+      "firstName": "Tochi",
+      "lastName": "Chukwuani",
+      "dateOfBirth": "2003-03-24",
+      "nationalityCountryIds": [
+        "denmark"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-nicolas-raskin-20010223",
+      "firstName": "Nicolas",
+      "lastName": "Raskin",
+      "dateOfBirth": "2001-02-23",
+      "nationalityCountryIds": [
+        "belgium"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ross-mccausland-20030512",
+      "firstName": "Ross",
+      "lastName": "McCausland",
+      "dateOfBirth": "2003-05-12",
+      "nationalityCountryIds": [
+        "northern-ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-joshua-gentles-20070926",
+      "firstName": "Joshua",
+      "lastName": "Gentles",
+      "dateOfBirth": "2007-09-26",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-findlay-curtis-20060609",
+      "firstName": "Findlay",
+      "lastName": "Curtis",
+      "dateOfBirth": "2006-06-09",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-enes-alic-19990903",
+      "firstName": "Enes",
+      "lastName": "Alić",
+      "dateOfBirth": "1999-09-03",
+      "nationalityCountryIds": [
+        "bosnia-and-herzegovina"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-cheick-diabate-20020121",
+      "firstName": "Cheick",
+      "lastName": "Diabate",
+      "dateOfBirth": "2002-01-21",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-morgan-boyes-20010422",
+      "firstName": "Morgan",
+      "lastName": "Boyes",
+      "dateOfBirth": "2001-04-22",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-zach-mitchell-20050109",
+      "firstName": "Zach",
+      "lastName": "Mitchell",
+      "dateOfBirth": "2005-01-09",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-bozo-mikulic-19970129",
+      "firstName": "Božo",
+      "lastName": "Mikulić",
+      "dateOfBirth": "1997-01-29",
+      "nationalityCountryIds": [
+        "croatia"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-matty-foulds-19980217",
+      "firstName": "Matty",
+      "lastName": "Foulds",
+      "dateOfBirth": "1998-02-17",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-danny-finlayson-20010119",
+      "firstName": "Danny",
+      "lastName": "Finlayson",
+      "dateOfBirth": "2001-01-19",
+      "nationalityCountryIds": [
+        "northern-ireland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-liam-smith-19960410",
+      "firstName": "Liam",
+      "lastName": "Smith",
+      "dateOfBirth": "1996-04-10",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-josh-fowler-20011114",
+      "firstName": "Josh",
+      "lastName": "Fowler",
+      "dateOfBirth": "2001-11-14",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-danny-schmidt-20030130",
+      "firstName": "Danny",
+      "lastName": "Schmidt",
+      "dateOfBirth": "2003-01-30",
+      "nationalityCountryIds": [
+        "germany"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-ruari-paton-20000908",
+      "firstName": "Ruari",
+      "lastName": "Paton",
+      "dateOfBirth": "2000-09-08",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-toby-steward-20050212",
+      "firstName": "Toby",
+      "lastName": "Steward",
+      "dateOfBirth": "2005-02-12",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-ross-sinclair-20010507",
+      "firstName": "Ross",
+      "lastName": "Sinclair",
+      "dateOfBirth": "2001-05-07",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-kyle-thomson-20070104",
+      "firstName": "Kyle",
+      "lastName": "Thomson",
+      "dateOfBirth": "2007-01-04",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-taylor-steven-20040917",
+      "firstName": "Taylor",
+      "lastName": "Steven",
+      "dateOfBirth": "2004-09-17",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jason-holt-19930219",
+      "firstName": "Jason",
+      "lastName": "Holt",
+      "dateOfBirth": "1993-02-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-jamie-gullan-19990702",
+      "firstName": "Jamie",
+      "lastName": "Gullan",
+      "dateOfBirth": "1999-07-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-sam-stanton-19940419",
+      "firstName": "Sam",
+      "lastName": "Stanton",
+      "dateOfBirth": "1994-04-19",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-unax-alvarez-20020216",
+      "firstName": "Unax",
+      "lastName": "Álvarez",
+      "dateOfBirth": "2002-02-16",
+      "nationalityCountryIds": [
+        "spain"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-kai-fotheringham-20030418",
+      "firstName": "Kai",
+      "lastName": "Fotheringham",
+      "dateOfBirth": "2003-04-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-logan-chalmers-20000324",
+      "firstName": "Logan",
+      "lastName": "Chalmers",
+      "dateOfBirth": "2000-03-24",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-macaulay-tait-20051127",
+      "firstName": "Macaulay",
+      "lastName": "Tait",
+      "dateOfBirth": "2005-11-27",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-matty-todd-20010614",
+      "firstName": "Matty",
+      "lastName": "Todd",
+      "dateOfBirth": "2001-06-14",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-joel-cotterill-20050110",
+      "firstName": "Joel",
+      "lastName": "Cotterill",
+      "dateOfBirth": "2005-01-10",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-josh-campbell-20000506",
+      "firstName": "Josh",
+      "lastName": "Campbell",
+      "dateOfBirth": "2000-05-06",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-reece-mcalear-20020212",
+      "firstName": "Reece",
+      "lastName": "McAlear",
+      "dateOfBirth": "2002-02-12",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-richard-king-20011127",
+      "firstName": "Richard",
+      "lastName": "King",
+      "dateOfBirth": "2001-11-27",
+      "nationalityCountryIds": [
+        "jamaica"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-louis-jackson-20050918",
+      "firstName": "Louis",
+      "lastName": "Jackson",
+      "dateOfBirth": "2005-09-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-alexander-gogic-19940413",
+      "firstName": "Alexander",
+      "lastName": "Gogić",
+      "dateOfBirth": "1994-04-13",
+      "nationalityCountryIds": [
+        "cyprus"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-marcus-fraser-19940623",
+      "firstName": "Marcus",
+      "lastName": "Fraser",
+      "dateOfBirth": "1994-06-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-marcello-de-barros",
+      "firstName": "Marcello De",
+      "lastName": "Barros",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-calvin-ramsay-20030731",
+      "firstName": "Calvin",
+      "lastName": "Ramsay",
+      "dateOfBirth": "2003-07-31",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-henry-fieldson-20050704",
+      "firstName": "Henry",
+      "lastName": "Fieldson",
+      "dateOfBirth": "2005-07-04",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "DF"
+    },
+    {
+      "id": "player-eseosa-sule-20060401",
+      "firstName": "Eseosa",
+      "lastName": "Sule",
+      "dateOfBirth": "2006-04-01",
+      "nationalityCountryIds": [
+        "nigeria"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-jonah-ayunga-19970524",
+      "firstName": "Jonah",
+      "lastName": "Ayunga",
+      "dateOfBirth": "1997-05-24",
+      "nationalityCountryIds": [
+        "kenya"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-jake-young-20010722",
+      "firstName": "Jake",
+      "lastName": "Young",
+      "dateOfBirth": "2001-07-22",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-chris-mochrie-20030407",
+      "firstName": "Chris",
+      "lastName": "Mochrie",
+      "dateOfBirth": "2003-04-07",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-josh-farquhar-20080118",
+      "firstName": "Josh",
+      "lastName": "Farquhar",
+      "dateOfBirth": "2008-01-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-nikolas-agrafiotis-20000425",
+      "firstName": "Nikolas",
+      "lastName": "Agrafiotis",
+      "dateOfBirth": "2000-04-25",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-luke-douglas-20090716",
+      "firstName": "Luke",
+      "lastName": "Douglas",
+      "dateOfBirth": "2009-07-16",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "FW"
+    },
+    {
+      "id": "player-jacob-chapman-20001021",
+      "firstName": "Jacob",
+      "lastName": "Chapman",
+      "dateOfBirth": "2000-10-21",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-peter-urminsky-19990924",
+      "firstName": "Peter",
+      "lastName": "Urminsky",
+      "dateOfBirth": "1999-09-24",
+      "nationalityCountryIds": [
+        "slovakia"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-ryan-mullen-20010518",
+      "firstName": "Ryan",
+      "lastName": "Mullen",
+      "dateOfBirth": "2001-05-18",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-grant-tamosevicius-20080902",
+      "firstName": "Grant",
+      "lastName": "Tamosevicius",
+      "dateOfBirth": "2008-09-02",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "GK"
+    },
+    {
+      "id": "player-jayden-richardson-20000904",
+      "firstName": "Jayden",
+      "lastName": "Richardson",
+      "dateOfBirth": "2000-09-04",
+      "nationalityCountryIds": [
+        "saint-kitts-and-nevis"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-declan-john-19950630",
+      "firstName": "Declan",
+      "lastName": "John",
+      "dateOfBirth": "1995-06-30",
+      "nationalityCountryIds": [
+        "wales"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-liam-donnelly-19960307",
+      "firstName": "Liam",
+      "lastName": "Donnelly",
+      "dateOfBirth": "1996-03-07",
+      "nationalityCountryIds": [
+        "northern-ireland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ryan-carr-20040923",
+      "firstName": "Ryan",
+      "lastName": "Carr",
+      "dateOfBirth": "2004-09-23",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-samuel-ramos-20000818",
+      "firstName": "Samuel",
+      "lastName": "Ramos",
+      "dateOfBirth": "2000-08-18",
+      "nationalityCountryIds": [
+        "spain"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-luke-thomas-19990219",
+      "firstName": "Luke",
+      "lastName": "Thomas",
+      "dateOfBirth": "1999-02-19",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-keanu-baccus-19980607",
+      "firstName": "Keanu",
+      "lastName": "Baccus",
+      "dateOfBirth": "1998-06-07",
+      "nationalityCountryIds": [
+        "australia"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-malik-dijksteel-20010708",
+      "firstName": "Malik",
+      "lastName": "Dijksteel",
+      "dateOfBirth": "2001-07-08",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-ismeal-kabia-20051210",
+      "firstName": "Ismeal",
+      "lastName": "Kabia",
+      "dateOfBirth": "2005-12-10",
+      "nationalityCountryIds": [
+        "netherlands"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-fraser-taylor-20030220",
+      "firstName": "Fraser",
+      "lastName": "Taylor",
+      "dateOfBirth": "2003-02-20",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-carrick-mcevoy-20070625",
+      "firstName": "Carrick",
+      "lastName": "McEvoy",
+      "dateOfBirth": "2007-06-25",
+      "nationalityCountryIds": [
+        "scotland"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-paul-nsio-20060315",
+      "firstName": "Paul",
+      "lastName": "Nsio",
+      "dateOfBirth": "2006-03-15",
+      "nationalityCountryIds": [
+        "england"
+      ],
+      "primaryPosition": "MF"
+    },
+    {
+      "id": "player-killian-phillips-20020330",
+      "firstName": "Killian",
+      "lastName": "Phillips",
+      "dateOfBirth": "2002-03-30",
+      "nationalityCountryIds": [
+        "ireland"
+      ],
+      "primaryPosition": "MF"
+    }
+  ],
+  "managers": [],
+  "domesticLeagueMemberships": [
+    {
+      "countryId": "scotland",
+      "competitionId": "scotland-premiership",
+      "clubIds": [
+        "aberdeen",
+        "celtic",
+        "dundee-fc",
+        "dundee-united",
+        "falkirk-fc",
+        "heart-of-midlothian",
+        "hibernian",
+        "kilmarnock",
+        "motherwell",
+        "rangers",
+        "st-johnstone",
+        "st-mirren"
+      ]
+    }
+  ],
+  "squadAssignments": [
+    {
+      "clubId": "aberdeen",
+      "playerIds": [
+        "player-nicky-devlin-19931017",
+        "player-mitchel-frame-20060125",
+        "player-kristers-tobers-20001213",
+        "player-mats-knoester-19981119",
+        "player-gavin-molloy-20011019",
+        "player-jack-milne-20030210",
+        "player-lewis-mayo-20000319",
+        "player-nesta-guinness-walker-19990914",
+        "player-daniel-happe-19980928",
+        "player-ayoub-mouloua-20020930",
+        "player-lewis-smith-20000316",
+        "player-kevin-nisbet-19970308",
+        "player-toyosi-olusanya-19971013",
+        "player-mitchy-ntelo-20010504",
+        "player-andrew-fasanya",
+        "player-marius-muller-19930712",
+        "player-daniel-klein-20010313",
+        "player-tony-yogane-20050924",
+        "player-bradley-lyons-19970526",
+        "player-alexander-briedl-20020421",
+        "player-hicham-mahou-19990702",
+        "player-stuart-armstrong-19920330",
+        "player-ante-palaversa-20000406",
+        "player-connor-ronan-19980306",
+        "player-chris-cadden-19960919",
+        "player-aremu-afeez-19991003",
+        "player-findlay-marshall-20060417",
+        "player-cooper-masson-20081110",
+        "player-emmanuel-gyamfi-20040723"
+      ]
+    },
+    {
+      "clubId": "celtic",
+      "playerIds": [
+        "player-alistair-johnston-19981008",
+        "player-jordan-lotomba-19980929",
+        "player-liam-scales-19980808",
+        "player-auston-trusty-19980812",
+        "player-cameron-carter-vickers-19971231",
+        "player-dane-murray-20030626",
+        "player-colby-donovan-20060906",
+        "player-tony-ralston-19981116",
+        "player-kieran-tierney-19970605",
+        "player-jota-19990330",
+        "player-benjamin-nygren-20010708",
+        "player-kasper-h-gh-20001206",
+        "player-camilo-duran-20020210",
+        "player-sebastian-tounekti-20020713",
+        "player-callum-osmand-20051108",
+        "player-shumaira-mheuka-20071020",
+        "player-viljami-sinisalo-20011011",
+        "player-sam-johnstone-19930325",
+        "player-ross-doohan-19980329",
+        "player-marcus-gill-20070511",
+        "player-yang-hyun-jun-20020525",
+        "player-luke-mccowan-19971209",
+        "player-oliver-s-rensen-20020310",
+        "player-alex-oxlade-chamberlain-19930815",
+        "player-mika-baur-20040709",
+        "player-haissem-hassan-20020208",
+        "player-sean-mcardle-20070826",
+        "player-joel-van-den-berg-20070211",
+        "player-callum-mcgregor-19930614",
+        "player-james-forrest-19910707",
+        "player-landon-emenalo-20080118",
+        "player-liam-kennedy-20090117"
+      ]
+    },
+    {
+      "clubId": "dundee-fc",
+      "playerIds": [
+        "player-idris-odutayo-20021026",
+        "player-ryan-astley-20011004",
+        "player-owen-bevan-20031026",
+        "player-matai-akinmboni-20061017",
+        "player-drey-wright-19940430",
+        "player-imari-samuels-20030205",
+        "player-joe-wright-19950226",
+        "player-bobby-wales-20050623",
+        "player-ashley-hay-20030710",
+        "player-simon-murray-19920315",
+        "player-joe-westley-20041018",
+        "player-bradley-fink-20030417",
+        "player-joe-bevan-20040715",
+        "player-ryan-bland-20090704",
+        "player-owen-goodman-20031127",
+        "player-kieran-ohara-19960422",
+        "player-harrison-sharp-20010404",
+        "player-brad-halliday-19950710",
+        "player-ryan-finnigan-20030923",
+        "player-finlay-robertson-20021112",
+        "player-alan-forrest-19960909",
+        "player-jack-moorhouse-20051129",
+        "player-zan-besir-20001017",
+        "player-charlie-reilly-20011205",
+        "player-callum-jones-20010405",
+        "player-ashton-leiper-20071021",
+        "player-ethan-hamilton-19981018"
+      ]
+    },
+    {
+      "clubId": "dundee-united",
+      "playerIds": [
+        "player-bert-esselink-19990916",
+        "player-iurie-iovu-20020706",
+        "player-ross-graham-20010220",
+        "player-michael-forbes-20040429",
+        "player-kevin-ciubotaru-20040202",
+        "player-dario-naamo-20050514",
+        "player-joshua-rawlins-20040423",
+        "player-zachary-sapsford-20020816",
+        "player-lachlan-rose-19990510",
+        "player-neil-farrugia-19990519",
+        "player-daniel-bennie-20060413",
+        "player-idjessi-metsoko-20020314",
+        "player-jack-james-walton-19980423",
+        "player-jordan-amissah-20010802",
+        "player-mehdi-merghem-19970719",
+        "player-panutche-camara-19970228",
+        "player-dylan-tait-20011201",
+        "player-william-ferry-20001207",
+        "player-emmanuel-agyei-20041103",
+        "player-zidane-iqbal-20030427",
+        "player-lyall-cameron-20021010",
+        "player-jesse-randall-20020819",
+        "player-abdoulaye-yoro-20061212",
+        "player-keir-gilligan-20080606",
+        "player-jack-anderson-20090427"
+      ]
+    },
+    {
+      "clubId": "falkirk-fc",
+      "playerIds": [
+        "player-keelan-adams-20011112",
+        "player-leon-mccann-20000316",
+        "player-liam-henderson-19960823",
+        "player-coll-donaldson-19950409",
+        "player-lewis-neilson-20030515",
+        "player-scott-tanser-19941023",
+        "player-connor-allan-20040110",
+        "player-deniss-melniks-20020907",
+        "player-ben-parkinson-20050310",
+        "player-ross-maclver-19990228",
+        "player-ethan-laidlaw-20050102",
+        "player-ethan-ross-20010815",
+        "player-jacob-murrell-20040329",
+        "player-alfie-agyeman-20000315",
+        "player-kai-brown-20091007",
+        "player-nicky-hogarth-20010704",
+        "player-scott-bain-19911122",
+        "player-jack-mcmillan-19971218",
+        "player-brad-spencer-19960516",
+        "player-craig-sibbald-19950518",
+        "player-paul-mcgovern-20080109",
+        "player-finn-yeats-20040419",
+        "player-finley-barbrook-20041204",
+        "player-joe-gardner-20050606",
+        "player-ryan-strain-19970402",
+        "player-aidan-nesbitt-19970205",
+        "player-connor-mcleod-20061215",
+        "player-ben-krauhaus-20041012",
+        "player-owen-eames-20061101",
+        "player-aodhan-doherty-20060503",
+        "player-calvin-fodrey-20040210"
+      ]
+    },
+    {
+      "clubId": "heart-of-midlothian",
+      "playerIds": [
+        "player-christian-borchgrevink-19990511",
+        "player-mj-kamson-kamara-20060214",
+        "player-stephen-kingsley-19940723",
+        "player-craig-halkett-19950529",
+        "player-jamie-mccart-19970620",
+        "player-oisin-mcentee-20010105",
+        "player-josh-williams-19880418",
+        "player-stuart-findlay-19950914",
+        "player-harry-milne-19961029",
+        "player-jordi-altena-20031204",
+        "player-malachi-fagan-walcott-20020311",
+        "player-jerome-williams-19980104",
+        "player-claudio-braga-19991028",
+        "player-pierre-landry-kabore-20010705",
+        "player-severin-sabri-guendouz-20000209",
+        "player-elton-kabangu-19980208",
+        "player-james-wilson-20070306",
+        "player-finlay-pollock-20040627",
+        "player-sabah-kerjota-20010814",
+        "player-rogers-mato-20031010",
+        "player-amadou-ba-sy-20010608",
+        "player-beau-reus-20011030",
+        "player-zander-clark-19920626",
+        "player-ryan-fulton-19960523",
+        "player-kieran-wright-19990401",
+        "player-aiden-duncan-20100504",
+        "player-calvin-miller-19980109",
+        "player-ageu-20020202",
+        "player-tom-renaud-20001119",
+        "player-josh-mcpake-20010831",
+        "player-blair-spittal-19951219",
+        "player-aron-benjaminsen-20071102",
+        "player-leart-kabashi-20071127",
+        "player-tomas-magnusson-20020814",
+        "player-yan-dhanda-19981214",
+        "player-laurent-mendy-19970326"
+      ]
+    },
+    {
+      "clubId": "hibernian",
+      "playerIds": [
+        "player-grant-hanley-19911120",
+        "player-jason-kerr-19970206",
+        "player-marko-ivezic-20011202",
+        "player-alex-williams-20050102",
+        "player-jack-iredale-19960502",
+        "player-jordan-obita-19931208",
+        "player-rocky-bushiri-19991130",
+        "player-joseph-mcgrath-20070312",
+        "player-owen-elding-20060307",
+        "player-nathan-lowe-20050918",
+        "player-martin-boyle-19930425",
+        "player-thibault-klidje-20010710",
+        "player-ante-suto-20000619",
+        "player-raphael-sallinger-19951208",
+        "player-jordan-smith-19941208",
+        "player-freddie-owens-20050928",
+        "player-adam-mayor-20050409",
+        "player-josh-mulligan-20021112",
+        "player-joe-newell-19930315",
+        "player-miguel-changa-chaiwa-20040407",
+        "player-jamie-mcgrath-19960930",
+        "player-nicky-cadden-19960919",
+        "player-callum-wright-20000502",
+        "player-jacob-devaney-20070611",
+        "player-felix-passlack-19980529",
+        "player-kanayochukwu-megwa-20040305",
+        "player-azeem-abdulai-20021209",
+        "player-mouad-el-fanis-20031231",
+        "player-jackson-thomson-20100311"
+      ]
+    },
+    {
+      "clubId": "kilmarnock",
+      "playerIds": [
+        "player-jamie-brandon-19980205",
+        "player-michael-john-kamara-20060831",
+        "player-cathal-mccarthy-20060831",
+        "player-robbie-deas-20000227",
+        "player-george-stanger-20000815",
+        "player-johnly-yfeko-20030623",
+        "player-jonathan-meier-19991111",
+        "player-michael-schj-nning-larsen-20010202",
+        "player-euan-bowie-20070701",
+        "player-joe-hugill-20031019",
+        "player-tyreece-john-jules-20010214",
+        "player-ieuan-owen-20060520",
+        "player-djenairo-daniels-20020107",
+        "player-max-stryjek-19960718",
+        "player-calum-ferrie-19980619",
+        "player-corey-armour-20060712",
+        "player-mark-ohara-19951212",
+        "player-rory-mckenzie-19931007",
+        "player-erik-ring-20020424",
+        "player-greg-kiltie-19970118",
+        "player-tom-lowery-19971231",
+        "player-nicky-clescenco-20010723",
+        "player-roshaun-mathurin-20040123",
+        "player-aaron-tshibola-19941231",
+        "player-cole-burke-20080729",
+        "player-bailey-rice-20061004"
+      ]
+    },
+    {
+      "clubId": "motherwell",
+      "playerIds": [
+        "player-stephen-odonnell-19920511",
+        "player-jake-girdwood-reich-20040526",
+        "player-jamie-knight-lebel-20041224",
+        "player-martin-moormann-20010430",
+        "player-jordan-mcghee-19960724",
+        "player-tom-sparrow-20030203",
+        "player-paul-mcginn-19901022",
+        "player-johnny-koutroumbis-19980306",
+        "player-ewan-wilson-20041119",
+        "player-scott-williamson-20070312",
+        "player-jon-joe-friel-20080202",
+        "player-jay-gillies-20080502",
+        "player-emmanuel-longelo-20001227",
+        "player-jack-dalziel-20090307",
+        "player-eythor-bj-rgolfsson-20000825",
+        "player-regan-charles-cook-19970301",
+        "player-tawanda-maswanhise-20021120",
+        "player-lucas-weir-20090628",
+        "player-sebastian-palmer-houlden-20040512",
+        "player-callum-hendry-19971208",
+        "player-willy-vogt-20020601",
+        "player-alex-paulsen-20020704",
+        "player-matty-connelly-20030302",
+        "player-jack-mcconnell-20080620",
+        "player-lukas-fadinger-20000927",
+        "player-alex-lowry-20030623",
+        "player-oscar-priestman-20030325",
+        "player-jardell-kanga-20051213",
+        "player-ibrahim-said-20020615",
+        "player-dylan-williams-20030912",
+        "player-mikey-booth-20070102",
+        "player-aaron-buchanan-20090602",
+        "player-robbie-hunter-20091029",
+        "player-blane-watson-20090805",
+        "player-rocco-mccolm-20080629",
+        "player-dylan-levitt-20001117",
+        "player-joe-hodge-20020914"
+      ]
+    },
+    {
+      "clubId": "rangers",
+      "playerIds": [
+        "player-ben-godfrey-19980115",
+        "player-john-souttar-19960925",
+        "player-kosta-nedeljkovic-20051216",
+        "player-dujon-sterling-19991024",
+        "player-olwethu-makhanya-20040430",
+        "player-tuur-rommens-20030326",
+        "player-james-penrice-19981222",
+        "player-emmanuel-fernandez-20011120",
+        "player-zander-hutton-20060731",
+        "player-arran-kerr-20070610",
+        "player-lawrence-shankland-19950810",
+        "player-youssef-chermiti-20040524",
+        "player-min-su-kim-20060119",
+        "player-daisuke-yokota-20000610",
+        "player-kevin-kelsy-20040727",
+        "player-ryan-don-naderi-20030710",
+        "player-bojan-miovski-19990624",
+        "player-ivor-pandur-20000325",
+        "player-liam-kelly-19960123",
+        "player-rydnn-mcguire-20080101",
+        "player-ross-mccrorie-19980318",
+        "player-dan-neil-20011130",
+        "player-cameron-devlin-19980607",
+        "player-jose-cifuentes-19990312",
+        "player-vanja-dragojevic-20060111",
+        "player-djeidi-gassama-20030910",
+        "player-badredine-bouanani-20041208",
+        "player-tochi-chukwuani-20030324",
+        "player-nicolas-raskin-20010223",
+        "player-ross-mccausland-20030512",
+        "player-joshua-gentles-20070926",
+        "player-findlay-curtis-20060609"
+      ]
+    },
+    {
+      "clubId": "st-johnstone",
+      "playerIds": [
+        "player-enes-alic-19990903",
+        "player-cheick-diabate-20020121",
+        "player-morgan-boyes-20010422",
+        "player-zach-mitchell-20050109",
+        "player-bozo-mikulic-19970129",
+        "player-matty-foulds-19980217",
+        "player-danny-finlayson-20010119",
+        "player-liam-smith-19960410",
+        "player-josh-fowler-20011114",
+        "player-danny-schmidt-20030130",
+        "player-ruari-paton-20000908",
+        "player-toby-steward-20050212",
+        "player-ross-sinclair-20010507",
+        "player-kyle-thomson-20070104",
+        "player-taylor-steven-20040917",
+        "player-jason-holt-19930219",
+        "player-jamie-gullan-19990702",
+        "player-sam-stanton-19940419",
+        "player-unax-alvarez-20020216",
+        "player-kai-fotheringham-20030418",
+        "player-logan-chalmers-20000324",
+        "player-macaulay-tait-20051127",
+        "player-matty-todd-20010614",
+        "player-joel-cotterill-20050110",
+        "player-josh-campbell-20000506",
+        "player-reece-mcalear-20020212"
+      ]
+    },
+    {
+      "clubId": "st-mirren",
+      "playerIds": [
+        "player-richard-king-20011127",
+        "player-louis-jackson-20050918",
+        "player-alexander-gogic-19940413",
+        "player-marcus-fraser-19940623",
+        "player-marcello-de-barros",
+        "player-calvin-ramsay-20030731",
+        "player-henry-fieldson-20050704",
+        "player-eseosa-sule-20060401",
+        "player-jonah-ayunga-19970524",
+        "player-jake-young-20010722",
+        "player-chris-mochrie-20030407",
+        "player-josh-farquhar-20080118",
+        "player-nikolas-agrafiotis-20000425",
+        "player-luke-douglas-20090716",
+        "player-jacob-chapman-20001021",
+        "player-peter-urminsky-19990924",
+        "player-ryan-mullen-20010518",
+        "player-grant-tamosevicius-20080902",
+        "player-jayden-richardson-20000904",
+        "player-declan-john-19950630",
+        "player-liam-donnelly-19960307",
+        "player-ryan-carr-20040923",
+        "player-samuel-ramos-20000818",
+        "player-luke-thomas-19990219",
+        "player-keanu-baccus-19980607",
+        "player-malik-dijksteel-20010708",
+        "player-ismeal-kabia-20051210",
+        "player-fraser-taylor-20030220",
+        "player-carrick-mcevoy-20070625",
+        "player-paul-nsio-20060315",
+        "player-killian-phillips-20020330"
+      ]
+    }
+  ],
+  "managerAssignments": [],
+  "competitionSeasons": [
+    {
+      "competitionId": "scotland-premiership",
+      "ruleSetId": "scotland-premiership:2026-27:v1",
+      "schedule": {
+        "competitionId": "scotland-premiership",
+        "seasonLabel": "2026-27",
+        "ruleSetId": "scotland-premiership:2026-27:v1",
+        "formatType": "DOUBLE_ROUND_ROBIN",
+        "participantTeamIds": [
+          "aberdeen",
+          "celtic",
+          "dundee-fc",
+          "dundee-united",
+          "falkirk-fc",
+          "heart-of-midlothian",
+          "hibernian",
+          "kilmarnock",
+          "motherwell",
+          "rangers",
+          "st-johnstone",
+          "st-mirren"
+        ],
+        "rounds": [
+          {
+            "round": 1,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r1:aberdeen:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 1,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "st-mirren",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r1:st-johnstone:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 1,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r1:dundee-fc:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 1,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "rangers",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r1:motherwell:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 1,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r1:falkirk-fc:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 1,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "kilmarnock",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r1:hibernian:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 1,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 2,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r2:st-johnstone:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 2,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "aberdeen",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r2:st-mirren:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 2,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "rangers",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r2:motherwell:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 2,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r2:dundee-fc:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 2,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "kilmarnock",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r2:hibernian:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 2,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r2:falkirk-fc:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 2,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 3,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r3:aberdeen:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 3,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "rangers",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r3:motherwell:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 3,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r3:st-mirren:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 3,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "kilmarnock",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r3:hibernian:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 3,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r3:dundee-fc:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 3,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r3:falkirk-fc:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 3,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 4,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r4:motherwell:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 4,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "aberdeen",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r4:rangers:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 4,
+                "homeTeamId": "rangers",
+                "awayTeamId": "kilmarnock",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r4:hibernian:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 4,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r4:st-mirren:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 4,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r4:falkirk-fc:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 4,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r4:dundee-fc:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 4,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 5,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r5:aberdeen:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 5,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "kilmarnock",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r5:hibernian:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 5,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "motherwell",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r5:rangers:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 5,
+                "homeTeamId": "rangers",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r5:falkirk-fc:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 5,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r5:st-mirren:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 5,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r5:dundee-fc:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 5,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "celtic",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 6,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r6:hibernian:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 6,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "aberdeen",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r6:kilmarnock:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 6,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r6:falkirk-fc:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 6,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "motherwell",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r6:rangers:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 6,
+                "homeTeamId": "rangers",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r6:dundee-fc:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 6,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r6:st-mirren:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 6,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "celtic",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 7,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r7:aberdeen:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 7,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r7:falkirk-fc:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 7,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "hibernian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r7:kilmarnock:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 7,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r7:dundee-fc:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 7,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "motherwell",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r7:rangers:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 7,
+                "homeTeamId": "rangers",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r7:st-mirren:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 7,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 8,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r8:falkirk-fc:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 8,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "aberdeen",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r8:heart-of-midlothian:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 8,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r8:dundee-fc:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 8,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "hibernian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r8:kilmarnock:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 8,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r8:st-mirren:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 8,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "motherwell",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r8:rangers:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 8,
+                "homeTeamId": "rangers",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 9,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r9:aberdeen:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 9,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "dundee-united",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r9:dundee-fc:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 9,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "falkirk-fc",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r9:heart-of-midlothian:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 9,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r9:st-mirren:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 9,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "hibernian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r9:kilmarnock:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 9,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r9:rangers:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 9,
+                "homeTeamId": "rangers",
+                "awayTeamId": "motherwell",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 10,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r10:dundee-fc:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 10,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "aberdeen",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r10:dundee-united:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 10,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r10:st-mirren:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 10,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "falkirk-fc",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r10:heart-of-midlothian:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 10,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r10:rangers:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 10,
+                "homeTeamId": "rangers",
+                "awayTeamId": "hibernian",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r10:kilmarnock:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 10,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "motherwell",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 11,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r11:aberdeen:celtic",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 11,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "celtic",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r11:st-mirren:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 11,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "dundee-fc",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r11:dundee-united:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 11,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "st-johnstone",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r11:rangers:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 11,
+                "homeTeamId": "rangers",
+                "awayTeamId": "falkirk-fc",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r11:heart-of-midlothian:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 11,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "motherwell",
+                "leg": 1
+              },
+              {
+                "id": "scotland-premiership:2026-27:r11:kilmarnock:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 11,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "hibernian",
+                "leg": 1
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 12,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r12:st-mirren:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 12,
+                "homeTeamId": "st-mirren",
+                "awayTeamId": "aberdeen",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r12:celtic:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 12,
+                "homeTeamId": "celtic",
+                "awayTeamId": "st-johnstone",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r12:rangers:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 12,
+                "homeTeamId": "rangers",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r12:dundee-united:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 12,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "motherwell",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r12:kilmarnock:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 12,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r12:heart-of-midlothian:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 12,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "hibernian",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 13,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r13:aberdeen:st-johnstone",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 13,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "st-johnstone",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r13:rangers:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 13,
+                "homeTeamId": "rangers",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r13:celtic:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 13,
+                "homeTeamId": "celtic",
+                "awayTeamId": "motherwell",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r13:kilmarnock:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 13,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r13:dundee-united:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 13,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "hibernian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r13:heart-of-midlothian:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 13,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 14,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r14:rangers:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 14,
+                "homeTeamId": "rangers",
+                "awayTeamId": "aberdeen",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r14:st-johnstone:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 14,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "motherwell",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r14:kilmarnock:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 14,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r14:celtic:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 14,
+                "homeTeamId": "celtic",
+                "awayTeamId": "hibernian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r14:heart-of-midlothian:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 14,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r14:dundee-united:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 14,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 15,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r15:aberdeen:motherwell",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 15,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "motherwell",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r15:kilmarnock:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 15,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "rangers",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r15:st-johnstone:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 15,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "hibernian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r15:heart-of-midlothian:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 15,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r15:celtic:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 15,
+                "homeTeamId": "celtic",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r15:dundee-united:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 15,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 16,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r16:kilmarnock:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 16,
+                "homeTeamId": "kilmarnock",
+                "awayTeamId": "aberdeen",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r16:motherwell:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 16,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "hibernian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r16:heart-of-midlothian:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 16,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "rangers",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r16:st-johnstone:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 16,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r16:dundee-united:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 16,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r16:celtic:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 16,
+                "homeTeamId": "celtic",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 17,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r17:aberdeen:hibernian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 17,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "hibernian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r17:heart-of-midlothian:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 17,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "kilmarnock",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r17:motherwell:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 17,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r17:dundee-united:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 17,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "rangers",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r17:st-johnstone:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 17,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r17:celtic:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 17,
+                "homeTeamId": "celtic",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 18,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r18:heart-of-midlothian:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 18,
+                "homeTeamId": "heart-of-midlothian",
+                "awayTeamId": "aberdeen",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r18:hibernian:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 18,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r18:dundee-united:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 18,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "kilmarnock",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r18:motherwell:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 18,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r18:celtic:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 18,
+                "homeTeamId": "celtic",
+                "awayTeamId": "rangers",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r18:st-johnstone:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 18,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 19,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r19:aberdeen:falkirk-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 19,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "falkirk-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r19:dundee-united:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 19,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r19:hibernian:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 19,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r19:celtic:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 19,
+                "homeTeamId": "celtic",
+                "awayTeamId": "kilmarnock",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r19:motherwell:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 19,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r19:st-johnstone:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 19,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "rangers",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 20,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r20:dundee-united:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 20,
+                "homeTeamId": "dundee-united",
+                "awayTeamId": "aberdeen",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r20:falkirk-fc:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 20,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r20:celtic:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 20,
+                "homeTeamId": "celtic",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r20:hibernian:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 20,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r20:st-johnstone:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 20,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "kilmarnock",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r20:motherwell:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 20,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "rangers",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 21,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r21:aberdeen:dundee-fc",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 21,
+                "homeTeamId": "aberdeen",
+                "awayTeamId": "dundee-fc",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r21:celtic:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 21,
+                "homeTeamId": "celtic",
+                "awayTeamId": "dundee-united",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r21:falkirk-fc:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 21,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r21:st-johnstone:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 21,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r21:hibernian:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 21,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "rangers",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r21:motherwell:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 21,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "kilmarnock",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          },
+          {
+            "round": 22,
+            "fixtures": [
+              {
+                "id": "scotland-premiership:2026-27:r22:celtic:aberdeen",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 22,
+                "homeTeamId": "celtic",
+                "awayTeamId": "aberdeen",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r22:dundee-fc:st-mirren",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 22,
+                "homeTeamId": "dundee-fc",
+                "awayTeamId": "st-mirren",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r22:st-johnstone:dundee-united",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 22,
+                "homeTeamId": "st-johnstone",
+                "awayTeamId": "dundee-united",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r22:falkirk-fc:rangers",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 22,
+                "homeTeamId": "falkirk-fc",
+                "awayTeamId": "rangers",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r22:motherwell:heart-of-midlothian",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 22,
+                "homeTeamId": "motherwell",
+                "awayTeamId": "heart-of-midlothian",
+                "leg": 2
+              },
+              {
+                "id": "scotland-premiership:2026-27:r22:hibernian:kilmarnock",
+                "competitionId": "scotland-premiership",
+                "seasonLabel": "2026-27",
+                "ruleSetId": "scotland-premiership:2026-27:v1",
+                "round": 22,
+                "homeTeamId": "hibernian",
+                "awayTeamId": "kilmarnock",
+                "leg": 2
+              }
+            ],
+            "byeTeamIds": []
+          }
+        ]
+      },
+      "results": [],
+      "fixtureDates": []
+    }
+  ]
+}

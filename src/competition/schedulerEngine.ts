@@ -395,54 +395,59 @@ export function validateCompetitionSchedule(
     }
   }
 
-  const expectedTotalFixtures =
-    schedule.formatType === 'SINGLE_ROUND_ROBIN'
-      ? (N * (N - 1)) / 2
-      : N * (N - 1);
+  if (
+    schedule.formatType === 'SINGLE_ROUND_ROBIN' ||
+    schedule.formatType === 'DOUBLE_ROUND_ROBIN'
+  ) {
+    const expectedTotalFixtures =
+      schedule.formatType === 'SINGLE_ROUND_ROBIN'
+        ? (N * (N - 1)) / 2
+        : N * (N - 1);
 
-  if (totalFixtures !== expectedTotalFixtures) {
-    errors.push(
-      `Total fixture count (${totalFixtures}) does not match expected (${expectedTotalFixtures}).`
-    );
-  }
-
-  const expectedPerTeam =
-    schedule.formatType === 'SINGLE_ROUND_ROBIN' ? N - 1 : 2 * (N - 1);
-
-  for (const teamId of schedule.participantTeamIds) {
-    const count = getTeamFixtureCount(schedule, teamId);
-    if (count !== expectedPerTeam) {
+    if (totalFixtures !== expectedTotalFixtures) {
       errors.push(
-        `Team "${teamId}" fixture count (${count}) does not match expected (${expectedPerTeam}).`
+        `Total fixture count (${totalFixtures}) does not match expected (${expectedTotalFixtures}).`
       );
     }
-  }
 
-  for (let i = 0; i < schedule.participantTeamIds.length; i++) {
-    for (let j = i + 1; j < schedule.participantTeamIds.length; j++) {
-      const t1 = schedule.participantTeamIds[i];
-      const t2 = schedule.participantTeamIds[j];
-      const unorderedKey = t1 < t2 ? `${t1}:${t2}` : `${t2}:${t1}`;
-      const unorderedCount = unorderedPairCounts.get(unorderedKey) ?? 0;
+    const expectedPerTeam =
+      schedule.formatType === 'SINGLE_ROUND_ROBIN' ? N - 1 : 2 * (N - 1);
 
-      if (schedule.formatType === 'SINGLE_ROUND_ROBIN') {
-        if (unorderedCount !== 1) {
-          errors.push(
-            `Pair (${t1}, ${t2}) appeared ${unorderedCount} times (expected 1).`
-          );
-        }
-      } else if (schedule.formatType === 'DOUBLE_ROUND_ROBIN') {
-        if (unorderedCount !== 2) {
-          errors.push(
-            `Pair (${t1}, ${t2}) appeared ${unorderedCount} times (expected 2).`
-          );
-        }
-        const home1 = orderedPairCounts.get(`${t1}:${t2}`) ?? 0;
-        const home2 = orderedPairCounts.get(`${t2}:${t1}`) ?? 0;
-        if (home1 !== 1 || home2 !== 1) {
-          errors.push(
-            `Pair (${t1}, ${t2}) home/away imbalance: ${t1} home = ${home1}, ${t2} home = ${home2} (expected 1 each).`
-          );
+    for (const teamId of schedule.participantTeamIds) {
+      const count = getTeamFixtureCount(schedule, teamId);
+      if (count !== expectedPerTeam) {
+        errors.push(
+          `Team "${teamId}" fixture count (${count}) does not match expected (${expectedPerTeam}).`
+        );
+      }
+    }
+
+    for (let i = 0; i < schedule.participantTeamIds.length; i++) {
+      for (let j = i + 1; j < schedule.participantTeamIds.length; j++) {
+        const t1 = schedule.participantTeamIds[i];
+        const t2 = schedule.participantTeamIds[j];
+        const unorderedKey = t1 < t2 ? `${t1}:${t2}` : `${t2}:${t1}`;
+        const unorderedCount = unorderedPairCounts.get(unorderedKey) ?? 0;
+
+        if (schedule.formatType === 'SINGLE_ROUND_ROBIN') {
+          if (unorderedCount !== 1) {
+            errors.push(
+              `Pair (${t1}, ${t2}) appeared ${unorderedCount} times (expected 1).`
+            );
+          }
+        } else if (schedule.formatType === 'DOUBLE_ROUND_ROBIN') {
+          if (unorderedCount !== 2) {
+            errors.push(
+              `Pair (${t1}, ${t2}) appeared ${unorderedCount} times (expected 2).`
+            );
+          }
+          const home1 = orderedPairCounts.get(`${t1}:${t2}`) ?? 0;
+          const home2 = orderedPairCounts.get(`${t2}:${t1}`) ?? 0;
+          if (home1 !== 1 || home2 !== 1) {
+            errors.push(
+              `Pair (${t1}, ${t2}) home/away imbalance: ${t1} home = ${home1}, ${t2} home = ${home2} (expected 1 each).`
+            );
+          }
         }
       }
     }

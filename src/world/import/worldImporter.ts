@@ -162,25 +162,28 @@ export function importFootballWorldSnapshot(
 
   for (const compId of seasonCompIds) {
     // Resolve matching rule set
-    const matchingRuleSets = raw.ruleSets.filter(
-      rs => rs.competitionId === compId && rs.seasonLabel === raw.seasonLabel
-    );
-
-    if (matchingRuleSets.length === 0) {
+    const compRuleSets = raw.ruleSets.filter(rs => rs.competitionId === compId);
+    if (compRuleSets.length === 0) {
       return {
         accepted: false,
-        error: `No matching rule set found for competition '${compId}' and season '${raw.seasonLabel}'.`,
+        error: `No matching rule set found for competition '${compId}'.`,
       };
     }
+    const matchingRuleSets = compRuleSets.filter(
+      rs => rs.seasonLabel === raw.seasonLabel
+    );
+    const candidateRuleSets =
+      matchingRuleSets.length > 0 ? matchingRuleSets : compRuleSets;
 
-    const selectedRuleSet = matchingRuleSets.reduce((prev, curr) =>
+    const selectedRuleSet = candidateRuleSets.reduce((prev, curr) =>
       curr.ruleVersion > prev.ruleVersion ? curr : prev
     );
 
     // Format validation
     if (
       selectedRuleSet.format.type !== 'SINGLE_ROUND_ROBIN' &&
-      selectedRuleSet.format.type !== 'DOUBLE_ROUND_ROBIN'
+      selectedRuleSet.format.type !== 'DOUBLE_ROUND_ROBIN' &&
+      selectedRuleSet.format.type !== 'CONFERENCE'
     ) {
       return {
         accepted: false,
@@ -234,7 +237,7 @@ export function importFootballWorldSnapshot(
             results.push({
               fixtureId: fix.id,
               competitionId: compId,
-              seasonLabel: raw.seasonLabel,
+              seasonLabel: selectedRuleSet.seasonLabel,
               ruleSetId: selectedRuleSet.id,
               round: fix.round,
               homeTeamId: fix.homeClubId,
@@ -264,7 +267,7 @@ export function importFootballWorldSnapshot(
           scheduledRoundFixtures.push({
             id: fix.id,
             competitionId: compId,
-            seasonLabel: raw.seasonLabel,
+            seasonLabel: selectedRuleSet.seasonLabel,
             ruleSetId: selectedRuleSet.id,
             round: fix.round,
             homeTeamId: fix.homeClubId,
@@ -287,7 +290,7 @@ export function importFootballWorldSnapshot(
 
       const schedule: CompetitionSchedule = {
         competitionId: compId,
-        seasonLabel: raw.seasonLabel,
+        seasonLabel: selectedRuleSet.seasonLabel,
         ruleSetId: selectedRuleSet.id,
         formatType: selectedRuleSet.format.type,
         participantTeamIds,
@@ -397,7 +400,7 @@ export function importFootballWorldSnapshot(
         results.push({
           fixtureId: canonicalFixture.id,
           competitionId: canonicalFixture.competitionId,
-          seasonLabel: raw.seasonLabel,
+          seasonLabel: selectedRuleSet.seasonLabel,
           ruleSetId: selectedRuleSet.id,
           round: canonicalFixture.round,
           homeTeamId: canonicalFixture.homeTeamId,

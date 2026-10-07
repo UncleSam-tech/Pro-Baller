@@ -77,9 +77,14 @@ export function bootstrapFootballWorld(
 
   const domesticLeagueMembershipStates: DomesticLeagueMembershipState[] = [];
   for (const [countryId, teamIdsMap] of membershipsByCountry) {
+    const compIds = Object.keys(teamIdsMap);
+    const countrySeasonLabel =
+      pack.competitionSeasons.find(cs => compIds.includes(cs.competitionId))
+        ?.schedule.seasonLabel ?? pack.seasonLabel;
+
     const membershipState = createDomesticLeagueMembershipState(
       countryId,
-      pack.seasonLabel,
+      countrySeasonLabel,
       teamIdsMap
     );
 
@@ -102,7 +107,7 @@ export function bootstrapFootballWorld(
   for (const seed of pack.competitionSeasons) {
     const seasonState: CompetitionSeasonState = {
       competitionId: seed.competitionId,
-      seasonLabel: pack.seasonLabel,
+      seasonLabel: seed.schedule.seasonLabel,
       ruleSetId: seed.ruleSetId,
       schedule: cloneSchedule(seed.schedule),
       results: seed.results.map(r => ({ ...r })),

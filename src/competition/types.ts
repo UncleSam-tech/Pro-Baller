@@ -378,9 +378,7 @@ export interface CompetitionSchedule {
   seasonLabel: string;
   ruleSetId: string;
 
-  formatType:
-    | 'SINGLE_ROUND_ROBIN'
-    | 'DOUBLE_ROUND_ROBIN';
+  formatType: CompetitionFormatType;
 
   participantTeamIds: string[];
 
