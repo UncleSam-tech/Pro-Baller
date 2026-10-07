@@ -14,12 +14,18 @@ import type {
   FootballWorldStaticContext,
   WorldFixtureParticipation,
   WorldFootballPosition,
+  WorldPlayerFootballState,
 } from './types';
 import {
   selectMatchTeamSquad,
   createFixtureParticipation,
   resolveRuleSetBenchSize,
 } from './matchSquadSelection';
+import {
+  applyDailyRecovery,
+  applyMatchConditionEffects,
+} from './playerCondition';
+import { validateWorldPlayerFootballStates } from './playerFootballState';
 
 // ============================================================================
 // SIMULATION CONSTANTS
@@ -387,76 +393,11 @@ export function advanceFootballWorldStep(
     };
   }
 
-  const updatedCompetitionSeasonStates: CompetitionSeasonState[] = [];
-  const progressSummaries: CompetitionProgressSummary[] = [];
-  const newlySimulatedParticipations: WorldFixtureParticipation[] = [];
+  // Pre-validate that all competition rule sets can be resolved
+  const compRuleSets = new Map<string, CompetitionRuleSet>();
+  const compBenchSizes = new Map<string, number>();
 
-  const playerFootballStatesMap = new Map(
-    (state.playerFootballStates ?? []).map((p) => [p.playerId, p])
-  );
-  const squadMap = new Map(
-    (state.squadAssignments ?? []).map((s) => [s.clubId, s.playerIds])
-  );
-
-  // 3. Advance each competition independently by due date
   for (const compState of state.competitionSeasonStates) {
-    const resolvedFixtureIds = new Set(compState.results.map((r) => r.fixtureId));
-    const allFixtures = compState.schedule.rounds.flatMap((r) => r.fixtures);
-
-    // If all fixtures already resolved, competition is complete
-    if (allFixtures.every((f) => resolvedFixtureIds.has(f.id))) {
-      updatedCompetitionSeasonStates.push({
-        ...compState,
-        schedule: compState.schedule,
-        results: [...compState.results],
-        fixtureDates: compState.fixtureDates?.map((fd) => ({ ...fd })),
-      });
-      progressSummaries.push({
-        competitionId: compState.competitionId,
-        fixturesSimulated: 0,
-        isComplete: true,
-      });
-      continue;
-    }
-
-    // Resolve date map for all fixtures in this competition
-    const dateMap = buildCompetitionFixtureDateMap(compState, state.currentDate);
-
-    // Select unresolved fixtures due in the interval (currentDate, nextDate]
-    const dueFixtures: ScheduledCompetitionFixture[] = [];
-    for (const f of allFixtures) {
-      if (resolvedFixtureIds.has(f.id)) continue;
-      const scheduledDate = dateMap.get(f.id);
-      if (
-        scheduledDate &&
-        scheduledDate > state.currentDate &&
-        scheduledDate <= nextDate
-      ) {
-        dueFixtures.push(f);
-      }
-    }
-
-    // If no fixtures are due in this date window:
-    if (dueFixtures.length === 0) {
-      updatedCompetitionSeasonStates.push({
-        ...compState,
-        schedule: compState.schedule,
-        results: [...compState.results],
-        fixtureDates: compState.fixtureDates?.map((fd) => ({ ...fd })),
-      });
-      progressSummaries.push({
-        competitionId: compState.competitionId,
-        fixturesSimulated: 0,
-        isComplete: false,
-      });
-      continue;
-    }
-
-    // Calculate strength snapshot BEFORE simulating fixtures in this step
-    // Preserves batch-order independence across all fixtures within the step
-    const strengthSnapshot = computeStrengthSnapshot(compState.results);
-
-    // Verify that the competition rule set exists in supplied static context
     let compRuleSet: CompetitionRuleSet | undefined;
     if (ruleSets instanceof Map) {
       compRuleSet = ruleSets.get(compState.ruleSetId);
@@ -473,22 +414,143 @@ export function advanceFootballWorldStep(
       };
     }
 
-    const benchSize = compRuleSet.substitutions?.benchSize ?? 9;
+    compRuleSets.set(compState.competitionId, compRuleSet);
+    compBenchSizes.set(
+      compState.competitionId,
+      resolveRuleSetBenchSize(compState.ruleSetId, ruleSets)
+    );
+  }
 
-    // Sort due fixtures deterministically: scheduledDate, round, id
-    dueFixtures.sort((a, b) => {
-      const dateA = dateMap.get(a.id) ?? '';
-      const dateB = dateMap.get(b.id) ?? '';
-      if (dateA !== dateB) return dateA.localeCompare(dateB);
-      if (a.round !== b.round) return a.round - b.round;
-      return a.id.localeCompare(b.id);
+  // Pre-index squads: clubId -> playerIds
+  const squadMap = new Map(
+    (state.squadAssignments ?? []).map((s) => [s.clubId, s.playerIds])
+  );
+
+  // Collect all due fixtures across all competitions
+  interface DueFixtureEntry {
+    compState: CompetitionSeasonState;
+    fixture: ScheduledCompetitionFixture;
+    scheduledDate: string;
+  }
+
+  const allDueFixtures: DueFixtureEntry[] = [];
+  const compAllFixtures = new Map<string, ScheduledCompetitionFixture[]>();
+  const compResolvedIds = new Map<string, Set<string>>();
+
+  for (const compState of state.competitionSeasonStates) {
+    const resolvedIds = new Set(compState.results.map((r) => r.fixtureId));
+    compResolvedIds.set(compState.competitionId, resolvedIds);
+
+    const allFixtures = compState.schedule.rounds.flatMap((r) => r.fixtures);
+    compAllFixtures.set(compState.competitionId, allFixtures);
+
+    const dateMap = buildCompetitionFixtureDateMap(compState, state.currentDate);
+
+    for (const f of allFixtures) {
+      if (resolvedIds.has(f.id)) continue;
+      const scheduledDate = dateMap.get(f.id);
+      if (
+        scheduledDate &&
+        scheduledDate > state.currentDate &&
+        scheduledDate <= nextDate
+      ) {
+        allDueFixtures.push({
+          compState,
+          fixture: f,
+          scheduledDate,
+        });
+      }
+    }
+  }
+
+  // Group due fixtures by scheduledDate
+  const fixturesByDate = new Map<string, DueFixtureEntry[]>();
+  for (const entry of allDueFixtures) {
+    const list = fixturesByDate.get(entry.scheduledDate) ?? [];
+    list.push(entry);
+    fixturesByDate.set(entry.scheduledDate, list);
+  }
+
+  // Chronological calendar days from dayAfter(currentDate) to nextDate
+  const calendarDates: string[] = [];
+  let dateCursor = state.currentDate;
+  while (dateCursor < nextDate) {
+    dateCursor = addDaysToDate(dateCursor, 1);
+    calendarDates.push(dateCursor);
+  }
+
+  // Working state for competition results and simulation tracking
+  const currentCompResults = new Map<string, CompetitionFixtureResult[]>();
+  const currentCompSimulatedCounts = new Map<string, number>();
+  const currentCompFirstDates = new Map<string, string>();
+  const currentCompLastDates = new Map<string, string>();
+
+  for (const compState of state.competitionSeasonStates) {
+    currentCompResults.set(compState.competitionId, [...compState.results]);
+    currentCompSimulatedCounts.set(compState.competitionId, 0);
+  }
+
+  const currentPlayerStatesMap = new Map<string, WorldPlayerFootballState>(
+    (state.playerFootballStates ?? []).map((p) => [p.playerId, { ...p }])
+  );
+  const newlySimulatedParticipations: WorldFixtureParticipation[] = [];
+
+  // Chronological day-by-day progression
+  for (const calendarDate of calendarDates) {
+    const fixturesOnDate = fixturesByDate.get(calendarDate) ?? [];
+
+    if (fixturesOnDate.length === 0) {
+      // Non-match calendar day: all players recover daily fitness
+      for (const [playerId, playerState] of currentPlayerStatesMap) {
+        currentPlayerStatesMap.set(playerId, applyDailyRecovery(playerState));
+      }
+      continue;
+    }
+
+    // Match day:
+    // SAME-DATE MATCHES RULE:
+    // All fixtures on this date must use player states from the beginning of this date.
+    const beginningOfDayPlayerStates = new Map(currentPlayerStatesMap);
+
+    // Compute strength snapshots for competitions active on this date
+    // from completed results prior to this date.
+    const compSnapshots = new Map<string, CompetitionStrengthSnapshot>();
+    for (const entry of fixturesOnDate) {
+      const compId = entry.compState.competitionId;
+      if (!compSnapshots.has(compId)) {
+        compSnapshots.set(
+          compId,
+          computeStrengthSnapshot(currentCompResults.get(compId)!)
+        );
+      }
+    }
+
+    // Sort fixtures deterministically: competitionId, round, id
+    fixturesOnDate.sort((a, b) => {
+      if (a.compState.competitionId !== b.compState.competitionId) {
+        return a.compState.competitionId.localeCompare(b.compState.competitionId);
+      }
+      if (a.fixture.round !== b.fixture.round) {
+        return a.fixture.round - b.fixture.round;
+      }
+      return a.fixture.id.localeCompare(b.fixture.id);
     });
 
-    const newlySimulatedResults: CompetitionFixtureResult[] = [];
-    for (const fixture of dueFixtures) {
-      const scheduledDate = dateMap.get(fixture.id);
+    // Track participants on this date: playerId -> { minutesPlayed, teamResult }
+    const appearancesOnDate = new Map<
+      string,
+      { minutesPlayed: number; teamResult: 'win' | 'draw' | 'loss' }
+    >();
+
+    for (const entry of fixturesOnDate) {
+      const compId = entry.compState.competitionId;
+      const fixture = entry.fixture;
+      const strengthSnapshot = compSnapshots.get(compId)!;
+      const benchSize = compBenchSizes.get(compId) ?? 9;
+
+      // Deterministic stable RNG seed (independent of caller nextDate)
       const seed = hashString(
-        `${state.dataPackId}:${compState.seasonLabel}:${compState.competitionId}:${fixture.id}:${nextDate}`
+        `${state.dataPackId}:${entry.compState.seasonLabel}:${compId}:${fixture.id}:${calendarDate}`
       );
       const rng = createRng(seed);
 
@@ -501,20 +563,20 @@ export function advanceFootballWorldStep(
       const homeGoals = samplePoisson(homeXg, rng);
       const awayGoals = samplePoisson(awayXg, rng);
 
-      // Deterministic squad selection and participation tracking
+      // Squad selection using player states at the beginning of this date
       const homeSquad = squadMap.get(fixture.homeTeamId) ?? [];
       const awaySquad = squadMap.get(fixture.awayTeamId) ?? [];
 
       const homeSelection = selectMatchTeamSquad(
         fixture.homeTeamId,
         homeSquad,
-        playerFootballStatesMap,
+        beginningOfDayPlayerStates,
         { benchSize, playerPositions }
       );
       const awaySelection = selectMatchTeamSquad(
         fixture.awayTeamId,
         awaySquad,
-        playerFootballStatesMap,
+        beginningOfDayPlayerStates,
         { benchSize, playerPositions }
       );
 
@@ -525,26 +587,84 @@ export function advanceFootballWorldStep(
       );
       newlySimulatedParticipations.push(participation);
 
-      newlySimulatedResults.push({
+      // Determine team match results
+      let homeResult: 'win' | 'draw' | 'loss' = 'draw';
+      let awayResult: 'win' | 'draw' | 'loss' = 'draw';
+      if (homeGoals > awayGoals) {
+        homeResult = 'win';
+        awayResult = 'loss';
+      } else if (awayGoals > homeGoals) {
+        homeResult = 'loss';
+        awayResult = 'win';
+      }
+
+      // Record player appearances
+      for (const app of participation.playerAppearances) {
+        if (app.minutesPlayed > 0) {
+          const teamResult =
+            app.teamId === fixture.homeTeamId ? homeResult : awayResult;
+          appearancesOnDate.set(app.playerId, {
+            minutesPlayed: app.minutesPlayed,
+            teamResult,
+          });
+        }
+      }
+
+      // Append fixture result
+      currentCompResults.get(compId)!.push({
         fixtureId: fixture.id,
-        competitionId: compState.competitionId,
-        seasonLabel: compState.seasonLabel,
-        ruleSetId: compState.ruleSetId,
+        competitionId: compId,
+        seasonLabel: entry.compState.seasonLabel,
+        ruleSetId: entry.compState.ruleSetId,
         round: fixture.round,
         homeTeamId: fixture.homeTeamId,
         awayTeamId: fixture.awayTeamId,
         homeGoals,
         awayGoals,
       });
+
+      // Update simulation counts and date bounds
+      const curCount = currentCompSimulatedCounts.get(compId) ?? 0;
+      currentCompSimulatedCounts.set(compId, curCount + 1);
+
+      if (!currentCompFirstDates.has(compId)) {
+        currentCompFirstDates.set(compId, calendarDate);
+      }
+      currentCompLastDates.set(compId, calendarDate);
     }
 
-    const updatedResults = [...compState.results, ...newlySimulatedResults];
+    // End-of-date condition updates:
+    for (const [playerId, playerState] of currentPlayerStatesMap) {
+      const appearance = appearancesOnDate.get(playerId);
+      if (appearance && appearance.minutesPlayed > 0) {
+        // Participant: loses fitness, gains sharpness, receives form & morale effects
+        const updated = applyMatchConditionEffects(
+          playerState,
+          appearance.minutesPlayed,
+          appearance.teamResult
+        );
+        currentPlayerStatesMap.set(playerId, updated);
+      } else {
+        // Non-participant: receives daily calendar recovery (+6 fitness)
+        const updated = applyDailyRecovery(playerState);
+        currentPlayerStatesMap.set(playerId, updated);
+      }
+    }
+  }
+
+  // Assemble updated competition season states and progress summaries
+  const updatedCompetitionSeasonStates: CompetitionSeasonState[] = [];
+  const progressSummaries: CompetitionProgressSummary[] = [];
+
+  for (const compState of state.competitionSeasonStates) {
+    const compId = compState.competitionId;
+    const results = currentCompResults.get(compId)!;
     const updatedCompState: CompetitionSeasonState = {
       competitionId: compState.competitionId,
       seasonLabel: compState.seasonLabel,
       ruleSetId: compState.ruleSetId,
       schedule: compState.schedule,
-      results: updatedResults,
+      results,
       fixtureDates: compState.fixtureDates?.map((fd) => ({ ...fd })),
     };
 
@@ -558,24 +678,33 @@ export function advanceFootballWorldStep(
 
     updatedCompetitionSeasonStates.push(updatedCompState);
 
-    const updatedResolvedIds = new Set(updatedResults.map((r) => r.fixtureId));
+    const allFixtures = compAllFixtures.get(compId) ?? [];
+    const updatedResolvedIds = new Set(results.map((r) => r.fixtureId));
     const isNowComplete = allFixtures.every((f) => updatedResolvedIds.has(f.id));
 
-    const simulatedDates = dueFixtures
-      .map((f) => dateMap.get(f.id)!)
-      .filter(Boolean)
-      .sort();
-
     progressSummaries.push({
-      competitionId: compState.competitionId,
-      fixturesSimulated: newlySimulatedResults.length,
+      competitionId: compId,
+      fixturesSimulated: currentCompSimulatedCounts.get(compId) ?? 0,
       isComplete: isNowComplete,
-      firstSimulatedDate: simulatedDates[0],
-      lastSimulatedDate: simulatedDates[simulatedDates.length - 1],
+      firstSimulatedDate: currentCompFirstDates.get(compId),
+      lastSimulatedDate: currentCompLastDates.get(compId),
     });
   }
 
-  // 4. Return new immutable state
+  // Assemble updated player football states
+  const nextPlayerFootballStates = (state.playerFootballStates ?? []).map((p) =>
+    currentPlayerStatesMap.get(p.playerId) ?? { ...p }
+  );
+
+  const playerValidation = validateWorldPlayerFootballStates(nextPlayerFootballStates);
+  if (!playerValidation.valid) {
+    return {
+      accepted: false,
+      error: `World player football state validation failed: ${playerValidation.errors.join('; ')}`,
+    };
+  }
+
+  // Return new immutable state
   const nextState: FootballWorldRuntimeState = {
     dataPackId: state.dataPackId,
     dataPackVersion: state.dataPackVersion,
@@ -585,7 +714,7 @@ export function advanceFootballWorldStep(
     competitionSeasonStates: updatedCompetitionSeasonStates,
     squadAssignments: state.squadAssignments,
     managerAssignments: state.managerAssignments,
-    playerFootballStates: state.playerFootballStates,
+    playerFootballStates: nextPlayerFootballStates,
     fixtureParticipations: [
       ...(state.fixtureParticipations ?? []),
       ...newlySimulatedParticipations,

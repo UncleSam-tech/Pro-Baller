@@ -66,7 +66,7 @@ export function computePlayerSelectionScore(
 ): number {
   return (
     state.ability * 100 +
-    state.fitness * 4 +
+    state.fitness * 10 +
     state.sharpness * 3 +
     state.form * 2 +
     state.morale * 1

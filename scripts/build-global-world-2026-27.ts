@@ -1400,7 +1400,7 @@ export async function runGlobalWorldBuild() {
     console.log(`  ✓ Combined world bootstrapped successfully in ${tBootstrap.toFixed(2)}ms`);
 
     const tProg0 = performance.now();
-    stepRes = advanceFootballWorldStep(bootstrapRes.state, '2026-10-14');
+    stepRes = advanceFootballWorldStep(bootstrapRes.state, '2026-10-14', combinedPack);
     tProg = performance.now() - tProg0;
 
     if (!stepRes.accepted || !stepRes.state) {
