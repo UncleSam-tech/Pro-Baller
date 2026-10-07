@@ -1,0 +1,165 @@
+import type {
+  CompetitionDefinition,
+  CompetitionMovementRelationship,
+  CompetitionRuleSet,
+} from '../competition/types';
+
+// ============================================================================
+// PART 1 — FOOTBALL POSITION
+// ============================================================================
+
+export type WorldFootballPosition =
+  | 'GK'
+  | 'RB'
+  | 'RWB'
+  | 'CB'
+  | 'LB'
+  | 'LWB'
+  | 'CDM'
+  | 'CM'
+  | 'CAM'
+  | 'RM'
+  | 'LM'
+  | 'RW'
+  | 'LW'
+  | 'CF'
+  | 'ST';
+
+// ============================================================================
+// PART 2 — COUNTRY DEFINITION
+// ============================================================================
+
+export interface WorldCountryDefinition {
+  id: string;
+
+  name: string;
+
+  code: string;
+
+  confederationId?: string;
+}
+
+// ============================================================================
+// PART 3 — CLUB DEFINITION
+// ============================================================================
+
+export interface WorldClubDefinition {
+  id: string;
+
+  name: string;
+
+  shortName: string;
+
+  countryId: string;
+
+  city?: string;
+
+  latitude?: number;
+  longitude?: number;
+}
+
+// ============================================================================
+// PART 4 — PLAYER DEFINITION
+// ============================================================================
+
+export interface WorldPlayerDefinition {
+  id: string;
+
+  firstName: string;
+  lastName: string;
+
+  dateOfBirth: string;
+
+  nationalityCountryIds: string[];
+
+  primaryPosition: WorldFootballPosition;
+}
+
+// ============================================================================
+// PART 5 — MANAGER DEFINITION
+// ============================================================================
+
+export interface WorldManagerDefinition {
+  id: string;
+
+  firstName: string;
+  lastName: string;
+
+  nationalityCountryIds: string[];
+}
+
+// ============================================================================
+// PART 6 — DOMESTIC MEMBERSHIP SEED
+// ============================================================================
+
+export interface WorldDomesticLeagueMembershipSeed {
+  countryId: string;
+
+  competitionId: string;
+
+  clubIds: string[];
+}
+
+// ============================================================================
+// PART 7 — SQUAD SEED
+// ============================================================================
+
+export interface WorldClubSquadSeed {
+  clubId: string;
+
+  playerIds: string[];
+}
+
+// ============================================================================
+// PART 8 — MANAGER ASSIGNMENT SEED
+// ============================================================================
+
+export interface WorldClubManagerSeed {
+  clubId: string;
+
+  managerId: string;
+}
+
+// ============================================================================
+// PART 9 — WORLD DATA PACK
+// ============================================================================
+
+export interface FootballWorldDataPack {
+  id: string;
+
+  version: number;
+
+  seasonLabel: string;
+
+  snapshotDate: string;
+
+  countries: WorldCountryDefinition[];
+
+  competitionDefinitions: CompetitionDefinition[];
+
+  competitionRuleSets: CompetitionRuleSet[];
+
+  competitionMovementRelationships: CompetitionMovementRelationship[];
+
+  clubs: WorldClubDefinition[];
+
+  players: WorldPlayerDefinition[];
+
+  managers: WorldManagerDefinition[];
+
+  domesticLeagueMemberships: WorldDomesticLeagueMembershipSeed[];
+
+  squadAssignments: WorldClubSquadSeed[];
+
+  managerAssignments: WorldClubManagerSeed[];
+}
+
+// ============================================================================
+// PART 10 — VALIDATION RESULT
+// ============================================================================
+
+export interface FootballWorldDataPackValidation {
+  valid: boolean;
+
+  errors: string[];
+}
