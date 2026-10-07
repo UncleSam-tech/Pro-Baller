@@ -112,7 +112,7 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
     id: 'england-premier-league:2026-27:v1',
     competitionId: 'england-premier-league',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -129,7 +129,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 9,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -142,18 +141,22 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 2500,
       policyName: 'FA Premier League Disciplinary Protocol (Section 12)',
     },
+    technology: {
+      varEnabled: true,
+    },
+    modifiers: {
+      reputationMultiplier: 1.0,
+    },
     presentation: {
       primaryColor: '#3D195B',
       matchBall: 'Nike Flight Hi-Vis Premier League',
-      varEnabled: true,
-      reputationMultiplier: 1.0,
     },
   },
   'spain-la-liga:2026-27:v1': {
     id: 'spain-la-liga:2026-27:v1',
     competitionId: 'spain-la-liga',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -170,7 +173,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 9,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -184,18 +186,22 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 1800,
       policyName: 'RFEF Competición Ciclo de Amonestaciones',
     },
+    technology: {
+      varEnabled: true,
+    },
+    modifiers: {
+      reputationMultiplier: 0.98,
+    },
     presentation: {
       primaryColor: '#EE1222',
       matchBall: 'Puma Orbita La Liga EA Sports',
-      varEnabled: true,
-      reputationMultiplier: 0.98,
     },
   },
   'germany-bundesliga:2026-27:v1': {
     id: 'germany-bundesliga:2026-27:v1',
     competitionId: 'germany-bundesliga',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -213,7 +219,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 9,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -227,18 +232,22 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 2200,
       policyName: 'DFB Gelbsperre Accumulation Standard',
     },
+    technology: {
+      varEnabled: true,
+    },
+    modifiers: {
+      reputationMultiplier: 0.96,
+    },
     presentation: {
       primaryColor: '#D10214',
       matchBall: 'Derbystar Bundesliga Brillant APS',
-      varEnabled: true,
-      reputationMultiplier: 0.96,
     },
   },
   'italy-serie-a:2026-27:v1': {
     id: 'italy-serie-a:2026-27:v1',
     competitionId: 'italy-serie-a',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -255,7 +264,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 15,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -268,18 +276,22 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 2000,
       policyName: 'FIGC Giudice Sportivo Disciplinary Code',
     },
+    technology: {
+      varEnabled: true,
+    },
+    modifiers: {
+      reputationMultiplier: 0.95,
+    },
     presentation: {
       primaryColor: '#008FD7',
       matchBall: 'Puma Orbita Serie A Enilive',
-      varEnabled: true,
-      reputationMultiplier: 0.95,
     },
   },
   'france-ligue-1:2026-27:v1': {
     id: 'france-ligue-1:2026-27:v1',
     competitionId: 'france-ligue-1',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -297,7 +309,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 9,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -310,18 +321,22 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 1700,
       policyName: 'LFP Commission de Discipline',
     },
+    technology: {
+      varEnabled: true,
+    },
+    modifiers: {
+      reputationMultiplier: 0.92,
+    },
     presentation: {
       primaryColor: '#091C3E',
       matchBall: "Kipsta Ligue 1 McDonald's Pro",
-      varEnabled: true,
-      reputationMultiplier: 0.92,
     },
   },
   'england-championship:2026-27:v1': {
     id: 'england-championship:2026-27:v1',
     competitionId: 'england-championship',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -340,7 +355,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 9,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -353,18 +367,22 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 1200,
       policyName: 'EFL Disciplinary Standard',
     },
+    technology: {
+      varEnabled: false,
+    },
+    modifiers: {
+      reputationMultiplier: 0.85,
+    },
     presentation: {
       primaryColor: '#1A2B4C',
       matchBall: 'Puma Orbita EFL Official Match Ball',
-      varEnabled: false,
-      reputationMultiplier: 0.85,
     },
   },
   'nigeria-npfl:2026-27:v1': {
     id: 'nigeria-npfl:2026-27:v1',
     competitionId: 'nigeria-npfl',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -381,7 +399,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 9,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -394,18 +411,22 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 500,
       policyName: 'NPFL / NFF Disciplinary Committee Rulebook Section B',
     },
+    technology: {
+      varEnabled: false,
+    },
+    modifiers: {
+      reputationMultiplier: 0.65,
+    },
     presentation: {
       primaryColor: '#008751',
       matchBall: 'NPFL Official Select Matchball',
-      varEnabled: false,
-      reputationMultiplier: 0.65,
     },
   },
   'brazil-brasileirao:2026-27:v1': {
     id: 'brazil-brasileirao:2026-27:v1',
     competitionId: 'brazil-brasileirao',
     seasonLabel: '2026-27',
-    ruleVersion: '1',
+    ruleVersion: 1,
     verificationStatus: 'NEEDS_OFFICIAL_VERIFICATION',
     format: {
       type: 'DOUBLE_ROUND_ROBIN',
@@ -422,7 +443,6 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       maxStoppageWindows: 3,
       benchSize: 12,
       halfTimeCountsAsWindow: false,
-      extraTimeEnabled: false,
       extraTimeExtraSub: 0,
     },
     discipline: {
@@ -435,11 +455,15 @@ export const SEED_COMPETITION_RULE_SETS: Record<string, CompetitionRuleSet> = {
       disciplinaryFineGBP: 1000,
       policyName: 'CBF STJD Regulamento Geral de Competições',
     },
+    technology: {
+      varEnabled: true,
+    },
+    modifiers: {
+      reputationMultiplier: 0.82,
+    },
     presentation: {
       primaryColor: '#FEDF00',
       matchBall: 'Penalty S11 Ecoknit Série A',
-      varEnabled: true,
-      reputationMultiplier: 0.82,
     },
   },
   // NOTE: 'portugal-primeira-liga' and 'netherlands-eredivisie' definitions exist
@@ -469,26 +493,37 @@ export function getCompetitionDefinition(
 
 /**
  * Retrieves a competition rule set for a specified competition and season.
- * If seasonLabel is omitted, resolves the newest available rule set for that competition.
- * Returns undefined if not found (never defaults to Premier League).
+ * Requires seasonLabel.
+ * Returns the matching rule set with the highest numeric ruleVersion if multiple exist.
+ * Returns undefined if no matching rule set exists (never defaults across seasons or leagues).
  */
 export function getCompetitionRuleSet(
   competitionId: string,
-  seasonLabel?: string
+  seasonLabel: string
 ): CompetitionRuleSet | undefined {
-  if (seasonLabel) {
-    const directKey = `${competitionId}:${seasonLabel}:v1`;
-    if (CANONICAL_COMPETITION_REGISTRY.ruleSets[directKey]) {
-      return CANONICAL_COMPETITION_REGISTRY.ruleSets[directKey];
-    }
-    // Search by competitionId and seasonLabel
-    return Object.values(CANONICAL_COMPETITION_REGISTRY.ruleSets).find(
-      rs => rs.competitionId === competitionId && rs.seasonLabel === seasonLabel
-    );
+  const matches = Object.values(CANONICAL_COMPETITION_REGISTRY.ruleSets).filter(
+    rs => rs.competitionId === competitionId && rs.seasonLabel === seasonLabel
+  );
+
+  if (matches.length === 0) {
+    return undefined;
   }
 
-  // Resolve matching rule set for this competition
-  return Object.values(CANONICAL_COMPETITION_REGISTRY.ruleSets).find(
-    rs => rs.competitionId === competitionId
+  if (matches.length === 1) {
+    return matches[0];
+  }
+
+  return matches.reduce((prev, curr) =>
+    curr.ruleVersion > prev.ruleVersion ? curr : prev
   );
+}
+
+/**
+ * Retrieves a competition rule set directly by its exact rule-set ID.
+ * Returns undefined if unknown (no fallback).
+ */
+export function getCompetitionRuleSetById(
+  ruleSetId: string
+): CompetitionRuleSet | undefined {
+  return CANONICAL_COMPETITION_REGISTRY.ruleSets[ruleSetId];
 }

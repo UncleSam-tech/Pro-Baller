@@ -57,7 +57,6 @@ export interface SubstitutionRules {
 
   halfTimeCountsAsWindow: boolean;
 
-  extraTimeEnabled: boolean;
   extraTimeExtraSub: number;
 }
 
@@ -83,13 +82,17 @@ export interface DisciplinaryRules {
   policyName: string;
 }
 
+export interface MatchTechnologyRules {
+  varEnabled: boolean;
+}
+
+export interface CompetitionSimulationModifiers {
+  reputationMultiplier?: number;
+}
+
 export interface CompetitionPresentation {
   primaryColor?: string;
   matchBall?: string;
-
-  varEnabled?: boolean;
-
-  reputationMultiplier?: number;
 }
 
 export type RuleVerificationStatus =
@@ -103,7 +106,7 @@ export interface CompetitionRuleSet {
 
   seasonLabel: string;
 
-  ruleVersion: string;
+  ruleVersion: number;
 
   verificationStatus: RuleVerificationStatus;
 
@@ -113,11 +116,117 @@ export interface CompetitionRuleSet {
 
   discipline: DisciplinaryRules;
 
+  technology: MatchTechnologyRules;
+
+  modifiers: CompetitionSimulationModifiers;
+
   presentation: CompetitionPresentation;
 }
 
 export interface CompetitionRuleRegistry {
   definitions: Record<string, CompetitionDefinition>;
   ruleSets: Record<string, CompetitionRuleSet>;
+}
+
+export type DisciplinaryEventType =
+  | 'YELLOW'
+  | 'SECOND_YELLOW_RED'
+  | 'STRAIGHT_RED';
+
+export interface DisciplinaryEvent {
+  id: string;
+
+  playerId: string;
+
+  competitionId: string;
+  seasonLabel: string;
+
+  fixtureId: string;
+
+  round: number;
+
+  matchSequence: number;
+
+  type: DisciplinaryEventType;
+}
+
+export interface DisciplinarySuspension {
+  id: string;
+
+  sourceEventId: string;
+
+  competitionId: string;
+  seasonLabel: string;
+
+  reason:
+    | 'YELLOW_THRESHOLD'
+    | 'YELLOW_REPEAT_CYCLE'
+    | 'YELLOW_ROLLING_WINDOW'
+    | 'SECOND_YELLOW_RED'
+    | 'STRAIGHT_RED';
+
+  matchesIssued: number;
+
+  matchesRemaining: number;
+
+  issuedAtRound: number;
+
+  servedFixtureIds: string[];
+
+  status:
+    | 'ACTIVE'
+    | 'SERVED';
+}
+
+export interface PlayerCompetitionDisciplinaryState {
+  playerId: string;
+
+  competitionId: string;
+  seasonLabel: string;
+
+  ruleSetId: string;
+
+  events: DisciplinaryEvent[];
+
+  suspensions: DisciplinarySuspension[];
+
+  processedEventIds: string[];
+
+  triggeredThresholdKeys: string[];
+}
+
+export interface DisciplinaryProcessResult {
+  state: PlayerCompetitionDisciplinaryState;
+
+  accepted: boolean;
+
+  error?: string;
+
+  newSuspensions: DisciplinarySuspension[];
+}
+
+export interface DisciplinarySummary {
+  yellowCards: number;
+  straightReds: number;
+  secondYellowReds: number;
+  activeSuspensions: number;
+  activeBanMatches: number;
+}
+
+export interface SuspensionServiceFixture {
+  fixtureId: string;
+
+  competitionId: string;
+  seasonLabel: string;
+}
+
+export interface SuspensionServiceResult {
+  state: PlayerCompetitionDisciplinaryState;
+
+  accepted: boolean;
+
+  error?: string;
+
+  suspensionServedId?: string;
 }
 
