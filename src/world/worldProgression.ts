@@ -26,6 +26,12 @@ import {
   applyMatchConditionEffects,
 } from './playerCondition';
 import { validateWorldPlayerFootballStates } from './playerFootballState';
+import {
+  type LineupQuality,
+  computeLineupQuality,
+  computeClubReferenceLineupQuality,
+  computeLineupStrengthModifiers,
+} from './lineupStrength';
 
 // ============================================================================
 // SIMULATION CONSTANTS
@@ -110,7 +116,7 @@ interface CompetitionStrengthSnapshot {
  * Computes pre-round team strength snapshot from current results in the competition.
  * Called once per competition round before any fixtures in that round are simulated.
  */
-function computeStrengthSnapshot(results: CompetitionFixtureResult[]): CompetitionStrengthSnapshot {
+export function computeStrengthSnapshot(results: CompetitionFixtureResult[]): CompetitionStrengthSnapshot {
   const teamStats = new Map<string, TeamMatchStats>();
 
   function getStats(teamId: string): TeamMatchStats {
@@ -148,10 +154,22 @@ function computeStrengthSnapshot(results: CompetitionFixtureResult[]): Competiti
 /**
  * Computes expected goals for home and away teams in a fixture based on pre-round strength snapshot.
  */
-function computeExpectedGoals(
+export interface MatchExpectedGoalsModifiers {
+  homeAttackMultiplier?: number;
+  homeDefensiveResistanceMultiplier?: number;
+  awayAttackMultiplier?: number;
+  awayDefensiveResistanceMultiplier?: number;
+}
+
+/**
+ * Computes expected goals for home and away teams in a fixture based on pre-round strength snapshot,
+ * with optional lineup strength modifiers.
+ */
+export function computeExpectedGoals(
   snapshot: CompetitionStrengthSnapshot,
   homeTeamId: string,
-  awayTeamId: string
+  awayTeamId: string,
+  modifiers?: MatchExpectedGoalsModifiers
 ): { homeXg: number; awayXg: number } {
   const { leagueGoalsPerTeam, teamStats } = snapshot;
 
@@ -178,8 +196,21 @@ function computeExpectedGoals(
   const awayAttack = awaySmoothedScored / leagueGoalsPerTeam;
   const awayDefense = awaySmoothedConceded / leagueGoalsPerTeam;
 
-  const rawHomeXg = leagueGoalsPerTeam * homeAttack * awayDefense * HOME_ADVANTAGE_FACTOR;
-  const rawAwayXg = leagueGoalsPerTeam * awayAttack * homeDefense * AWAY_ADVANTAGE_FACTOR;
+  const homeAttackMult = modifiers?.homeAttackMultiplier ?? 1.0;
+  const homeDefResistanceMult = modifiers?.homeDefensiveResistanceMultiplier ?? 1.0;
+  const awayAttackMult = modifiers?.awayAttackMultiplier ?? 1.0;
+  const awayDefResistanceMult = modifiers?.awayDefensiveResistanceMultiplier ?? 1.0;
+
+  const effectiveHomeAttack = homeAttack * homeAttackMult;
+  const effectiveAwayDefense =
+    awayDefResistanceMult > 0 ? awayDefense / awayDefResistanceMult : awayDefense;
+
+  const effectiveAwayAttack = awayAttack * awayAttackMult;
+  const effectiveHomeDefense =
+    homeDefResistanceMult > 0 ? homeDefense / homeDefResistanceMult : homeDefense;
+
+  const rawHomeXg = leagueGoalsPerTeam * effectiveHomeAttack * effectiveAwayDefense * HOME_ADVANTAGE_FACTOR;
+  const rawAwayXg = leagueGoalsPerTeam * effectiveAwayAttack * effectiveHomeDefense * AWAY_ADVANTAGE_FACTOR;
 
   return {
     homeXg: Math.max(MIN_EXPECTED_GOALS, Math.min(MAX_EXPECTED_GOALS, rawHomeXg)),
@@ -494,6 +525,7 @@ export function advanceFootballWorldStep(
     (state.playerFootballStates ?? []).map((p) => [p.playerId, { ...p }])
   );
   const newlySimulatedParticipations: WorldFixtureParticipation[] = [];
+  const clubReferenceQualities = new Map<string, LineupQuality>();
 
   // Chronological day-by-day progression
   for (const calendarDate of calendarDates) {
@@ -554,15 +586,6 @@ export function advanceFootballWorldStep(
       );
       const rng = createRng(seed);
 
-      const { homeXg, awayXg } = computeExpectedGoals(
-        strengthSnapshot,
-        fixture.homeTeamId,
-        fixture.awayTeamId
-      );
-
-      const homeGoals = samplePoisson(homeXg, rng);
-      const awayGoals = samplePoisson(awayXg, rng);
-
       // Squad selection using player states at the beginning of this date
       const homeSquad = squadMap.get(fixture.homeTeamId) ?? [];
       const awaySquad = squadMap.get(fixture.awayTeamId) ?? [];
@@ -579,6 +602,64 @@ export function advanceFootballWorldStep(
         beginningOfDayPlayerStates,
         { benchSize, playerPositions }
       );
+
+      // Phase 3L: Selected XI Lineup Quality and Bounded Modifiers
+      const homeTodayQuality = computeLineupQuality(
+        homeSelection.startingPlayerIds,
+        beginningOfDayPlayerStates,
+        playerPositions
+      );
+      const awayTodayQuality = computeLineupQuality(
+        awaySelection.startingPlayerIds,
+        beginningOfDayPlayerStates,
+        playerPositions
+      );
+
+      let homeRefQuality = clubReferenceQualities.get(fixture.homeTeamId);
+      if (!homeRefQuality) {
+        homeRefQuality = computeClubReferenceLineupQuality(
+          fixture.homeTeamId,
+          homeSquad,
+          beginningOfDayPlayerStates,
+          { playerPositions }
+        );
+        clubReferenceQualities.set(fixture.homeTeamId, homeRefQuality);
+      }
+
+      let awayRefQuality = clubReferenceQualities.get(fixture.awayTeamId);
+      if (!awayRefQuality) {
+        awayRefQuality = computeClubReferenceLineupQuality(
+          fixture.awayTeamId,
+          awaySquad,
+          beginningOfDayPlayerStates,
+          { playerPositions }
+        );
+        clubReferenceQualities.set(fixture.awayTeamId, awayRefQuality);
+      }
+
+      const homeModifiers = computeLineupStrengthModifiers(
+        homeTodayQuality,
+        homeRefQuality
+      );
+      const awayModifiers = computeLineupStrengthModifiers(
+        awayTodayQuality,
+        awayRefQuality
+      );
+
+      const { homeXg, awayXg } = computeExpectedGoals(
+        strengthSnapshot,
+        fixture.homeTeamId,
+        fixture.awayTeamId,
+        {
+          homeAttackMultiplier: homeModifiers.attackStrengthMultiplier,
+          homeDefensiveResistanceMultiplier: homeModifiers.defensiveResistanceMultiplier,
+          awayAttackMultiplier: awayModifiers.attackStrengthMultiplier,
+          awayDefensiveResistanceMultiplier: awayModifiers.defensiveResistanceMultiplier,
+        }
+      );
+
+      const homeGoals = samplePoisson(homeXg, rng);
+      const awayGoals = samplePoisson(awayXg, rng);
 
       const participation = createFixtureParticipation(
         fixture.id,
@@ -645,7 +726,7 @@ export function advanceFootballWorldStep(
         );
         currentPlayerStatesMap.set(playerId, updated);
       } else {
-        // Non-participant: receives daily calendar recovery (+6 fitness)
+        // Non-participant: receives daily calendar recovery (+4 fitness)
         const updated = applyDailyRecovery(playerState);
         currentPlayerStatesMap.set(playerId, updated);
       }
