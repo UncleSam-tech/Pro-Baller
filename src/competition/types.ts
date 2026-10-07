@@ -495,6 +495,35 @@ export interface CompetitionSeasonOutcomeResult {
   error?: string;
 }
 
+export type CompetitionMovementType =
+  | 'PROMOTION'
+  | 'RELEGATION';
 
+export interface CompetitionMovementRelationship {
+  id: string;
 
+  countryId: string;
 
+  sourceCompetitionId: string;
+
+  destinationCompetitionId: string;
+
+  movementType: CompetitionMovementType;
+}
+
+export interface CompetitionHierarchyRegistry {
+  relationships: Record<string, CompetitionMovementRelationship>;
+}
+
+export interface CompetitionMovementLookupResult {
+  accepted: boolean;
+
+  relationship?: CompetitionMovementRelationship;
+
+  error?: string;
+}
+
+export interface CompetitionHierarchyValidation {
+  valid: boolean;
+  errors: string[];
+}
