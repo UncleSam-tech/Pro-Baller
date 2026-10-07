@@ -14,6 +14,9 @@ import type {
 
 export type WorldFootballPosition =
   | 'GK'
+  | 'DF'
+  | 'MF'
+  | 'FW'
   | 'RB'
   | 'RWB'
   | 'CB'
@@ -72,7 +75,7 @@ export interface WorldPlayerDefinition {
   firstName: string;
   lastName: string;
 
-  dateOfBirth: string;
+  dateOfBirth?: string;
 
   nationalityCountryIds: string[];
 

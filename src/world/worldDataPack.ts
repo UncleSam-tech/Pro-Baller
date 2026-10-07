@@ -4,7 +4,29 @@ import type { CompetitionSeasonState } from '../competition/types';
 import type {
   FootballWorldDataPack,
   FootballWorldDataPackValidation,
+  WorldFootballPosition,
 } from './types';
+
+const VALID_FOOTBALL_POSITIONS = new Set<WorldFootballPosition>([
+  'GK',
+  'DF',
+  'MF',
+  'FW',
+  'RB',
+  'RWB',
+  'CB',
+  'LB',
+  'LWB',
+  'CDM',
+  'CM',
+  'CAM',
+  'RM',
+  'LM',
+  'RW',
+  'LW',
+  'CF',
+  'ST',
+]);
 
 // ============================================================================
 // SHARED VALIDATION HELPERS
@@ -111,8 +133,25 @@ export function validateFootballWorldDataPack(
     }
   }
 
-  // 4. Player Nationality Validation
+  // 4. Player Validation
   for (const player of pack.players) {
+    if (player.dateOfBirth !== undefined) {
+      if (
+        typeof player.dateOfBirth !== 'string' ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(player.dateOfBirth)
+      ) {
+        errors.push(
+          `Player '${player.id}' has invalid dateOfBirth '${player.dateOfBirth}'. Must match YYYY-MM-DD format.`
+        );
+      }
+    }
+
+    if (!VALID_FOOTBALL_POSITIONS.has(player.primaryPosition)) {
+      errors.push(
+        `Player '${player.id}' has invalid primaryPosition '${player.primaryPosition}'.`
+      );
+    }
+
     if (!player.nationalityCountryIds || player.nationalityCountryIds.length === 0) {
       errors.push(`Player '${player.id}' has no nationalities defined.`);
       continue;

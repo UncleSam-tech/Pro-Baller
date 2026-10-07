@@ -71,7 +71,7 @@ export function importFootballWorldSnapshot(
     id: p.id,
     firstName: p.firstName,
     lastName: p.lastName,
-    dateOfBirth: p.dateOfBirth,
+    ...(p.dateOfBirth !== undefined ? { dateOfBirth: p.dateOfBirth } : {}),
     nationalityCountryIds: [...p.nationalityCountryIds],
     primaryPosition: p.primaryPosition,
   }));

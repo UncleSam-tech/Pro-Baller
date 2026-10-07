@@ -60,7 +60,7 @@ export interface RawWorldPlayer {
   firstName: string;
   lastName: string;
 
-  dateOfBirth: string;
+  dateOfBirth?: string;
 
   nationalityCountryIds: string[];
 
