@@ -469,6 +469,7 @@ export function advanceFootballWorldStep(
     competitionSeasonStates: updatedCompetitionSeasonStates,
     squadAssignments: state.squadAssignments,
     managerAssignments: state.managerAssignments,
+    playerFootballStates: state.playerFootballStates,
   };
 
   return {

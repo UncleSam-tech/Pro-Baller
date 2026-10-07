@@ -16,6 +16,11 @@ import type {
 } from './types';
 import { validateFootballWorldDataPack } from './worldDataPack';
 import { prepareCompetitionFixtureDates } from './worldProgression';
+import {
+  initializeWorldPlayerFootballStates,
+  validateWorldPlayerFootballStates,
+  getWorldPlayerFootballState,
+} from './playerFootballState';
 
 // ============================================================================
 // CLONING UTILITIES
@@ -141,6 +146,19 @@ export function bootstrapFootballWorld(
 
   const managerAssignments = pack.managerAssignments.map(m => ({ ...m }));
 
+  // 5. Initialize and Validate Player Football States
+  const playerFootballStates = initializeWorldPlayerFootballStates(pack);
+  const playerValidation = validateWorldPlayerFootballStates(
+    playerFootballStates,
+    new Set(pack.players.map(p => p.id))
+  );
+  if (!playerValidation.valid) {
+    return {
+      accepted: false,
+      error: `Player football state validation failed: ${playerValidation.errors.join('; ')}`,
+    };
+  }
+
   return {
     accepted: true,
     state: {
@@ -152,6 +170,7 @@ export function bootstrapFootballWorld(
       competitionSeasonStates,
       squadAssignments,
       managerAssignments,
+      playerFootballStates,
     },
   };
 }
@@ -208,3 +227,6 @@ export function getWorldClubManagerId(
   const assignment = state.managerAssignments.find(m => m.clubId === clubId);
   return assignment?.managerId;
 }
+
+export { getWorldPlayerFootballState } from './playerFootballState';
+

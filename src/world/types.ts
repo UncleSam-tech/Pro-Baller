@@ -200,6 +200,17 @@ export interface FootballWorldDataPackValidation {
 // PART 11 — RUNTIME WORLD STATE
 // ============================================================================
 
+export interface WorldPlayerFootballState {
+  playerId: string;
+
+  ability: number;
+
+  fitness: number;
+  sharpness: number;
+  form: number;
+  morale: number;
+}
+
 export interface FootballWorldRuntimeState {
   dataPackId: string;
   dataPackVersion: number;
@@ -215,6 +226,8 @@ export interface FootballWorldRuntimeState {
   squadAssignments: WorldClubSquadSeed[];
 
   managerAssignments: WorldClubManagerSeed[];
+
+  playerFootballStates: WorldPlayerFootballState[];
 }
 
 export interface FootballWorldBootstrapResult {
