@@ -47,18 +47,36 @@ export interface CompetitionStandingsRules {
   tieBreakers: StandingsTieBreaker[];
 }
 
+export type PlayoffQualificationRule =
+  | {
+      mode: 'NONE';
+    }
+  | {
+      mode: 'POSITIONS';
+      positions: number[];
+    }
+  | {
+      mode: 'UNCONFIGURED';
+    };
+
+export interface CompetitionSeasonOutcomeRules {
+  championPosition: number;
+
+  directPromotionPositions: number[];
+
+  promotionPlayoff: PlayoffQualificationRule;
+
+  directRelegationPositions: number[];
+
+  relegationPlayoff: PlayoffQualificationRule;
+}
+
 export interface CompetitionFormatRules {
   type: CompetitionFormatType;
 
   expectedClubCount?: number;
 
   rounds?: number;
-
-  promotionPlaces?: number;
-  relegationPlaces?: number;
-
-  hasPromotionPlayoff?: boolean;
-  hasRelegationPlayoff?: boolean;
 
   extraTimeEnabled: boolean;
   penaltiesEnabled: boolean;
@@ -127,6 +145,8 @@ export interface CompetitionRuleSet {
   format: CompetitionFormatRules;
 
   standings?: CompetitionStandingsRules;
+
+  seasonOutcomes?: CompetitionSeasonOutcomeRules;
 
   substitutions: SubstitutionRules;
 
@@ -441,6 +461,40 @@ export interface CompetitionSeasonStateValidation {
   valid: boolean;
   errors: string[];
 }
+
+export type CompetitionSeasonOutcomeTag =
+  | 'CHAMPION'
+  | 'DIRECT_PROMOTION'
+  | 'PROMOTION_PLAYOFF_QUALIFIER'
+  | 'DIRECT_RELEGATION'
+  | 'RELEGATION_PLAYOFF_QUALIFIER';
+
+export interface CompetitionTeamSeasonOutcome {
+  teamId: string;
+
+  finalPosition: number;
+
+  tags: CompetitionSeasonOutcomeTag[];
+}
+
+export interface CompetitionSeasonOutcomeEvaluation {
+  competitionId: string;
+  seasonLabel: string;
+  ruleSetId: string;
+
+  championTeamId: string;
+
+  teamOutcomes: CompetitionTeamSeasonOutcome[];
+}
+
+export interface CompetitionSeasonOutcomeResult {
+  accepted: boolean;
+
+  evaluation?: CompetitionSeasonOutcomeEvaluation;
+
+  error?: string;
+}
+
 
 
 
