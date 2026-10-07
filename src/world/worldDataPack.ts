@@ -6,6 +6,7 @@ import type {
   FootballWorldDataPackValidation,
   WorldFootballPosition,
 } from './types';
+import { isValidCalendarDate } from './worldProgression';
 
 const VALID_FOOTBALL_POSITIONS = new Set<WorldFootballPosition>([
   'GK',
@@ -510,10 +511,10 @@ export function validateFootballWorldDataPack(
 
       if (
         fd.scheduledDate !== undefined &&
-        !/^\d{4}-\d{2}-\d{2}$/.test(fd.scheduledDate)
+        !isValidCalendarDate(fd.scheduledDate)
       ) {
         errors.push(
-          `Fixture date seed for '${fd.fixtureId}' has malformed scheduledDate '${fd.scheduledDate}'. Expected YYYY-MM-DD.`
+          `Fixture date seed for '${fd.fixtureId}' has malformed scheduledDate '${fd.scheduledDate}'. Expected valid YYYY-MM-DD calendar date.`
         );
       }
     }

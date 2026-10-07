@@ -231,9 +231,10 @@ export interface FootballWorldBootstrapResult {
 
 export interface CompetitionProgressSummary {
   competitionId: string;
-  roundSimulated?: number;
   fixturesSimulated: number;
   isComplete: boolean;
+  firstSimulatedDate?: string;
+  lastSimulatedDate?: string;
 }
 
 export interface FootballWorldAdvanceResult {

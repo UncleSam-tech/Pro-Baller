@@ -422,6 +422,8 @@ export interface CompetitionSeasonState {
   schedule: CompetitionSchedule;
 
   results: CompetitionFixtureResult[];
+
+  fixtureDates?: Array<{ fixtureId: string; scheduledDate?: string }>;
 }
 
 export interface CompetitionResultProcessResult {

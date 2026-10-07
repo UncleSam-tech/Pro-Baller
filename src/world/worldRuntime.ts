@@ -15,6 +15,7 @@ import type {
   FootballWorldRuntimeState,
 } from './types';
 import { validateFootballWorldDataPack } from './worldDataPack';
+import { prepareCompetitionFixtureDates } from './worldProgression';
 
 // ============================================================================
 // CLONING UTILITIES
@@ -105,12 +106,20 @@ export function bootstrapFootballWorld(
   // 3. Bootstrap Competition Season States
   const competitionSeasonStates: CompetitionSeasonState[] = [];
   for (const seed of pack.competitionSeasons) {
+    const fixtureDates = prepareCompetitionFixtureDates(
+      seed.schedule,
+      seed.fixtureDates,
+      seed.results,
+      pack.snapshotDate
+    );
+
     const seasonState: CompetitionSeasonState = {
       competitionId: seed.competitionId,
       seasonLabel: seed.schedule.seasonLabel,
       ruleSetId: seed.ruleSetId,
       schedule: cloneSchedule(seed.schedule),
       results: seed.results.map(r => ({ ...r })),
+      fixtureDates,
     };
 
     const seasonValidation = validateCompetitionSeasonState(seasonState);
