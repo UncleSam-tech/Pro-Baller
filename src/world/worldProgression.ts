@@ -1,6 +1,7 @@
 import { validateCompetitionSeasonState } from '../competition/seasonEngine';
 import type {
   CompetitionFixtureResult,
+  CompetitionRuleSet,
   CompetitionSchedule,
   CompetitionSeasonState,
   ScheduledCompetitionFixture,
@@ -8,8 +9,17 @@ import type {
 import type {
   CompetitionProgressSummary,
   FootballWorldAdvanceResult,
+  FootballWorldDataPack,
   FootballWorldRuntimeState,
+  FootballWorldStaticContext,
+  WorldFixtureParticipation,
+  WorldFootballPosition,
 } from './types';
+import {
+  selectMatchTeamSquad,
+  createFixtureParticipation,
+  resolveRuleSetBenchSize,
+} from './matchSquadSelection';
 
 // ============================================================================
 // SIMULATION CONSTANTS
@@ -300,11 +310,13 @@ export function prepareCompetitionFixtureDates(
  *
  * @param state The current immutable runtime world state.
  * @param nextDate The caller-supplied target simulation date (must be strictly after state.currentDate).
+ * @param context Required static world context (descriptors, player positions, rule sets, or data pack).
  * @returns FootballWorldAdvanceResult containing the updated state or rejection reason.
  */
 export function advanceFootballWorldStep(
   state: FootballWorldRuntimeState,
-  nextDate: string
+  nextDate: string,
+  context: FootballWorldStaticContext | FootballWorldDataPack
 ): FootballWorldAdvanceResult {
   // 1. Validate date structure & calendar validity
   if (!isValidCalendarDate(nextDate)) {
@@ -322,8 +334,69 @@ export function advanceFootballWorldStep(
     };
   }
 
+  // 3. Validate static world context
+  if (!context) {
+    return {
+      accepted: false,
+      error: 'Static world context is required for world progression.',
+    };
+  }
+
+  // Resolve and validate player positions
+  let playerPositions:
+    | Map<string, WorldFootballPosition>
+    | Record<string, WorldFootballPosition>
+    | undefined;
+
+  if ('playerPositions' in context && context.playerPositions) {
+    playerPositions = context.playerPositions;
+  } else if ('players' in context && Array.isArray(context.players)) {
+    const posMap = new Map<string, WorldFootballPosition>();
+    for (const p of context.players) {
+      if (p.primaryPosition) {
+        posMap.set(p.id, p.primaryPosition);
+      }
+    }
+    playerPositions = posMap;
+  }
+
+  if (!playerPositions) {
+    return {
+      accepted: false,
+      error: 'Static world context must provide player positions or player definitions.',
+    };
+  }
+
+  // Resolve and validate competition rule sets
+  let ruleSets:
+    | CompetitionRuleSet[]
+    | Record<string, CompetitionRuleSet>
+    | Map<string, CompetitionRuleSet>
+    | undefined;
+
+  if ('ruleSets' in context && context.ruleSets) {
+    ruleSets = context.ruleSets;
+  } else if ('competitionRuleSets' in context && context.competitionRuleSets) {
+    ruleSets = context.competitionRuleSets;
+  }
+
+  if (!ruleSets) {
+    return {
+      accepted: false,
+      error: 'Static world context must provide competition rule sets.',
+    };
+  }
+
   const updatedCompetitionSeasonStates: CompetitionSeasonState[] = [];
   const progressSummaries: CompetitionProgressSummary[] = [];
+  const newlySimulatedParticipations: WorldFixtureParticipation[] = [];
+
+  const playerFootballStatesMap = new Map(
+    (state.playerFootballStates ?? []).map((p) => [p.playerId, p])
+  );
+  const squadMap = new Map(
+    (state.squadAssignments ?? []).map((s) => [s.clubId, s.playerIds])
+  );
 
   // 3. Advance each competition independently by due date
   for (const compState of state.competitionSeasonStates) {
@@ -383,6 +456,25 @@ export function advanceFootballWorldStep(
     // Preserves batch-order independence across all fixtures within the step
     const strengthSnapshot = computeStrengthSnapshot(compState.results);
 
+    // Verify that the competition rule set exists in supplied static context
+    let compRuleSet: CompetitionRuleSet | undefined;
+    if (ruleSets instanceof Map) {
+      compRuleSet = ruleSets.get(compState.ruleSetId);
+    } else if (Array.isArray(ruleSets)) {
+      compRuleSet = ruleSets.find((r) => r.id === compState.ruleSetId);
+    } else {
+      compRuleSet = (ruleSets as Record<string, CompetitionRuleSet>)[compState.ruleSetId];
+    }
+
+    if (!compRuleSet) {
+      return {
+        accepted: false,
+        error: `Competition rule set '${compState.ruleSetId}' could not be resolved from supplied static context.`,
+      };
+    }
+
+    const benchSize = compRuleSet.substitutions?.benchSize ?? 9;
+
     // Sort due fixtures deterministically: scheduledDate, round, id
     dueFixtures.sort((a, b) => {
       const dateA = dateMap.get(a.id) ?? '';
@@ -408,6 +500,30 @@ export function advanceFootballWorldStep(
 
       const homeGoals = samplePoisson(homeXg, rng);
       const awayGoals = samplePoisson(awayXg, rng);
+
+      // Deterministic squad selection and participation tracking
+      const homeSquad = squadMap.get(fixture.homeTeamId) ?? [];
+      const awaySquad = squadMap.get(fixture.awayTeamId) ?? [];
+
+      const homeSelection = selectMatchTeamSquad(
+        fixture.homeTeamId,
+        homeSquad,
+        playerFootballStatesMap,
+        { benchSize, playerPositions }
+      );
+      const awaySelection = selectMatchTeamSquad(
+        fixture.awayTeamId,
+        awaySquad,
+        playerFootballStatesMap,
+        { benchSize, playerPositions }
+      );
+
+      const participation = createFixtureParticipation(
+        fixture.id,
+        homeSelection,
+        awaySelection
+      );
+      newlySimulatedParticipations.push(participation);
 
       newlySimulatedResults.push({
         fixtureId: fixture.id,
@@ -470,6 +586,10 @@ export function advanceFootballWorldStep(
     squadAssignments: state.squadAssignments,
     managerAssignments: state.managerAssignments,
     playerFootballStates: state.playerFootballStates,
+    fixtureParticipations: [
+      ...(state.fixtureParticipations ?? []),
+      ...newlySimulatedParticipations,
+    ],
   };
 
   return {

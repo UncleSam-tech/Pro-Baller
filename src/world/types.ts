@@ -211,6 +211,26 @@ export interface WorldPlayerFootballState {
   morale: number;
 }
 
+export interface WorldMatchTeamSelection {
+  teamId: string;
+  startingPlayerIds: string[];
+  benchPlayerIds: string[];
+}
+
+export interface WorldPlayerMatchAppearance {
+  playerId: string;
+  teamId: string;
+  started: boolean;
+  minutesPlayed: number;
+}
+
+export interface WorldFixtureParticipation {
+  fixtureId: string;
+  homeSelection: WorldMatchTeamSelection;
+  awaySelection: WorldMatchTeamSelection;
+  playerAppearances: WorldPlayerMatchAppearance[];
+}
+
 export interface FootballWorldRuntimeState {
   dataPackId: string;
   dataPackVersion: number;
@@ -228,6 +248,8 @@ export interface FootballWorldRuntimeState {
   managerAssignments: WorldClubManagerSeed[];
 
   playerFootballStates: WorldPlayerFootballState[];
+
+  fixtureParticipations: WorldFixtureParticipation[];
 }
 
 export interface FootballWorldBootstrapResult {
@@ -241,6 +263,20 @@ export interface FootballWorldBootstrapResult {
 // ============================================================================
 // PART 12 — WORLD PROGRESSION
 // ============================================================================
+
+export interface FootballWorldStaticContext {
+  players?: Array<{ id: string; primaryPosition?: WorldFootballPosition }>;
+  playerPositions?:
+    | Map<string, WorldFootballPosition>
+    | Record<string, WorldFootballPosition>;
+  competitionRuleSets?:
+    | CompetitionRuleSet[]
+    | Record<string, CompetitionRuleSet>;
+  ruleSets?:
+    | CompetitionRuleSet[]
+    | Record<string, CompetitionRuleSet>
+    | Map<string, CompetitionRuleSet>;
+}
 
 export interface CompetitionProgressSummary {
   competitionId: string;

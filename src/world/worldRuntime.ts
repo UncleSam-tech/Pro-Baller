@@ -5,6 +5,7 @@ import {
 import { validateCompetitionSeasonState } from '../competition/seasonEngine';
 import type {
   CompetitionRuleRegistry,
+  CompetitionRuleSet,
   CompetitionSchedule,
   CompetitionSeasonState,
   DomesticLeagueMembershipState,
@@ -13,6 +14,8 @@ import type {
   FootballWorldBootstrapResult,
   FootballWorldDataPack,
   FootballWorldRuntimeState,
+  FootballWorldStaticContext,
+  WorldFootballPosition,
 } from './types';
 import { validateFootballWorldDataPack } from './worldDataPack';
 import { prepareCompetitionFixtureDates } from './worldProgression';
@@ -21,6 +24,11 @@ import {
   validateWorldPlayerFootballStates,
   getWorldPlayerFootballState,
 } from './playerFootballState';
+import {
+  getWorldFixtureParticipation,
+  getWorldPlayerAppearances,
+  getWorldPlayerMinutes,
+} from './matchSquadSelection';
 
 // ============================================================================
 // CLONING UTILITIES
@@ -171,6 +179,7 @@ export function bootstrapFootballWorld(
       squadAssignments,
       managerAssignments,
       playerFootballStates,
+      fixtureParticipations: [],
     },
   };
 }
@@ -229,4 +238,34 @@ export function getWorldClubManagerId(
 }
 
 export { getWorldPlayerFootballState } from './playerFootballState';
+export {
+  getWorldFixtureParticipation,
+  getWorldPlayerAppearances,
+  getWorldPlayerMinutes,
+} from './matchSquadSelection';
+
+/**
+ * Creates an immutable, zero-overhead static context from a FootballWorldDataPack
+ * for progression calls.
+ */
+export function createFootballWorldStaticContext(
+  pack: FootballWorldDataPack
+): FootballWorldStaticContext {
+  const playerPositions = new Map<string, WorldFootballPosition>();
+  for (const p of pack.players) {
+    if (p.primaryPosition) {
+      playerPositions.set(p.id, p.primaryPosition);
+    }
+  }
+  const ruleSets = new Map<string, CompetitionRuleSet>();
+  for (const r of pack.competitionRuleSets) {
+    ruleSets.set(r.id, r);
+  }
+  return {
+    playerPositions,
+    ruleSets,
+    competitionRuleSets: pack.competitionRuleSets,
+  };
+}
+
 
