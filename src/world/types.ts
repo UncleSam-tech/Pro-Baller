@@ -223,3 +223,21 @@ export interface FootballWorldBootstrapResult {
 
   error?: string;
 }
+
+// ============================================================================
+// PART 12 — WORLD PROGRESSION
+// ============================================================================
+
+export interface CompetitionProgressSummary {
+  competitionId: string;
+  roundSimulated?: number;
+  fixturesSimulated: number;
+  isComplete: boolean;
+}
+
+export interface FootballWorldAdvanceResult {
+  accepted: boolean;
+  state?: FootballWorldRuntimeState;
+  error?: string;
+  competitionProgressSummaries?: CompetitionProgressSummary[];
+}
