@@ -30,13 +30,27 @@ export interface CompetitionDefinition {
   level?: number;
 }
 
+export type StandingsTieBreaker =
+  | 'GOAL_DIFFERENCE'
+  | 'GOALS_FOR'
+  | 'HEAD_TO_HEAD_POINTS'
+  | 'HEAD_TO_HEAD_GOAL_DIFFERENCE'
+  | 'HEAD_TO_HEAD_GOALS_FOR'
+  | 'WINS'
+  | 'TEAM_ID';
+
+export interface CompetitionStandingsRules {
+  pointsForWin: number;
+  pointsForDraw: number;
+  pointsForLoss: number;
+
+  tieBreakers: StandingsTieBreaker[];
+}
+
 export interface CompetitionFormatRules {
   type: CompetitionFormatType;
 
   expectedClubCount?: number;
-
-  pointsForWin?: number;
-  pointsForDraw?: number;
 
   rounds?: number;
 
@@ -111,6 +125,8 @@ export interface CompetitionRuleSet {
   verificationStatus: RuleVerificationStatus;
 
   format: CompetitionFormatRules;
+
+  standings?: CompetitionStandingsRules;
 
   substitutions: SubstitutionRules;
 
@@ -363,4 +379,68 @@ export interface CompetitionScheduleValidation {
   valid: boolean;
   errors: string[];
 }
+
+export interface CompetitionFixtureResult {
+  fixtureId: string;
+
+  competitionId: string;
+  seasonLabel: string;
+  ruleSetId: string;
+
+  round: number;
+
+  homeTeamId: string;
+  awayTeamId: string;
+
+  homeGoals: number;
+  awayGoals: number;
+}
+
+export interface CompetitionSeasonState {
+  competitionId: string;
+  seasonLabel: string;
+  ruleSetId: string;
+
+  schedule: CompetitionSchedule;
+
+  results: CompetitionFixtureResult[];
+}
+
+export interface CompetitionResultProcessResult {
+  state: CompetitionSeasonState;
+
+  accepted: boolean;
+
+  error?: string;
+}
+
+export interface CompetitionStandingsRow {
+  position: number;
+
+  teamId: string;
+
+  played: number;
+  won: number;
+  drawn: number;
+  lost: number;
+
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+
+  points: number;
+}
+
+export interface CompetitionStandingsResult {
+  accepted: boolean;
+  standings?: CompetitionStandingsRow[];
+  error?: string;
+}
+
+export interface CompetitionSeasonStateValidation {
+  valid: boolean;
+  errors: string[];
+}
+
+
 
