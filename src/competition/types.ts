@@ -230,3 +230,87 @@ export interface SuspensionServiceResult {
   suspensionServedId?: string;
 }
 
+export type SubstitutionPhase =
+  | 'REGULATION'
+  | 'EXTRA_TIME';
+
+export type SubstitutionStoppageType =
+  | 'IN_PLAY'
+  | 'HALF_TIME';
+
+export interface SubstitutionChange {
+  playerOutId: string;
+  playerInId: string;
+}
+
+export interface SubstitutionRequest {
+  id: string;
+
+  fixtureId: string;
+
+  teamId: string;
+
+  competitionId: string;
+  seasonLabel: string;
+
+  windowId: string;
+
+  phase: SubstitutionPhase;
+
+  stoppageType: SubstitutionStoppageType;
+
+  changes: SubstitutionChange[];
+}
+
+export interface SubstitutionRecord {
+  requestId: string;
+
+  windowId: string;
+
+  phase: SubstitutionPhase;
+
+  stoppageType: SubstitutionStoppageType;
+
+  changes: SubstitutionChange[];
+
+  countedAsWindow: boolean;
+}
+
+export interface FixtureTeamSubstitutionState {
+  fixtureId: string;
+
+  teamId: string;
+
+  competitionId: string;
+  seasonLabel: string;
+
+  ruleSetId: string;
+
+  onPitchPlayerIds: string[];
+
+  registeredBenchPlayerIds: string[];
+
+  records: SubstitutionRecord[];
+
+  processedRequestIds: string[];
+
+  usedWindowIds: string[];
+}
+
+export interface SubstitutionProcessResult {
+  state: FixtureTeamSubstitutionState;
+
+  accepted: boolean;
+
+  error?: string;
+
+  record?: SubstitutionRecord;
+}
+
+export interface SubstitutionSummary {
+  substitutionsUsed: number;
+  windowsUsed: number;
+  playersCurrentlyOnPitch: number;
+  registeredBenchSize: number;
+}
+
