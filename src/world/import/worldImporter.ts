@@ -1,3 +1,4 @@
+import { generateCompetitionSchedule } from '../../competition/schedulerEngine';
 import type {
   CompetitionDefinition,
   CompetitionFixtureResult,
@@ -21,6 +22,7 @@ import { validateFootballWorldDataPack } from '../worldDataPack';
 import type {
   FootballWorldImportResult,
   RawFootballWorldSnapshot,
+  RawSeasonScheduleMode,
   RawWorldFixture,
 } from './types';
 
@@ -148,8 +150,17 @@ export function importFootballWorldSnapshot(
 
   // 10. Construct Competition Season Seeds
   const competitionSeasons: WorldCompetitionSeasonSeed[] = [];
+  const seasonCompIds = new Set<string>();
+  for (const compId of fixturesByComp.keys()) {
+    seasonCompIds.add(compId);
+  }
+  for (const comp of raw.competitions) {
+    if (comp.scheduleMode === 'GENERATE_FROM_MEMBERSHIP') {
+      seasonCompIds.add(comp.id);
+    }
+  }
 
-  for (const [compId, compFixtures] of fixturesByComp) {
+  for (const compId of seasonCompIds) {
     // Resolve matching rule set
     const matchingRuleSets = raw.ruleSets.filter(
       rs => rs.competitionId === compId && rs.seasonLabel === raw.seasonLabel
@@ -180,31 +191,154 @@ export function importFootballWorldSnapshot(
     // Determine participant team IDs from domestic membership
     const membership = domesticLeagueMemberships.find(m => m.competitionId === compId);
     const participantTeamIds = membership ? [...membership.clubIds] : [];
+    const compFixtures = fixturesByComp.get(compId) ?? [];
+    const rawComp = compLookup.get(compId);
+    const scheduleMode: RawSeasonScheduleMode = rawComp?.scheduleMode ?? 'SOURCE_COMPLETE';
 
-    // Group fixtures by integer round
-    const fixturesByRound = new Map<number, RawWorldFixture[]>();
-    for (const fix of compFixtures) {
-      let rList = fixturesByRound.get(fix.round);
-      if (!rList) {
-        rList = [];
-        fixturesByRound.set(fix.round, rList);
+    if (scheduleMode === 'SOURCE_COMPLETE') {
+      // Group fixtures by integer round
+      const fixturesByRound = new Map<number, RawWorldFixture[]>();
+      for (const fix of compFixtures) {
+        let rList = fixturesByRound.get(fix.round);
+        if (!rList) {
+          rList = [];
+          fixturesByRound.set(fix.round, rList);
+        }
+        rList.push(fix);
       }
-      rList.push(fix);
-    }
 
-    const sortedRounds = Array.from(fixturesByRound.keys()).sort((a, b) => a - b);
-    const pairOccurrence = new Map<string, number>();
-    const roundSchedules: CompetitionRoundSchedule[] = [];
-    const results: CompetitionFixtureResult[] = [];
-    const fixtureDates: WorldFixtureDateSeed[] = [];
+      const sortedRounds = Array.from(fixturesByRound.keys()).sort((a, b) => a - b);
+      const pairOccurrence = new Map<string, number>();
+      const roundSchedules: CompetitionRoundSchedule[] = [];
+      const results: CompetitionFixtureResult[] = [];
+      const fixtureDates: WorldFixtureDateSeed[] = [];
 
-    for (const roundNum of sortedRounds) {
-      const roundRawFixtures = fixturesByRound.get(roundNum)!;
-      const scheduledRoundFixtures: ScheduledCompetitionFixture[] = [];
-      const teamsInRound = new Set<string>();
+      for (const roundNum of sortedRounds) {
+        const roundRawFixtures = fixturesByRound.get(roundNum)!;
+        const scheduledRoundFixtures: ScheduledCompetitionFixture[] = [];
+        const teamsInRound = new Set<string>();
 
-      for (const fix of roundRawFixtures) {
-        // Score validation
+        for (const fix of roundRawFixtures) {
+          // Score validation
+          const hasHomeGoals = fix.homeGoals !== undefined;
+          const hasAwayGoals = fix.awayGoals !== undefined;
+
+          if (hasHomeGoals !== hasAwayGoals) {
+            return {
+              accepted: false,
+              error: `Fixture '${fix.id}' has incomplete score: homeGoals and awayGoals must both be present or both absent.`,
+            };
+          }
+
+          if (hasHomeGoals && hasAwayGoals) {
+            results.push({
+              fixtureId: fix.id,
+              competitionId: compId,
+              seasonLabel: raw.seasonLabel,
+              ruleSetId: selectedRuleSet.id,
+              round: fix.round,
+              homeTeamId: fix.homeClubId,
+              awayTeamId: fix.awayClubId,
+              homeGoals: fix.homeGoals!,
+              awayGoals: fix.awayGoals!,
+            });
+          }
+
+          fixtureDates.push({
+            fixtureId: fix.id,
+            scheduledDate: fix.scheduledDate,
+          });
+
+          // Track pair occurrence for leg derivation
+          const pairKey = [fix.homeClubId, fix.awayClubId].sort().join(':');
+          const count = (pairOccurrence.get(pairKey) ?? 0) + 1;
+          pairOccurrence.set(pairKey, count);
+
+          const leg: 1 | 2 =
+            selectedRuleSet.format.type === 'DOUBLE_ROUND_ROBIN'
+              ? count === 1
+                ? 1
+                : 2
+              : 1;
+
+          scheduledRoundFixtures.push({
+            id: fix.id,
+            competitionId: compId,
+            seasonLabel: raw.seasonLabel,
+            ruleSetId: selectedRuleSet.id,
+            round: fix.round,
+            homeTeamId: fix.homeClubId,
+            awayTeamId: fix.awayClubId,
+            leg,
+          });
+
+          teamsInRound.add(fix.homeClubId);
+          teamsInRound.add(fix.awayClubId);
+        }
+
+        const byeTeamIds = participantTeamIds.filter(t => !teamsInRound.has(t));
+
+        roundSchedules.push({
+          round: roundNum,
+          fixtures: scheduledRoundFixtures,
+          byeTeamIds,
+        });
+      }
+
+      const schedule: CompetitionSchedule = {
+        competitionId: compId,
+        seasonLabel: raw.seasonLabel,
+        ruleSetId: selectedRuleSet.id,
+        formatType: selectedRuleSet.format.type,
+        participantTeamIds,
+        rounds: roundSchedules,
+      };
+
+      competitionSeasons.push({
+        competitionId: compId,
+        ruleSetId: selectedRuleSet.id,
+        schedule,
+        results,
+        fixtureDates,
+      });
+    } else {
+      // GENERATE_FROM_MEMBERSHIP
+      const compDef = competitionDefinitions.find(c => c.id === compId);
+      if (!compDef) {
+        return {
+          accepted: false,
+          error: `Competition definition not found for '${compId}'.`,
+        };
+      }
+
+      const schedResult = generateCompetitionSchedule(
+        compDef,
+        selectedRuleSet,
+        participantTeamIds
+      );
+
+      if (!schedResult.accepted || !schedResult.schedule) {
+        return {
+          accepted: false,
+          error: `Failed to generate competition schedule for '${compId}': ${schedResult.error ?? 'Unknown error'}`,
+        };
+      }
+
+      const schedule = schedResult.schedule;
+
+      const canonicalByDirectedPair = new Map<string, ScheduledCompetitionFixture>();
+      for (const round of schedule.rounds) {
+        for (const f of round.fixtures) {
+          canonicalByDirectedPair.set(`${f.homeTeamId}:${f.awayTeamId}`, f);
+        }
+      }
+
+      const membershipSet = new Set(participantTeamIds);
+      const mappedCanonicalFixtureIds = new Set<string>();
+      const results: CompetitionFixtureResult[] = [];
+      const fixtureDates: WorldFixtureDateSeed[] = [];
+
+      for (const fix of compFixtures) {
         const hasHomeGoals = fix.homeGoals !== undefined;
         const hasAwayGoals = fix.awayGoals !== undefined;
 
@@ -215,77 +349,79 @@ export function importFootballWorldSnapshot(
           };
         }
 
-        if (hasHomeGoals && hasAwayGoals) {
-          results.push({
-            fixtureId: fix.id,
-            competitionId: compId,
-            seasonLabel: raw.seasonLabel,
-            ruleSetId: selectedRuleSet.id,
-            round: fix.round,
-            homeTeamId: fix.homeClubId,
-            awayTeamId: fix.awayClubId,
-            homeGoals: fix.homeGoals!,
-            awayGoals: fix.awayGoals!,
-          });
+        // If neither goal value is present, omit from historical completed matches
+        if (!hasHomeGoals && !hasAwayGoals) {
+          continue;
         }
 
-        fixtureDates.push({
-          fixtureId: fix.id,
-          scheduledDate: fix.scheduledDate,
-        });
+        if (!membershipSet.has(fix.homeClubId)) {
+          return {
+            accepted: false,
+            error: `Historical fixture '${fix.id}' references unknown home club '${fix.homeClubId}' outside competition membership.`,
+          };
+        }
+        if (!membershipSet.has(fix.awayClubId)) {
+          return {
+            accepted: false,
+            error: `Historical fixture '${fix.id}' references unknown away club '${fix.awayClubId}' outside competition membership.`,
+          };
+        }
 
-        // Track pair occurrence for leg derivation
-        const pairKey = [fix.homeClubId, fix.awayClubId].sort().join(':');
-        const count = (pairOccurrence.get(pairKey) ?? 0) + 1;
-        pairOccurrence.set(pairKey, count);
+        const directedKey = `${fix.homeClubId}:${fix.awayClubId}`;
+        const canonicalFixture = canonicalByDirectedPair.get(directedKey);
+        if (!canonicalFixture) {
+          return {
+            accepted: false,
+            error: `No matching canonical directed fixture found for historical match '${fix.id}' (${fix.homeClubId} vs ${fix.awayClubId}).`,
+          };
+        }
 
-        const leg: 1 | 2 =
-          selectedRuleSet.format.type === 'DOUBLE_ROUND_ROBIN'
-            ? count === 1
-              ? 1
-              : 2
-            : 1;
+        if (mappedCanonicalFixtureIds.has(canonicalFixture.id)) {
+          return {
+            accepted: false,
+            error: `Duplicate historical match result attempting to map to canonical fixture '${canonicalFixture.id}'.`,
+          };
+        }
+        mappedCanonicalFixtureIds.add(canonicalFixture.id);
 
-        scheduledRoundFixtures.push({
-          id: fix.id,
-          competitionId: compId,
+        if (
+          fix.scheduledDate !== undefined &&
+          !/^\d{4}-\d{2}-\d{2}$/.test(fix.scheduledDate)
+        ) {
+          return {
+            accepted: false,
+            error: `Historical fixture '${fix.id}' has malformed scheduledDate '${fix.scheduledDate}'. Expected YYYY-MM-DD.`,
+          };
+        }
+
+        results.push({
+          fixtureId: canonicalFixture.id,
+          competitionId: canonicalFixture.competitionId,
           seasonLabel: raw.seasonLabel,
           ruleSetId: selectedRuleSet.id,
-          round: fix.round,
-          homeTeamId: fix.homeClubId,
-          awayTeamId: fix.awayClubId,
-          leg,
+          round: canonicalFixture.round,
+          homeTeamId: canonicalFixture.homeTeamId,
+          awayTeamId: canonicalFixture.awayTeamId,
+          homeGoals: fix.homeGoals!,
+          awayGoals: fix.awayGoals!,
         });
 
-        teamsInRound.add(fix.homeClubId);
-        teamsInRound.add(fix.awayClubId);
+        if (fix.scheduledDate !== undefined) {
+          fixtureDates.push({
+            fixtureId: canonicalFixture.id,
+            scheduledDate: fix.scheduledDate,
+          });
+        }
       }
 
-      const byeTeamIds = participantTeamIds.filter(t => !teamsInRound.has(t));
-
-      roundSchedules.push({
-        round: roundNum,
-        fixtures: scheduledRoundFixtures,
-        byeTeamIds,
+      competitionSeasons.push({
+        competitionId: compId,
+        ruleSetId: selectedRuleSet.id,
+        schedule,
+        results,
+        fixtureDates,
       });
     }
-
-    const schedule: CompetitionSchedule = {
-      competitionId: compId,
-      seasonLabel: raw.seasonLabel,
-      ruleSetId: selectedRuleSet.id,
-      formatType: selectedRuleSet.format.type,
-      participantTeamIds,
-      rounds: roundSchedules,
-    };
-
-    competitionSeasons.push({
-      competitionId: compId,
-      ruleSetId: selectedRuleSet.id,
-      schedule,
-      results,
-      fixtureDates,
-    });
   }
 
   // 11. Assemble Normalized FootballWorldDataPack

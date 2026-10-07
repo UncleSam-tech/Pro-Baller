@@ -19,6 +19,10 @@ export interface RawWorldCountry {
   confederationId?: string;
 }
 
+export type RawSeasonScheduleMode =
+  | 'SOURCE_COMPLETE'
+  | 'GENERATE_FROM_MEMBERSHIP';
+
 export interface RawWorldCompetition {
   id: string;
   name: string;
@@ -30,6 +34,8 @@ export interface RawWorldCompetition {
   category: CompetitionCategory;
 
   level?: number;
+
+  scheduleMode?: RawSeasonScheduleMode;
 }
 
 export interface RawWorldClub {
