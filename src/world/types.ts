@@ -1,7 +1,9 @@
 import type {
   CompetitionDefinition,
+  CompetitionFixtureResult,
   CompetitionMovementRelationship,
   CompetitionRuleSet,
+  CompetitionSchedule,
 } from '../competition/types';
 
 // ============================================================================
@@ -121,6 +123,28 @@ export interface WorldClubManagerSeed {
 }
 
 // ============================================================================
+// PART 8.5 — COMPETITION SEASON & FIXTURE DATE SEEDS
+// ============================================================================
+
+export interface WorldFixtureDateSeed {
+  fixtureId: string;
+
+  scheduledDate?: string;
+}
+
+export interface WorldCompetitionSeasonSeed {
+  competitionId: string;
+
+  ruleSetId: string;
+
+  schedule: CompetitionSchedule;
+
+  results: CompetitionFixtureResult[];
+
+  fixtureDates: WorldFixtureDateSeed[];
+}
+
+// ============================================================================
 // PART 9 — WORLD DATA PACK
 // ============================================================================
 
@@ -152,6 +176,8 @@ export interface FootballWorldDataPack {
   squadAssignments: WorldClubSquadSeed[];
 
   managerAssignments: WorldClubManagerSeed[];
+
+  competitionSeasons: WorldCompetitionSeasonSeed[];
 }
 
 // ============================================================================

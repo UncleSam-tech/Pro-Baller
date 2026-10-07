@@ -1,3 +1,6 @@
+import { validateCompetitionSchedule } from '../competition/schedulerEngine';
+import { validateCompetitionSeasonState } from '../competition/seasonEngine';
+import type { CompetitionSeasonState } from '../competition/types';
 import type {
   FootballWorldDataPack,
   FootballWorldDataPackValidation,
@@ -338,6 +341,146 @@ export function validateFootballWorldDataPack(
       );
     } else {
       seenAssignedManagers.add(assignment.managerId);
+    }
+  }
+
+  // 12. Competition Season Seeds
+  const seenSeasonComps = new Set<string>();
+  const ruleSetMap = new Map(pack.competitionRuleSets.map(r => [r.id, r]));
+  const membershipByComp = new Map(
+    pack.domesticLeagueMemberships.map(m => [m.competitionId, m])
+  );
+
+  const seasons = Array.isArray(pack.competitionSeasons)
+    ? pack.competitionSeasons
+    : [];
+
+  for (const seed of seasons) {
+    if (seenSeasonComps.has(seed.competitionId)) {
+      errors.push(
+        `Duplicate competition season seed for competition '${seed.competitionId}'.`
+      );
+    } else {
+      seenSeasonComps.add(seed.competitionId);
+    }
+
+    if (!competitionIds.has(seed.competitionId)) {
+      errors.push(
+        `Competition season seed references unknown competition '${seed.competitionId}'.`
+      );
+    }
+
+    const ruleSet = ruleSetMap.get(seed.ruleSetId);
+    if (!ruleSet) {
+      errors.push(
+        `Competition season seed references unknown rule set '${seed.ruleSetId}'.`
+      );
+    } else {
+      if (ruleSet.competitionId !== seed.competitionId) {
+        errors.push(
+          `Rule set '${seed.ruleSetId}' competitionId '${ruleSet.competitionId}' does not match season seed competitionId '${seed.competitionId}'.`
+        );
+      }
+      if (ruleSet.seasonLabel !== pack.seasonLabel) {
+        errors.push(
+          `Rule set '${seed.ruleSetId}' seasonLabel '${ruleSet.seasonLabel}' does not match pack seasonLabel '${pack.seasonLabel}'.`
+        );
+      }
+    }
+
+    // Schedule scope validation
+    if (seed.schedule.competitionId !== seed.competitionId) {
+      errors.push(
+        `Schedule competitionId '${seed.schedule.competitionId}' does not match season seed competitionId '${seed.competitionId}'.`
+      );
+    }
+    if (seed.schedule.ruleSetId !== seed.ruleSetId) {
+      errors.push(
+        `Schedule ruleSetId '${seed.schedule.ruleSetId}' does not match season seed ruleSetId '${seed.ruleSetId}'.`
+      );
+    }
+    if (seed.schedule.seasonLabel !== pack.seasonLabel) {
+      errors.push(
+        `Schedule seasonLabel '${seed.schedule.seasonLabel}' does not match pack seasonLabel '${pack.seasonLabel}'.`
+      );
+    }
+
+    // Reuse competition schedule validation
+    const schedVal = validateCompetitionSchedule(seed.schedule);
+    if (!schedVal.valid) {
+      errors.push(...schedVal.errors);
+    }
+
+    // Reuse competition season state validation
+    const seasonState: CompetitionSeasonState = {
+      competitionId: seed.competitionId,
+      seasonLabel: pack.seasonLabel,
+      ruleSetId: seed.ruleSetId,
+      schedule: seed.schedule,
+      results: seed.results,
+    };
+    const seasonVal = validateCompetitionSeasonState(seasonState);
+    if (!seasonVal.valid) {
+      errors.push(...seasonVal.errors);
+    }
+
+    // Domestic membership consistency
+    const membership = membershipByComp.get(seed.competitionId);
+    if (membership) {
+      const membershipSet = new Set(membership.clubIds);
+      const scheduleSet = new Set(seed.schedule.participantTeamIds);
+
+      let setsMatch = membershipSet.size === scheduleSet.size;
+      if (setsMatch) {
+        for (const clubId of membershipSet) {
+          if (!scheduleSet.has(clubId)) {
+            setsMatch = false;
+            break;
+          }
+        }
+      }
+
+      if (!setsMatch) {
+        errors.push(
+          `Participant team set in schedule for '${seed.competitionId}' does not match domestic league membership club set.`
+        );
+      }
+    }
+
+    // Fixture dates validation
+    const scheduledFixtureIds = new Set(
+      seed.schedule.rounds.flatMap(r => r.fixtures.map(f => f.id))
+    );
+    const seenFixtureDateIds = new Set<string>();
+
+    for (const fd of seed.fixtureDates) {
+      if (!fd.fixtureId || fd.fixtureId.trim() === '') {
+        errors.push('Fixture date seed contains a blank or empty fixtureId.');
+        continue;
+      }
+
+      if (!scheduledFixtureIds.has(fd.fixtureId)) {
+        errors.push(
+          `Fixture date seed references unknown fixtureId '${fd.fixtureId}'.`
+        );
+      }
+
+      if (seenFixtureDateIds.has(fd.fixtureId)) {
+        errors.push(
+          `Duplicate fixture date seed for fixtureId '${fd.fixtureId}'.`
+        );
+      } else {
+        seenFixtureDateIds.add(fd.fixtureId);
+      }
+
+      if (
+        fd.scheduledDate !== undefined &&
+        !/^\d{4}-\d{2}-\d{2}$/.test(fd.scheduledDate)
+      ) {
+        errors.push(
+          `Fixture date seed for '${fd.fixtureId}' has malformed scheduledDate '${fd.scheduledDate}'. Expected YYYY-MM-DD.`
+        );
+      }
     }
   }
 
