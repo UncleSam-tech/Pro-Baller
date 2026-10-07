@@ -99,8 +99,15 @@ export const MatchView: React.FC<MatchViewProps> = ({
   // Derby & Rivalry Detection
   const derbyInfo = useMemo(() => getDerbyMatchDetails(homeClub, awayClub), [homeClub, awayClub]);
 
-  // Coach-Mandated Formation & Tactical Focus Instructions
-  const managerFormation = useMemo(() => getManagerMandatedFormation(playerClub), [playerClub]);
+  // Tactical Blueprint & Coach Instructions
+  const [selectedFormation, setSelectedFormation] = useState<FormationType>(() => getManagerMandatedFormation(playerClub));
+  const [tacticalMentality, setTacticalMentality] = useState<'ATTACKING' | 'BALANCED' | 'DEFENSIVE'>('BALANCED');
+  const [tacticalPressing, setTacticalPressing] = useState<'HIGH_PRESS' | 'MID_BLOCK' | 'LOW_BLOCK'>('HIGH_PRESS');
+
+  useEffect(() => {
+    setSelectedFormation(getManagerMandatedFormation(playerClub));
+  }, [playerClub]);
+
   const [selectedFocus, setSelectedFocus] = useState<TacticalFocusType>('HIGH_PRESS');
   const activeFocusConfig = useMemo(() => {
     return TACTICAL_FOCUS_OPTIONS.find(f => f.id === selectedFocus) || TACTICAL_FOCUS_OPTIONS[0];
@@ -123,9 +130,9 @@ export const MatchView: React.FC<MatchViewProps> = ({
   const [homeSubWindowsUsed, setHomeSubWindowsUsed] = useState(0);
   const [awaySubWindowsUsed, setAwaySubWindowsUsed] = useState(0);
   
-  // Tactical Strength (Attack & Defense Ratings Modified by Coach's Formation & Tactical Focus!)
+  // Tactical Strength (Attack & Defense Ratings Modified by Formation & Tactical Focus!)
   const formationBonus = useMemo(() => {
-    switch (managerFormation) {
+    switch (selectedFormation) {
       case '4-3-3 Attacking': return { att: 8, def: -3 };
       case '4-2-3-1 Balanced': return { att: 4, def: 4 };
       case '3-5-2 Wing-backs': return { att: 7, def: 2 };
@@ -133,7 +140,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
       case '5-3-2 Park The Bus': return { att: -6, def: 12 };
       default: return { att: 0, def: 0 };
     }
-  }, [managerFormation]);
+  }, [selectedFormation]);
 
   const playerTeamAttBoost = formationBonus.att + activeFocusConfig.attDelta;
   const playerTeamDefBoost = formationBonus.def + activeFocusConfig.defDelta;

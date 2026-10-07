@@ -377,6 +377,13 @@ export interface BrandAmbassadorDeal {
   active: boolean;
   description: string;
 }
+export interface LifestyleAssets {
+  residence: string;
+  car: string;
+  charityFounded: boolean;
+  personalBrandLevel: number;
+  ownedItemIds: string[];
+}
 
 export interface PersonalStaff {
   agentTier: 'family' | 'registered' | 'elite' | 'super_agent';
@@ -571,12 +578,7 @@ export interface Player {
   staff: PersonalStaff;
   sponsors: SponsorDeal[];
   agentTerminalHistory?: AgentMessage[];
-  lifestyleAssets: {
-    residence: string;
-    car: string;
-    charityFounded: boolean;
-    personalBrandLevel: number;
-  };
+  lifestyleAssets: LifestyleAssets;
 
   // Season Stats (Current)
   seasonStats: {

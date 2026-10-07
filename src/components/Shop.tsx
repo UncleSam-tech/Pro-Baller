@@ -589,10 +589,9 @@ export const SHOP_CATALOG: ShopItem[] = [
 
 export const Shop: React.FC<ShopProps> = ({ player, onUpdatePlayer }) => {
   const [selectedCat, setSelectedCat] = useState<'all' | ShopItem['category']>('all');
-  const [ownedItemIds, setOwnedItemIds] = useState<string[]>(() => {
-    return (player.lifestyleAssets as any)?.ownedItemIds || [];
-  });
   const [purchaseNotice, setPurchaseNotice] = useState<string | null>(null);
+
+  const ownedItemIds = player.lifestyleAssets.ownedItemIds;
 
   const currency = player.preferredCurrency || 'GBP';
 
@@ -632,7 +631,6 @@ export const Shop: React.FC<ShopProps> = ({ player, onUpdatePlayer }) => {
     });
 
     const newOwned = [...ownedItemIds, item.id];
-    setOwnedItemIds(newOwned);
 
     // Apply attribute boosts
     const updatedAttrs = { ...player.attributes };
@@ -697,7 +695,7 @@ export const Shop: React.FC<ShopProps> = ({ player, onUpdatePlayer }) => {
         ...player.lifestyleAssets,
         charityFounded: item.id === 'grassroots_academy_fund' || item.id === 'hometown_medical_clinic' ? true : player.lifestyleAssets.charityFounded,
         ownedItemIds: newOwned,
-      } as any,
+      },
     });
 
     setPurchaseNotice(`Successfully acquired "${item.name}"! ${item.perk}`);

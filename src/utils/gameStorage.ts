@@ -2,7 +2,7 @@ import { Club, Player, Position, PlayerArchetype, PlayerOrigin } from '../types/
 import { getClubById } from '../data/clubs';
 import { generateProContract } from './contractGenerator';
 import { getCountryCurrency } from './currency';
-import { calculateTaxResidency } from './taxSystem';
+import { calculateTaxBreakdown } from './taxResidency';
 import { DEFAULT_PLAYER_ROUTINE } from '../data/dailyRoutineData';
 
 const STORAGE_KEY = 'career_legend_save_v1';
@@ -97,7 +97,7 @@ export function createNewPlayer(
   } as unknown as Player;
 
   const initialContract = generateProContract(club, tempPlayer, 'Future Star');
-  const initialTax = calculateTaxResidency(initialContract.weeklyWage, club.country, initialContract.agentFeePercent || 5);
+  const initialTax = calculateTaxBreakdown(club, initialContract.weeklyWage, initialContract.agentFeePercent || 5);
 
   return {
     id: `player_${Date.now()}`,
@@ -129,15 +129,15 @@ export function createNewPlayer(
     recurringInjuryCount: 0,
     preferredCurrency: getCountryCurrency(club.country),
     taxResidency: {
-      country: club.country,
+      country: initialTax.country,
       taxAuthority: initialTax.taxAuthority,
       taxAuthorityShort: initialTax.taxAuthorityShort,
-      taxSystemName: initialTax.taxSystemName,
-      effectiveTaxRate: initialTax.effectiveTaxRate,
-      systemDescription: initialTax.systemDescription,
+      taxSystemName: initialTax.taxSchemeName,
+      effectiveTaxRate: initialTax.effectiveRatePercent / 100,
+      systemDescription: initialTax.notes,
       isTaxFreeHaven: initialTax.isTaxFreeHaven,
       totalTaxesPaidCareer: 0,
-      lastTaxDeductionWeekly: initialTax.taxWithheld,
+      lastTaxDeductionWeekly: initialTax.taxDeductedWeekly,
     },
     person: {
       hometown,
@@ -188,6 +188,7 @@ export function createNewPlayer(
       car: 'Used Compact Hatchback',
       charityFounded: false,
       personalBrandLevel: 1,
+      ownedItemIds: [],
     },
     seasonStats: {
       appearances: 0,
@@ -270,32 +271,76 @@ export function loadPlayer(): Player | null {
     if (p.recurringInjuryCount === undefined) {
       p.recurringInjuryCount = 0;
     }
-    if (!p.lifestyleAssets) {
-      p.lifestyleAssets = {
-        residenceTier: 'Youth Academy Dormitory',
-        vehiclesOwned: [],
-        luxuryWatches: 0,
-        privateChef: false,
-        financialAdvisor: false,
-        socialMediaManager: false,
-        charityFounded: false,
-        ownedItemIds: [],
-      };
+    // Normalize lifestyle assets from old or partial saves into the canonical schema
+    const rawLifestyle = p.lifestyleAssets as Record<string, unknown> | undefined;
+
+    let residence = 'Academy Shared Dormitory';
+    if (typeof rawLifestyle?.residence === 'string' && rawLifestyle.residence.trim() !== '') {
+      residence = rawLifestyle.residence;
+    } else if (typeof rawLifestyle?.residenceTier === 'string' && rawLifestyle.residenceTier.trim() !== '') {
+      residence = rawLifestyle.residenceTier;
     }
+
+    let car = 'Used Compact Hatchback';
+    if (typeof rawLifestyle?.car === 'string' && rawLifestyle.car.trim() !== '') {
+      car = rawLifestyle.car;
+    } else if (Array.isArray(rawLifestyle?.vehiclesOwned)) {
+      const validVehicles = rawLifestyle.vehiclesOwned.filter(
+        (v): v is string => typeof v === 'string' && v.trim() !== ''
+      );
+      if (validVehicles.length > 0) {
+        car = validVehicles[validVehicles.length - 1];
+      }
+    }
+
+    const charityFounded = typeof rawLifestyle?.charityFounded === 'boolean'
+      ? rawLifestyle.charityFounded
+      : false;
+
+    const personalBrandLevel = (
+      typeof rawLifestyle?.personalBrandLevel === 'number' &&
+      Number.isFinite(rawLifestyle.personalBrandLevel) &&
+      rawLifestyle.personalBrandLevel >= 1
+    )
+      ? rawLifestyle.personalBrandLevel
+      : 1;
+
+    let ownedItemIds: string[] = [];
+    if (Array.isArray(rawLifestyle?.ownedItemIds)) {
+      const seen = new Set<string>();
+      for (const id of rawLifestyle.ownedItemIds) {
+        if (typeof id === 'string' && !seen.has(id)) {
+          seen.add(id);
+          ownedItemIds.push(id);
+        }
+      }
+    }
+
+    p.lifestyleAssets = {
+      residence,
+      car,
+      charityFounded,
+      personalBrandLevel,
+      ownedItemIds,
+    };
 
     if (!p.taxResidency) {
       const currentClub = getClubById(p.currentClubId || 'sporting_lagos');
-      const taxCalc = calculateTaxResidency(p.currentContract?.weeklyWage || 500, currentClub.country, p.currentContract?.agentFeePercent || 5);
+      const taxCalc = calculateTaxBreakdown(
+        currentClub,
+        p.currentContract?.weeklyWage || 500,
+        p.currentContract?.agentFeePercent || 5
+      );
       p.taxResidency = {
-        country: currentClub.country,
+        country: taxCalc.country,
         taxAuthority: taxCalc.taxAuthority,
         taxAuthorityShort: taxCalc.taxAuthorityShort,
-        taxSystemName: taxCalc.taxSystemName,
-        effectiveTaxRate: taxCalc.effectiveTaxRate,
-        systemDescription: taxCalc.systemDescription,
+        taxSystemName: taxCalc.taxSchemeName,
+        effectiveTaxRate: taxCalc.effectiveRatePercent / 100,
+        systemDescription: taxCalc.notes,
         isTaxFreeHaven: taxCalc.isTaxFreeHaven,
         totalTaxesPaidCareer: 0,
-        lastTaxDeductionWeekly: taxCalc.taxWithheld,
+        lastTaxDeductionWeekly: taxCalc.taxDeductedWeekly,
       };
     }
 
