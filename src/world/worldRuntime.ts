@@ -17,6 +17,7 @@ import type {
   FootballWorldStaticContext,
   WorldFixtureMatchDetail,
   WorldFootballPosition,
+  WorldPlayerAvailabilityState,
 } from './types';
 import { validateFootballWorldDataPack } from './worldDataPack';
 import { prepareCompetitionFixtureDates } from './worldProgression';
@@ -182,6 +183,7 @@ export function bootstrapFootballWorld(
       playerFootballStates,
       fixtureParticipations: [],
       fixtureMatchDetails: [],
+      playerAvailabilityStates: [],
     },
   };
 }
@@ -265,6 +267,16 @@ export function getWorldPlayerPotential(
 ): number | undefined {
   const p = state.playerFootballStates.find(s => s.playerId === playerId);
   return p?.potential;
+}
+
+/**
+ * Retrieves the WorldPlayerAvailabilityState for a given player ID, or undefined.
+ */
+export function getWorldPlayerAvailability(
+  state: FootballWorldRuntimeState,
+  playerId: string
+): WorldPlayerAvailabilityState | undefined {
+  return state.playerAvailabilityStates?.find(s => s.playerId === playerId);
 }
 
 /**

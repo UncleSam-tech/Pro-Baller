@@ -38,6 +38,16 @@ import {
   isDevelopmentCheckpointDate,
   applyMonthlyWorldPlayerDevelopment,
 } from './playerDevelopment';
+import {
+  isPlayerAvailableForFixture,
+  generateMatchInjury,
+  processYellowCardDiscipline,
+  serveCompetitionSuspension,
+} from './playerAvailability';
+import type {
+  WorldPlayerAvailabilityState,
+  WorldPlayerInjury,
+} from './types';
 
 // ============================================================================
 // SIMULATION CONSTANTS
@@ -451,6 +461,13 @@ export function advanceFootballWorldStep(
       };
     }
 
+    if (!compRuleSet.discipline || !Array.isArray(compRuleSet.discipline.yellowThresholds)) {
+      return {
+        accepted: false,
+        error: `Competition rule set '${compState.ruleSetId}' for competition '${compState.competitionId}' is missing required discipline configuration.`,
+      };
+    }
+
     compRuleSets.set(compState.competitionId, compRuleSet);
     compBenchSizes.set(
       compState.competitionId,
@@ -548,6 +565,20 @@ export function advanceFootballWorldStep(
 
   let currentLastDevDate = state.lastDevelopmentDate;
 
+  // Initialize availability map
+  const currentAvailabilityMap = new Map<string, WorldPlayerAvailabilityState>();
+  if (state.playerAvailabilityStates) {
+    for (const a of state.playerAvailabilityStates) {
+      currentAvailabilityMap.set(a.playerId, {
+        playerId: a.playerId,
+        injury: a.injury ? { ...a.injury } : undefined,
+        suspensions: a.suspensions ? a.suspensions.map((s) => ({ ...s })) : undefined,
+        competitionYellows: a.competitionYellows ? { ...a.competitionYellows } : undefined,
+        triggeredThresholds: a.triggeredThresholds ? { ...a.triggeredThresholds } : undefined,
+      });
+    }
+  }
+
   // Chronological day-by-day progression
   for (const calendarDate of calendarDates) {
     // 0. MONTHLY DEVELOPMENT CHECKPOINT (1st of each calendar month)
@@ -593,12 +624,30 @@ export function advanceFootballWorldStep(
       currentLastDevDate = calendarDate;
     }
 
+    // Same-date availability snapshot:
+    const beginningOfDayAvailabilityMap = new Map<string, WorldPlayerAvailabilityState>();
+    for (const [pId, a] of currentAvailabilityMap) {
+      beginningOfDayAvailabilityMap.set(pId, {
+        playerId: a.playerId,
+        injury: a.injury ? { ...a.injury } : undefined,
+        suspensions: a.suspensions ? a.suspensions.map((s) => ({ ...s })) : undefined,
+        competitionYellows: a.competitionYellows ? { ...a.competitionYellows } : undefined,
+        triggeredThresholds: a.triggeredThresholds ? { ...a.triggeredThresholds } : undefined,
+      });
+    }
+
     const fixturesOnDate = fixturesByDate.get(calendarDate) ?? [];
 
     if (fixturesOnDate.length === 0) {
       // Non-match calendar day: all players recover daily fitness
       for (const [playerId, playerState] of currentPlayerStatesMap) {
         currentPlayerStatesMap.set(playerId, applyDailyRecovery(playerState));
+      }
+      // Clear expired injuries
+      for (const avail of currentAvailabilityMap.values()) {
+        if (avail.injury && calendarDate >= avail.injury.availableFromDate) {
+          avail.injury = undefined;
+        }
       }
       continue;
     }
@@ -607,6 +656,11 @@ export function advanceFootballWorldStep(
     // SAME-DATE MATCHES RULE:
     // All fixtures on this date must use player states from the beginning of this date.
     const beginningOfDayPlayerStates = new Map(currentPlayerStatesMap);
+
+    // Staging collections for post-match consequences applied at end of calendar date
+    const stagedInjuriesOnDate: Array<{ playerId: string; injury: WorldPlayerInjury }> = [];
+    const stagedYellowsOnDate: Array<{ playerId: string; competitionId: string; round: number }> = [];
+    const stagedClubsPlayedCompOnDate: Array<{ clubId: string; competitionId: string }> = [];
 
     // Compute strength snapshots for competitions active on this date
     // from completed results prior to this date.
@@ -649,21 +703,44 @@ export function advanceFootballWorldStep(
       const seed = hashString(baseFixtureKey);
       const rng = createRng(seed);
 
-      // Squad selection using player states at the beginning of this date
+      // Squad selection using player states & availability at the beginning of this date
       const homeSquad = squadMap.get(fixture.homeTeamId) ?? [];
       const awaySquad = squadMap.get(fixture.awayTeamId) ?? [];
+
+      const isPlayerAvailableHome = (playerId: string) =>
+        isPlayerAvailableForFixture(
+          playerId,
+          calendarDate,
+          compId,
+          beginningOfDayAvailabilityMap.get(playerId)
+        ).available;
+      const isPlayerAvailableAway = (playerId: string) =>
+        isPlayerAvailableForFixture(
+          playerId,
+          calendarDate,
+          compId,
+          beginningOfDayAvailabilityMap.get(playerId)
+        ).available;
 
       const homeSelection = selectMatchTeamSquad(
         fixture.homeTeamId,
         homeSquad,
         beginningOfDayPlayerStates,
-        { benchSize, playerPositions }
+        {
+          benchSize,
+          playerPositions,
+          isPlayerAvailable: isPlayerAvailableHome,
+        }
       );
       const awaySelection = selectMatchTeamSquad(
         fixture.awayTeamId,
         awaySquad,
         beginningOfDayPlayerStates,
-        { benchSize, playerPositions }
+        {
+          benchSize,
+          playerPositions,
+          isPlayerAvailable: isPlayerAvailableAway,
+        }
       );
 
       // Phase 3L: Selected XI Lineup Quality and Bounded Modifiers
@@ -731,8 +808,9 @@ export function advanceFootballWorldStep(
       );
       newlySimulatedParticipations.push(participation);
 
+      let matchDetail: WorldFixtureMatchDetail | null | undefined = undefined;
       if (!existingDetailFixtureIds.has(fixture.id)) {
-        const matchDetail = generateFixtureMatchDetail({
+        matchDetail = generateFixtureMatchDetail({
           fixture: {
             id: fixture.id,
             homeTeamId: fixture.homeTeamId,
@@ -751,6 +829,43 @@ export function advanceFootballWorldStep(
           existingDetailFixtureIds.add(fixture.id);
         }
       }
+
+      // Stage match injuries for appearing players
+      for (const app of participation.playerAppearances) {
+        if (app.minutesPlayed > 0) {
+          const preMatchState = beginningOfDayPlayerStates.get(app.playerId);
+          const preMatchFitness = preMatchState?.fitness ?? 100;
+          const currentInj = beginningOfDayAvailabilityMap.get(app.playerId)?.injury;
+          const newInjury = generateMatchInjury({
+            playerId: app.playerId,
+            minutesPlayed: app.minutesPlayed,
+            preMatchFitness,
+            calendarDate,
+            baseFixtureKey,
+            currentInjury: currentInj,
+          });
+          if (newInjury) {
+            stagedInjuriesOnDate.push({ playerId: app.playerId, injury: newInjury });
+          }
+        }
+      }
+
+      // Stage yellow card events
+      if (matchDetail) {
+        for (const event of matchDetail.events) {
+          if (event.type === 'YELLOW_CARD') {
+            stagedYellowsOnDate.push({
+              playerId: event.playerId,
+              competitionId: compId,
+              round: fixture.round,
+            });
+          }
+        }
+      }
+
+      // Stage clubs playing in this competition
+      stagedClubsPlayedCompOnDate.push({ clubId: fixture.homeTeamId, competitionId: compId });
+      stagedClubsPlayedCompOnDate.push({ clubId: fixture.awayTeamId, competitionId: compId });
 
       // Determine team match results
       let homeResult: 'win' | 'draw' | 'loss' = 'draw';
@@ -813,6 +928,71 @@ export function advanceFootballWorldStep(
         // Non-participant: receives daily calendar recovery (+4 fitness)
         const updated = applyDailyRecovery(playerState);
         currentPlayerStatesMap.set(playerId, updated);
+      }
+    }
+
+    // End-of-date availability updates:
+    // 1. Serve suspensions for clubs that played in each competition
+    const uniqueClubsPlayed = new Set<string>();
+    for (const { clubId, competitionId } of stagedClubsPlayedCompOnDate) {
+      const key = `${clubId}:${competitionId}`;
+      if (!uniqueClubsPlayed.has(key)) {
+        uniqueClubsPlayed.add(key);
+        const clubPlayerIds = squadMap.get(clubId) ?? [];
+        for (const playerId of clubPlayerIds) {
+          const avail = currentAvailabilityMap.get(playerId);
+          if (avail && avail.suspensions && avail.suspensions.length > 0) {
+            avail.suspensions = serveCompetitionSuspension(avail.suspensions, competitionId);
+          }
+        }
+      }
+    }
+
+    // 2. Process staged yellow cards and new suspensions
+    for (const { playerId, competitionId, round } of stagedYellowsOnDate) {
+      let avail = currentAvailabilityMap.get(playerId);
+      if (!avail) {
+        avail = { playerId };
+        currentAvailabilityMap.set(playerId, avail);
+      }
+      if (!avail.competitionYellows) avail.competitionYellows = {};
+      if (!avail.triggeredThresholds) avail.triggeredThresholds = {};
+      const curYellows = avail.competitionYellows[competitionId] ?? 0;
+      const curTriggered = avail.triggeredThresholds[competitionId] ?? [];
+      const ruleSet = compRuleSets.get(competitionId);
+
+      const result = processYellowCardDiscipline({
+        playerId,
+        competitionId,
+        currentYellows: curYellows,
+        triggeredThresholds: curTriggered,
+        round,
+        ruleSet,
+      });
+
+      avail.competitionYellows[competitionId] = result.newYellowCount;
+      avail.triggeredThresholds[competitionId] = result.newTriggeredThresholds;
+
+      if (result.newSuspension) {
+        if (!avail.suspensions) avail.suspensions = [];
+        avail.suspensions.push(result.newSuspension);
+      }
+    }
+
+    // 3. Apply staged injuries
+    for (const { playerId, injury } of stagedInjuriesOnDate) {
+      let avail = currentAvailabilityMap.get(playerId);
+      if (!avail) {
+        avail = { playerId };
+        currentAvailabilityMap.set(playerId, avail);
+      }
+      avail.injury = injury;
+    }
+
+    // 4. Clear expired injuries
+    for (const avail of currentAvailabilityMap.values()) {
+      if (avail.injury && calendarDate >= avail.injury.availableFromDate) {
+        avail.injury = undefined;
       }
     }
   }
@@ -888,6 +1068,31 @@ export function advanceFootballWorldStep(
       ...(state.fixtureMatchDetails ?? []),
       ...newlySimulatedMatchDetails,
     ],
+    playerAvailabilityStates: Array.from(currentAvailabilityMap.values())
+      .filter(
+        (s) =>
+          s.injury !== undefined ||
+          (s.suspensions && s.suspensions.length > 0) ||
+          (s.competitionYellows && Object.keys(s.competitionYellows).length > 0)
+      )
+      .sort((a, b) => a.playerId.localeCompare(b.playerId))
+      .map((s) => ({
+        playerId: s.playerId,
+        ...(s.injury ? { injury: { ...s.injury } } : {}),
+        ...(s.suspensions && s.suspensions.length > 0
+          ? { suspensions: s.suspensions.map((sub) => ({ ...sub })) }
+          : {}),
+        ...(s.competitionYellows && Object.keys(s.competitionYellows).length > 0
+          ? { competitionYellows: { ...s.competitionYellows } }
+          : {}),
+        ...(s.triggeredThresholds && Object.keys(s.triggeredThresholds).length > 0
+          ? {
+              triggeredThresholds: Object.fromEntries(
+                Object.entries(s.triggeredThresholds).map(([k, v]) => [k, [...v]])
+              ),
+            }
+          : {}),
+      })),
     ...(currentLastDevDate !== undefined ? { lastDevelopmentDate: currentLastDevDate } : {}),
   };
 

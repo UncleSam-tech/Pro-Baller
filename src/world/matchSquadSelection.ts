@@ -123,6 +123,7 @@ export interface SelectMatchTeamSquadOptions {
     | Map<string, WorldFootballPosition>
     | Record<string, WorldFootballPosition>
     | ((playerId: string) => WorldFootballPosition | undefined);
+  isPlayerAvailable?: (playerId: string) => boolean;
 }
 
 interface Candidate {
@@ -138,7 +139,7 @@ interface Candidate {
  *
  * Rules:
  * - Target shape: 1 GK, 4 DEF, 3 MID, 3 ATT (= 11 starters).
- * - Only players in squad with existing football state and fitness > 0 are eligible.
+ * - Only players in squad with existing football state and fitness > 0 and available are eligible.
  * - Outfield shortages fallback: highest-scoring unselected outfield players.
  * - Goalkeeper shortage fallback: highest-scoring unselected player as emergency GK.
  * - If club has < 11 eligible players, selects all eligible players without fake fillers.
@@ -157,7 +158,8 @@ export function selectMatchTeamSquad(
   const eligibleCandidates: Candidate[] = [];
   for (const id of squadPlayerIds) {
     const fState = playerFootballStatesMap.get(id);
-    if (fState && fState.fitness > 0) {
+    const isAvailable = options?.isPlayerAvailable ? options.isPlayerAvailable(id) : true;
+    if (fState && fState.fitness > 0 && isAvailable) {
       let pos: WorldFootballPosition | undefined;
       if (options?.playerPositions) {
         if (typeof options.playerPositions === 'function') {

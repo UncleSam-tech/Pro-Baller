@@ -268,6 +268,32 @@ export interface WorldFixtureMatchDetail {
   playerRatings: WorldPlayerMatchRating[];
 }
 
+// ============================================================================
+// PART 11.7 — PLAYER AVAILABILITY: INJURIES & SUSPENSIONS (PHASE 3O)
+// ============================================================================
+
+export interface WorldPlayerInjury {
+  type: string;
+  name: string;
+  startDate: string;
+  availableFromDate: string;
+  durationDays: number;
+  severity: 'minor' | 'moderate' | 'serious';
+}
+
+export interface WorldCompetitionSuspension {
+  competitionId: string;
+  matchesRemaining: number;
+}
+
+export interface WorldPlayerAvailabilityState {
+  playerId: string;
+  injury?: WorldPlayerInjury;
+  suspensions?: WorldCompetitionSuspension[];
+  competitionYellows?: Record<string, number>;
+  triggeredThresholds?: Record<string, number[]>;
+}
+
 export interface FootballWorldRuntimeState {
   dataPackId: string;
   dataPackVersion: number;
@@ -291,6 +317,8 @@ export interface FootballWorldRuntimeState {
   fixtureMatchDetails?: WorldFixtureMatchDetail[];
 
   lastDevelopmentDate?: string;
+
+  playerAvailabilityStates?: WorldPlayerAvailabilityState[];
 }
 
 export interface FootballWorldBootstrapResult {
