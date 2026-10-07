@@ -294,6 +294,41 @@ export interface WorldPlayerAvailabilityState {
   triggeredThresholds?: Record<string, number[]>;
 }
 
+// ============================================================================
+// PART 11.8 — MANAGER AI & MATCH PLANS (PHASE 3P)
+// ============================================================================
+
+export type WorldFormation = '4-3-3' | '4-2-3-1' | '4-4-2' | '3-5-2' | '5-3-2' | '4-1-4-1';
+
+export type WorldTacticalIntent = 'DEFENSIVE' | 'BALANCED' | 'ATTACKING';
+
+/**
+ * Manager simulation profile for autonomous decision making.
+ *
+ * Provenance / Authority Distinction:
+ * - Imported factual fields: manager ID, firstName, lastName, nationality, club assignment.
+ * - Generated simulation traits: preferredFormation, rotationPreference, youthTrust,
+ *   formPreference, fitnessPreference, attackingIntent (derived deterministically from managerId).
+ * These behavioral seeds model in-engine tactical tendencies and do not represent real-world factual data.
+ */
+export interface WorldManagerFootballProfile {
+  managerId: string;
+  preferredFormation: WorldFormation;
+  rotationPreference: number;
+  youthTrust: number;
+  formPreference: number;
+  fitnessPreference: number;
+  attackingIntent: number;
+}
+
+export interface WorldManagerMatchPlan {
+  fixtureId: string;
+  teamId: string;
+  managerId?: string;
+  formation: WorldFormation;
+  tacticalIntent: WorldTacticalIntent;
+}
+
 export interface FootballWorldRuntimeState {
   dataPackId: string;
   dataPackVersion: number;
@@ -319,6 +354,8 @@ export interface FootballWorldRuntimeState {
   lastDevelopmentDate?: string;
 
   playerAvailabilityStates?: WorldPlayerAvailabilityState[];
+
+  managerMatchPlans?: WorldManagerMatchPlan[];
 }
 
 export interface FootballWorldBootstrapResult {

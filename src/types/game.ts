@@ -617,6 +617,10 @@ export interface Player {
   }[];
 }
 
+/**
+ * Legacy career presentation formation labels.
+ * For canonical structural formations, see WorldFormation ('4-3-3' | '4-2-3-1' | etc.).
+ */
 export type FormationType = 
   | '4-3-3 Attacking'
   | '4-2-3-1 Balanced'
@@ -624,9 +628,11 @@ export type FormationType =
   | '4-4-2 Diamond'
   | '5-3-2 Park The Bus';
 
+export type TacticalMentality = 'ATTACKING' | 'BALANCED' | 'DEFENSIVE';
+
 export interface TacticalBriefing {
   formation: FormationType;
-  mentality: 'ATTACKING' | 'BALANCED' | 'DEFENSIVE';
+  mentality: TacticalMentality;
   tempo: 'FAST_DIRECT' | 'CONTROLLED' | 'COUNTER_ATTACK';
   pressing: 'HIGH_PRESS' | 'MID_BLOCK' | 'LOW_BLOCK';
   attackModifier: number;

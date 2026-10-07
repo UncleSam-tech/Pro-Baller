@@ -421,8 +421,13 @@ export function validateFixtureMatchup(
 }
 
 /**
- * Determines the team formation strictly mandated by the Club Manager / Head Coach!
- * (In real football, the Manager decides the formation, not the individual player).
+ * LEGACY CAREER PRESENTATION LOGIC.
+ * Determines the team formation presentation label from club manager name for legacy career MatchView UI.
+ *
+ * NOTE: Phase 3P managerAI (WorldManagerMatchPlan / resolveWorldManagerProfile) is the authoritative
+ * decision engine for living-world simulation fixtures. When career matches are migrated to be owned
+ * by the world runtime, MatchView will display the manager decision from WorldManagerMatchPlan rather
+ * than independently calculating it here.
  */
 export function getManagerMandatedFormation(club: Club): FormationType {
   const manager = club.managerName.toLowerCase();

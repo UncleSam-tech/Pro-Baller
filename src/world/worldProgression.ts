@@ -15,6 +15,7 @@ import type {
   WorldFixtureParticipation,
   WorldFixtureMatchDetail,
   WorldFootballPosition,
+  WorldManagerMatchPlan,
   WorldPlayerFootballState,
 } from './types';
 import {
@@ -22,6 +23,11 @@ import {
   createFixtureParticipation,
   resolveRuleSetBenchSize,
 } from './matchSquadSelection';
+import {
+  resolveWorldManagerProfile,
+  selectMatchTeamSquadWithManager,
+  computeTacticalIntentModifiers,
+} from './managerAI';
 import {
   applyDailyRecovery,
   applyMatchConditionEffects,
@@ -549,10 +555,25 @@ export function advanceFootballWorldStep(
   );
   const newlySimulatedParticipations: WorldFixtureParticipation[] = [];
   const newlySimulatedMatchDetails: WorldFixtureMatchDetail[] = [];
+  const newlySimulatedManagerPlans: WorldManagerMatchPlan[] = [];
   const existingDetailFixtureIds = new Set(
     (state.fixtureMatchDetails ?? []).map((d) => d.fixtureId)
   );
   const clubReferenceQualities = new Map<string, LineupQuality>();
+
+  const clubManagerMap = new Map<string, string>();
+  for (const m of state.managerAssignments ?? []) {
+    clubManagerMap.set(m.clubId, m.managerId);
+  }
+
+  const playerBirthDates = new Map<string, string>();
+  if (context.players) {
+    for (const p of context.players) {
+      if (p.dateOfBirth) {
+        playerBirthDates.set(p.id, p.dateOfBirth);
+      }
+    }
+  }
 
   // Pre-index fixture scheduled dates across all competitions
   const allFixtureDateMap = new Map<string, string>();
@@ -722,26 +743,46 @@ export function advanceFootballWorldStep(
           beginningOfDayAvailabilityMap.get(playerId)
         ).available;
 
-      const homeSelection = selectMatchTeamSquad(
+      const homeManagerId = clubManagerMap.get(fixture.homeTeamId);
+      const awayManagerId = clubManagerMap.get(fixture.awayTeamId);
+
+      const homeManagerProfile = resolveWorldManagerProfile(homeManagerId);
+      const awayManagerProfile = resolveWorldManagerProfile(awayManagerId);
+
+      const homeSquadResult = selectMatchTeamSquadWithManager(
         fixture.homeTeamId,
         homeSquad,
         beginningOfDayPlayerStates,
         {
+          fixtureId: fixture.id,
           benchSize,
           playerPositions,
           isPlayerAvailable: isPlayerAvailableHome,
+          playerBirthDates,
+          calendarDate,
+          managerProfile: homeManagerProfile,
         }
       );
-      const awaySelection = selectMatchTeamSquad(
+      const awaySquadResult = selectMatchTeamSquadWithManager(
         fixture.awayTeamId,
         awaySquad,
         beginningOfDayPlayerStates,
         {
+          fixtureId: fixture.id,
           benchSize,
           playerPositions,
           isPlayerAvailable: isPlayerAvailableAway,
+          playerBirthDates,
+          calendarDate,
+          managerProfile: awayManagerProfile,
         }
       );
+
+      const homeSelection = homeSquadResult.selection;
+      const awaySelection = awaySquadResult.selection;
+
+      newlySimulatedManagerPlans.push(homeSquadResult.matchPlan);
+      newlySimulatedManagerPlans.push(awaySquadResult.matchPlan);
 
       // Phase 3L: Selected XI Lineup Quality and Bounded Modifiers
       const homeTodayQuality = computeLineupQuality(
@@ -786,15 +827,29 @@ export function advanceFootballWorldStep(
         awayRefQuality
       );
 
+      // Phase 3P: Tactical Intent Modifiers
+      const homeTactical = computeTacticalIntentModifiers(
+        homeSquadResult.matchPlan.tacticalIntent
+      );
+      const awayTactical = computeTacticalIntentModifiers(
+        awaySquadResult.matchPlan.tacticalIntent
+      );
+
       const { homeXg, awayXg } = computeExpectedGoals(
         strengthSnapshot,
         fixture.homeTeamId,
         fixture.awayTeamId,
         {
-          homeAttackMultiplier: homeModifiers.attackStrengthMultiplier,
-          homeDefensiveResistanceMultiplier: homeModifiers.defensiveResistanceMultiplier,
-          awayAttackMultiplier: awayModifiers.attackStrengthMultiplier,
-          awayDefensiveResistanceMultiplier: awayModifiers.defensiveResistanceMultiplier,
+          homeAttackMultiplier:
+            homeModifiers.attackStrengthMultiplier * homeTactical.attackMultiplier,
+          homeDefensiveResistanceMultiplier:
+            homeModifiers.defensiveResistanceMultiplier *
+            homeTactical.defensiveResistanceMultiplier,
+          awayAttackMultiplier:
+            awayModifiers.attackStrengthMultiplier * awayTactical.attackMultiplier,
+          awayDefensiveResistanceMultiplier:
+            awayModifiers.defensiveResistanceMultiplier *
+            awayTactical.defensiveResistanceMultiplier,
         }
       );
 
@@ -1094,6 +1149,10 @@ export function advanceFootballWorldStep(
           : {}),
       })),
     ...(currentLastDevDate !== undefined ? { lastDevelopmentDate: currentLastDevDate } : {}),
+    managerMatchPlans: [
+      ...(state.managerMatchPlans ?? []),
+      ...newlySimulatedManagerPlans,
+    ],
   };
 
   return {

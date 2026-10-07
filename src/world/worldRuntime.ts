@@ -17,6 +17,7 @@ import type {
   FootballWorldStaticContext,
   WorldFixtureMatchDetail,
   WorldFootballPosition,
+  WorldManagerMatchPlan,
   WorldPlayerAvailabilityState,
 } from './types';
 import { validateFootballWorldDataPack } from './worldDataPack';
@@ -184,6 +185,7 @@ export function bootstrapFootballWorld(
       fixtureParticipations: [],
       fixtureMatchDetails: [],
       playerAvailabilityStates: [],
+      managerMatchPlans: [],
     },
   };
 }
@@ -304,4 +306,12 @@ export function createFootballWorldStaticContext(
   };
 }
 
-
+/**
+ * Retrieves the WorldManagerMatchPlan records for a given fixture ID.
+ */
+export function getWorldManagerMatchPlans(
+  state: FootballWorldRuntimeState,
+  fixtureId: string
+): WorldManagerMatchPlan[] {
+  return (state.managerMatchPlans ?? []).filter(p => p.fixtureId === fixtureId);
+}

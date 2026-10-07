@@ -233,7 +233,7 @@ export interface ProcessYellowCardResult {
 /**
  * Purely processes a newly received yellow card in a competition.
  * Evaluates competition yellow thresholds from ruleSet.discipline.
- * Fallback: 5 yellows -> 1 match suspension if unconfigured.
+ * Strict rule authority: competition ruleSet must configure discipline.yellowThresholds.
  */
 export function processYellowCardDiscipline(
   params: ProcessYellowCardDisciplineParams

@@ -7,7 +7,9 @@ import type {
   WorldMatchTeamSelection,
   WorldPlayerFootballState,
   WorldPlayerMatchAppearance,
+  WorldManagerFootballProfile,
 } from './types';
+import { selectMatchTeamSquadWithManager } from './managerAI';
 
 // ============================================================================
 // BROAD ROLE TYPES & POSITION MAPPING
@@ -124,6 +126,12 @@ export interface SelectMatchTeamSquadOptions {
     | Record<string, WorldFootballPosition>
     | ((playerId: string) => WorldFootballPosition | undefined);
   isPlayerAvailable?: (playerId: string) => boolean;
+  managerProfile?: WorldManagerFootballProfile;
+  calendarDate?: string;
+  playerBirthDates?:
+    | Map<string, string>
+    | Record<string, string>
+    | ((playerId: string) => string | undefined);
 }
 
 interface Candidate {
@@ -153,6 +161,23 @@ export function selectMatchTeamSquad(
   options?: SelectMatchTeamSquadOptions
 ): WorldMatchTeamSelection {
   const benchSize = options?.benchSize ?? 9;
+
+  if (options?.managerProfile) {
+    return selectMatchTeamSquadWithManager(
+      teamId,
+      squadPlayerIds,
+      playerFootballStatesMap,
+      {
+        fixtureId: 'match-squad-selection',
+        benchSize,
+        playerPositions: options.playerPositions,
+        isPlayerAvailable: options.isPlayerAvailable,
+        playerBirthDates: options.playerBirthDates,
+        calendarDate: options.calendarDate,
+        managerProfile: options.managerProfile,
+      }
+    ).selection;
+  }
 
   // 1. Filter eligible candidates
   const eligibleCandidates: Candidate[] = [];
