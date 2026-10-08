@@ -382,6 +382,7 @@ export interface FootballWorldStaticContext {
     | CompetitionRuleSet[]
     | Record<string, CompetitionRuleSet>
     | Map<string, CompetitionRuleSet>;
+  userControlledPlayerIds?: ReadonlySet<string>;
 }
 
 export interface CompetitionProgressSummary {

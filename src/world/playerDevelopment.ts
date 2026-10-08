@@ -291,6 +291,7 @@ export interface ApplyMonthlyDevelopmentParams {
   participationsInWindow: WorldFixtureParticipation[];
   matchDetailsInWindow: Map<string, WorldFixtureMatchDetail>;
   checkpointDate: string;
+  userControlledPlayerIds?: ReadonlySet<string>;
 }
 
 /**
@@ -307,7 +308,10 @@ export function applyMonthlyWorldPlayerDevelopment(
     participationsInWindow,
     matchDetailsInWindow,
     checkpointDate,
+    userControlledPlayerIds,
   } = params;
+
+  const userControlledSet = userControlledPlayerIds;
 
   // 1. Aggregate period minutes and match ratings
   const playerMinutes = new Map<string, number>();
@@ -342,6 +346,12 @@ export function applyMonthlyWorldPlayerDevelopment(
   const updatedStates = new Map<string, WorldPlayerFootballState>();
 
   for (const [playerId, state] of playerStates.entries()) {
+    // User-controlled player: career layer owns development, skip NPC growth/decline
+    if (userControlledSet && userControlledSet.has(playerId)) {
+      updatedStates.set(playerId, { ...state });
+      continue;
+    }
+
     const pDef = playerDefMap.get(playerId);
     const dob = pDef?.dateOfBirth;
 

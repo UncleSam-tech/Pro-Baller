@@ -636,6 +636,7 @@ export function advanceFootballWorldStep(
         participationsInWindow,
         matchDetailsInWindow,
         checkpointDate: calendarDate,
+        userControlledPlayerIds: 'userControlledPlayerIds' in context ? context.userControlledPlayerIds : undefined,
       });
 
       for (const [pId, pState] of updated.entries()) {
