@@ -54,6 +54,59 @@ import type {
   SubstitutionRequest,
 } from '../competition/types';
 
+export interface MatchPresentationTeam {
+  id: string;
+  name: string;
+  shortName: string;
+  stadiumName?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  managerName?: string;
+  league?: string;
+}
+
+export interface MatchPresentationRules {
+  competitionName: string;
+  shortName: string;
+  leagueName: string;
+  matchBall: string;
+  maxSubs: number;
+  maxSubs90Min: number;
+  maxSubWindows: number;
+  benchSize: number;
+  extraTimeSubAllowed: boolean;
+  extraTimeEnabled: boolean;
+  penaltiesEnabled: boolean;
+  varEnabled: boolean;
+  badgeColor: string;
+  yellowCardSuspensionThreshold: number;
+  secondaryYellowThreshold?: number;
+  straightRedMatches: number;
+  secondYellowMatches: number;
+  suspensionPolicyName: string;
+  suspensionSummary?: string;
+  cardDisciplinaryFineGBP: number;
+}
+
+export interface MatchPresentationResult {
+  homeScore: number;
+  awayScore: number;
+  playerMinutes: number;
+  playerStarted: boolean;
+  playerGoals: number;
+  playerAssists: number;
+  playerRating: number;
+  matchRatingDetail: string;
+  events: MatchLiveEvent[];
+  playerYellowCards?: number;
+  playerRedCards?: number;
+  isSuspendedNextMatch?: boolean;
+  suspensionReason?: string;
+  winningsPaid: number;
+  managerTrustDelta: number;
+  fanMoraleDelta: number;
+}
+
 export interface LegacyMatchViewProps {
   mode?: 'legacy';
   player: Player;
@@ -94,7 +147,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
     : (player.currentClubId === props.homeClub?.id);
 
   // Presentation clubs (does NOT fabricate fake legacy Club objects)
-  const homeClub = useMemo(() => {
+  const homeClub: MatchPresentationTeam = useMemo(() => {
     if (isWorldMode && worldModel) {
       return {
         id: worldModel.home.clubId,
@@ -105,13 +158,12 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         secondaryColor: '#64748b',
         managerName: worldModel.home.managerName,
         league: worldModel.competitionShortName,
-        reputation: 75,
-      } as unknown as Club;
+      };
     }
     return props.homeClub!;
   }, [isWorldMode, worldModel, props.homeClub]);
 
-  const awayClub = useMemo(() => {
+  const awayClub: MatchPresentationTeam = useMemo(() => {
     if (isWorldMode && worldModel) {
       return {
         id: worldModel.away.clubId,
@@ -122,8 +174,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         secondaryColor: '#64748b',
         managerName: worldModel.away.managerName,
         league: worldModel.competitionShortName,
-        reputation: 75,
-      } as unknown as Club;
+      };
     }
     return props.awayClub!;
   }, [isWorldMode, worldModel, props.awayClub]);
@@ -131,60 +182,66 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
   const playerClub = isPlayerHome ? homeClub : awayClub;
   const opponentClub = isPlayerHome ? awayClub : homeClub;
 
-  // Real-World League Rules and Disciplinary Accumulation Set
-  const leagueRuleSet: LeagueRuleSet = useMemo(() => {
+  // Unified Presentation Rules
+  const presentationRules: MatchPresentationRules = useMemo(() => {
     if (isWorldMode && worldModel) {
-      return {
-        id: worldModel.ruleSet.id,
-        name: worldModel.competitionName,
-        shortName: worldModel.competitionShortName,
-        leagueName: worldModel.competitionName,
-        country: 'Global',
-        tier: 1,
-        matchBall: worldModel.ruleSet.presentation?.matchBall || 'Official Match Ball',
-        maxSubs: worldModel.ruleSet.substitutions.maxSubsRegulation,
-        maxSubs90Min: worldModel.ruleSet.substitutions.maxSubsRegulation,
-        maxSubWindows: worldModel.ruleSet.substitutions.maxStoppageWindows,
-        benchSize: worldModel.ruleSet.substitutions.benchSize,
-        extraTimeSubAllowed: worldModel.ruleSet.substitutions.extraTimeExtraSub > 0,
-        maxYellowsPerSeason: worldModel.ruleSet.discipline.yellowThresholds[0]?.cards ?? 5,
-        yellowCardSuspensionThreshold: worldModel.ruleSet.discipline.yellowThresholds[0]?.cards ?? 5,
-        redCardMatchSuspension: worldModel.ruleSet.discipline.straightRedDefaultMatches,
-        secondYellowSuspensionMatches: worldModel.ruleSet.discipline.secondYellowRedMatches,
-        suspensionPolicyName: worldModel.ruleSet.discipline.policyName,
-      } as unknown as LeagueRuleSet;
-    }
-    return getLeagueRuleSet(playerClub.league);
-  }, [isWorldMode, worldModel, playerClub.league]);
-
-  // Competition Rules
-  const competitionRules: CompetitionRules = useMemo(() => {
-    if (isWorldMode && worldModel) {
+      const rs = worldModel.ruleSet;
       return {
         competitionName: worldModel.competitionName,
         shortName: worldModel.competitionShortName,
-        category: 'LEAGUE',
-        maxSubs90Min: worldModel.ruleSet.substitutions.maxSubsRegulation,
-        maxSubWindows: worldModel.ruleSet.substitutions.maxStoppageWindows,
-        benchSize: worldModel.ruleSet.substitutions.benchSize,
-        extraTimeSubAllowed: worldModel.ruleSet.substitutions.extraTimeExtraSub > 0,
-        extraTimeEnabled: worldModel.ruleSet.format.extraTimeEnabled,
-        penaltiesEnabled: worldModel.ruleSet.format.penaltiesEnabled,
-        varEnabled: worldModel.ruleSet.technology.varEnabled,
-        matchBall: worldModel.ruleSet.presentation?.matchBall || 'Official Match Ball',
-        badgeColor: worldModel.ruleSet.presentation?.primaryColor || '#047857',
-      } as unknown as CompetitionRules;
+        leagueName: worldModel.competitionName,
+        matchBall: rs.presentation?.matchBall || 'Official Match Ball',
+        maxSubs: rs.substitutions.maxSubsRegulation,
+        maxSubs90Min: rs.substitutions.maxSubsRegulation,
+        maxSubWindows: rs.substitutions.maxStoppageWindows,
+        benchSize: rs.substitutions.benchSize,
+        extraTimeSubAllowed: rs.substitutions.extraTimeExtraSub > 0,
+        extraTimeEnabled: rs.format.extraTimeEnabled,
+        penaltiesEnabled: rs.format.penaltiesEnabled,
+        varEnabled: rs.technology.varEnabled,
+        badgeColor: rs.presentation?.primaryColor || '#047857',
+        yellowCardSuspensionThreshold: rs.discipline.yellowThresholds[0]?.cards ?? 5,
+        secondaryYellowThreshold: rs.discipline.yellowThresholds[1]?.cards ?? 10,
+        straightRedMatches: rs.discipline.straightRedDefaultMatches,
+        secondYellowMatches: rs.discipline.secondYellowRedMatches,
+        suspensionPolicyName: rs.discipline.policyName,
+        suspensionSummary: `${rs.discipline.policyName} regulations`,
+        cardDisciplinaryFineGBP: 0,
+      };
     }
-    return getCompetitionRules(props.competitionName || playerClub.league, playerClub.league);
-  }, [isWorldMode, worldModel, props.competitionName, playerClub.league]);
+    const legacyRules = getLeagueRuleSet(playerClub.league || 'Premier League');
+    const compRules = getCompetitionRules(props.competitionName || playerClub.league || 'Premier League', playerClub.league || 'Premier League');
+    return {
+      competitionName: compRules.competitionName,
+      shortName: compRules.shortName,
+      leagueName: legacyRules.leagueName,
+      matchBall: compRules.matchBall,
+      maxSubs: legacyRules.maxSubs,
+      maxSubs90Min: compRules.maxSubs90Min,
+      maxSubWindows: compRules.maxSubWindows,
+      benchSize: compRules.benchSize,
+      extraTimeSubAllowed: compRules.extraTimeSubAllowed,
+      extraTimeEnabled: compRules.extraTimeEnabled,
+      penaltiesEnabled: compRules.penaltiesEnabled,
+      varEnabled: compRules.varEnabled,
+      badgeColor: compRules.badgeColor,
+      yellowCardSuspensionThreshold: legacyRules.yellowCardSuspensionThreshold,
+      secondaryYellowThreshold: legacyRules.secondaryYellowThreshold,
+      straightRedMatches: legacyRules.straightRedMatches,
+      secondYellowMatches: legacyRules.secondYellowRedMatches,
+      suspensionPolicyName: legacyRules.suspensionPolicyName,
+      suspensionSummary: legacyRules.suspensionSummary,
+      cardDisciplinaryFineGBP: legacyRules.cardDisciplinaryFineGBP,
+    };
+  }, [isWorldMode, worldModel, playerClub.league, props.competitionName]);
 
   // LeagueEngine Matchup Validation
   const matchupValidation = useMemo(() => {
     if (isWorldMode) {
       return { isValid: true };
     }
-    return validateFixtureMatchup(props.homeClub!, props.awayClub!, competitionRules.competitionName);
-  }, [isWorldMode, props.homeClub, props.awayClub, competitionRules.competitionName]);
+    return validateFixtureMatchup(props.homeClub!, props.awayClub!, presentationRules.competitionName);
+  }, [isWorldMode, props.homeClub, props.awayClub, presentationRules.competitionName]);
 
   // Squad Rosters (In WORLD mode: NEVER call getClubRoster)
   const rawHomeRoster = useMemo(() => {
@@ -212,8 +269,9 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         } as SquadPlayer)),
       };
     }
-    return mapCompetitionRoster(rawHomeRoster!, competitionRules);
-  }, [isWorldMode, worldModel, rawHomeRoster, competitionRules]);
+    const legacyRules = getCompetitionRules(props.competitionName || playerClub.league || 'Premier League', playerClub.league || 'Premier League');
+    return mapCompetitionRoster(rawHomeRoster!, legacyRules);
+  }, [isWorldMode, worldModel, rawHomeRoster, props.competitionName, playerClub.league]);
 
   const awayRoster = useMemo(() => {
     if (isWorldMode && worldModel) {
@@ -230,8 +288,9 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         } as SquadPlayer)),
       };
     }
-    return mapCompetitionRoster(rawAwayRoster!, competitionRules);
-  }, [isWorldMode, worldModel, rawAwayRoster, competitionRules]);
+    const legacyRules = getCompetitionRules(props.competitionName || playerClub.league || 'Premier League', playerClub.league || 'Premier League');
+    return mapCompetitionRoster(rawAwayRoster!, legacyRules);
+  }, [isWorldMode, worldModel, rawAwayRoster, props.competitionName, playerClub.league]);
 
   // Player's Match & Disciplinary Role
   const isInjured = isWorldMode
@@ -315,8 +374,17 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
 
   const currentTotalYellows = (player.seasonStats?.yellowCards || 0) + playerYellowCardsMatch;
   const disciplinaryStatus = useMemo(() => {
-    return getLeagueDisciplinaryStatus(leagueRuleSet, currentTotalYellows, player.currentWeek);
-  }, [leagueRuleSet, currentTotalYellows, player.currentWeek]);
+    if (isWorldMode) {
+      return {
+        cardsCount: player.seasonStats?.yellowCards || 0,
+        cardsUntilBan: Math.max(0, presentationRules.yellowCardSuspensionThreshold - (player.seasonStats?.yellowCards || 0)),
+        statusBadge: isSuspended ? 'Suspended' : 'Clear',
+        severity: isSuspended ? ('danger' as const) : ('safe' as const),
+      };
+    }
+    const legacyRuleSet = getLeagueRuleSet(playerClub.league || 'Premier League');
+    return getLeagueDisciplinaryStatus(legacyRuleSet, currentTotalYellows, player.currentWeek);
+  }, [isWorldMode, isSuspended, presentationRules.yellowCardSuspensionThreshold, player.seasonStats?.yellowCards, playerClub.league, currentTotalYellows, player.currentWeek]);
 
   const [tacticalSubPrompt, setTacticalSubPrompt] = useState<{
     minute: number;
@@ -343,8 +411,9 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         default: return '4-3-3 Attacking';
       }
     }
-    return getManagerMandatedFormation(playerClub);
-  }, [isWorldMode, worldModel, isPlayerHome, playerClub]);
+    const legacyClub = isPlayerHome ? props.homeClub! : props.awayClub!;
+    return getManagerMandatedFormation(legacyClub);
+  }, [isWorldMode, worldModel, isPlayerHome, props.homeClub, props.awayClub]);
 
   const managerMandatedMentality = useMemo<'ATTACKING' | 'BALANCED' | 'DEFENSIVE'>(() => {
     if (isWorldMode && worldModel) {
@@ -400,10 +469,18 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
   const playerTeamAttBoost = formationBonus.att + activeFocusConfig.attDelta;
   const playerTeamDefBoost = formationBonus.def + activeFocusConfig.defDelta;
 
-  const baseHomeAtt = Math.round(homeClub.reputation * 0.95 + (isPlayerHome && isStarting ? 3 : 0));
-  const baseAwayAtt = Math.round(awayClub.reputation * 0.95 + (!isPlayerHome && isStarting ? 3 : 0));
-  const baseHomeDef = Math.round(homeClub.reputation * 0.92);
-  const baseAwayDef = Math.round(awayClub.reputation * 0.92);
+  const baseHomeAtt = isWorldMode && worldModel
+    ? worldModel.home.attackRating + (isPlayerHome && isStarting ? 3 : 0)
+    : Math.round(props.homeClub!.reputation * 0.95 + (isPlayerHome && isStarting ? 3 : 0));
+  const baseAwayAtt = isWorldMode && worldModel
+    ? worldModel.away.attackRating + (!isPlayerHome && isStarting ? 3 : 0)
+    : Math.round(props.awayClub!.reputation * 0.95 + (!isPlayerHome && isStarting ? 3 : 0));
+  const baseHomeDef = isWorldMode && worldModel
+    ? worldModel.home.defenseRating
+    : Math.round(props.homeClub!.reputation * 0.92);
+  const baseAwayDef = isWorldMode && worldModel
+    ? worldModel.away.defenseRating
+    : Math.round(props.awayClub!.reputation * 0.92);
 
   const homeAttack = isPlayerHome ? baseHomeAtt + playerTeamAttBoost : baseHomeAtt;
   const awayAttack = !isPlayerHome ? baseAwayAtt + playerTeamAttBoost : baseAwayAtt;
@@ -449,7 +526,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
   const [playerAssists, setPlayerAssists] = useState(0);
 
   // Final Result
-  const [finalResult, setFinalResult] = useState<MatchSimulationResult | null>(null);
+  const [finalResult, setFinalResult] = useState<MatchPresentationResult | null>(null);
 
   // Initialize moments on mount if player is active
   useEffect(() => {
@@ -470,11 +547,11 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
     setMatchPhase('LIVE_SIM');
     setCurrentMinute(1);
     const venueText = isWorldMode ? 'Home venue' : homeClub.stadiumName;
-    const attendanceText = isWorldMode ? '45,000' : Math.round(homeClub.reputation * 620).toLocaleString();
+    const attendanceText = isWorldMode ? '45,000' : Math.round(props.homeClub!.reputation * 620).toLocaleString();
     setEvents([
       { 
         minute: 1, 
-        text: `Kick-off at ${venueText}! ${homeClub.name} vs ${awayClub.name} (${competitionRules.competitionName}). Official Ball: ${competitionRules.matchBall}. Rules: Max ${competitionRules.maxSubs90Min} substitutions in ${competitionRules.maxSubWindows} windows${competitionRules.extraTimeSubAllowed ? ' (+1 extra in ET)' : ''}. Attendance: ${attendanceText}.`, 
+        text: `Kick-off at ${venueText}! ${homeClub.name} vs ${awayClub.name} (${presentationRules.competitionName}). Official Ball: ${presentationRules.matchBall}. Rules: Max ${presentationRules.maxSubs90Min} substitutions in ${presentationRules.maxSubWindows} windows${presentationRules.extraTimeSubAllowed ? ' (+1 extra in ET)' : ''}. Attendance: ${attendanceText}.`, 
         type: 'commentary' 
       }
     ]);
@@ -551,7 +628,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
                 setEvents(evts => [
                   {
                     minute: nextMin,
-                    text: `🔄 Tactical Substitution: Manager ${playerClub.managerName} brings ON #${player.jerseyNumber} ${player.firstName} ${player.lastName} (${player.position}) replacing ${outPlayerName}! (${worldModel.ruleSet.substitutions.maxSubsRegulation - (isPlayerHome ? homeSubsUsed + 1 : awaySubsUsed + 1)} subs remaining under ${competitionRules.shortName} regulations)`,
+                    text: `🔄 Tactical Substitution: Manager ${playerClub.managerName} brings ON #${player.jerseyNumber} ${player.firstName} ${player.lastName} (${player.position}) replacing ${outPlayerName}! (${worldModel.ruleSet.substitutions.maxSubsRegulation - (isPlayerHome ? homeSubsUsed + 1 : awaySubsUsed + 1)} subs remaining under ${presentationRules.shortName} regulations)`,
                     type: 'commentary',
                     isPlayerInvolved: true,
                   },
@@ -561,8 +638,9 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
             }
           } else {
             // Legacy mode fallback
-            const homeCanSub = validateCompetitionSubstitution(competitionRules, homeSubsUsed, homeSubWindowsUsed, nextMin > 90, nextMin === 45);
-            const awayCanSub = validateCompetitionSubstitution(competitionRules, awaySubsUsed, awaySubWindowsUsed, nextMin > 90, nextMin === 45);
+            const legCompRules = getCompetitionRules(props.competitionName || playerClub.league || 'Premier League', playerClub.league || 'Premier League');
+            const homeCanSub = validateCompetitionSubstitution(legCompRules, homeSubsUsed, homeSubWindowsUsed, nextMin > 90, nextMin === 45);
+            const awayCanSub = validateCompetitionSubstitution(legCompRules, awaySubsUsed, awaySubWindowsUsed, nextMin > 90, nextMin === 45);
             const canPlayerSub = isPlayerHome ? homeCanSub.canSubstitute : awayCanSub.canSubstitute;
             if (canPlayerSub) {
               setPlayerSubbedIn(true);
@@ -578,7 +656,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
               setEvents(evts => [
                 {
                   minute: nextMin,
-                  text: `🔄 Tactical Substitution: Manager ${playerClub.managerName} brings ON #${player.jerseyNumber} ${player.firstName} ${player.lastName} (${player.position}) to inject energy! (${competitionRules.maxSubs90Min - (isPlayerHome ? homeSubsUsed + 1 : awaySubsUsed + 1)} subs remaining under ${competitionRules.shortName} regulations)`,
+                  text: `🔄 Tactical Substitution: Manager ${playerClub.managerName} brings ON #${player.jerseyNumber} ${player.firstName} ${player.lastName} (${player.position}) to inject energy! (${presentationRules.maxSubs90Min - (isPlayerHome ? homeSubsUsed + 1 : awaySubsUsed + 1)} subs remaining under ${presentationRules.shortName} regulations)`,
                   type: 'commentary',
                   isPlayerInvolved: true,
                 },
@@ -618,8 +696,9 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
               return nextMin;
             }
           } else {
-            const homeCanSub = validateCompetitionSubstitution(competitionRules, homeSubsUsed, homeSubWindowsUsed, nextMin > 90, nextMin === 45);
-            const awayCanSub = validateCompetitionSubstitution(competitionRules, awaySubsUsed, awaySubWindowsUsed, nextMin > 90, nextMin === 45);
+            const legCompRules = getCompetitionRules(props.competitionName || playerClub.league || 'Premier League', playerClub.league || 'Premier League');
+            const homeCanSub = validateCompetitionSubstitution(legCompRules, homeSubsUsed, homeSubWindowsUsed, nextMin > 90, nextMin === 45);
+            const awayCanSub = validateCompetitionSubstitution(legCompRules, awaySubsUsed, awaySubWindowsUsed, nextMin > 90, nextMin === 45);
             const canClubSub = isPlayerHome ? homeCanSub.canSubstitute : awayCanSub.canSubstitute;
             if (canClubSub) {
               clearInterval(timer);
@@ -703,7 +782,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         // Halftime whistle
         if (prev < 45 && nextMin >= 45) {
           setEvents(evts => [
-            { minute: 45, text: `⏱️ Half-Time: ${homeClub.shortName} ${homeScore} - ${awayScore} ${awayClub.shortName}. Tactical adjustments in progress under ${leagueRuleSet.shortName} regulations.`, type: 'commentary' },
+            { minute: 45, text: `⏱️ Half-Time: ${homeClub.shortName} ${homeScore} - ${awayScore} ${awayClub.shortName}. Tactical adjustments in progress under ${presentationRules.shortName} regulations.`, type: 'commentary' },
             ...evts
           ]);
         }
@@ -722,7 +801,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
   }, [
     matchPhase, currentMomentIndex, moments, homeClub, awayClub, homeScore, awayScore, 
     playerSubbedIn, playerSubbedOff, tacticalSubPrompt, isInjured, homeSubsUsed, awaySubsUsed, 
-    homeSubWindowsUsed, awaySubWindowsUsed, leagueRuleSet, isPlayerHome, homeAttack, awayAttack, 
+    homeSubWindowsUsed, awaySubWindowsUsed, presentationRules, isPlayerHome, homeAttack, awayAttack, 
     homeDefense, awayDefense, homeRoster, awayRoster, playerClub, player, fatiguePercent, isStarting,
     isWorldMode, worldModel, userTeamSubState, onPitchHomeIds, onPitchAwayIds, isDismissed, isBench, isNotSelectedOrUnavailable
   ]);
@@ -798,10 +877,10 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
       if (playerYellowCardsMatch === 0) {
         setPlayerYellowCardsMatch(1);
         sounds.playWhistle();
-        const willTriggerSuspension = (currentTotalYellows + 1) >= leagueRuleSet.yellowCardSuspensionThreshold;
+        const willTriggerSuspension = (currentTotalYellows + 1) >= presentationRules.yellowCardSuspensionThreshold;
         bookingCommentary = willTriggerSuspension
-          ? ` 🟨 BOOKING: Referee shows a yellow card for a cynical foul! ${player.firstName} ${player.lastName} reaches ${leagueRuleSet.yellowCardSuspensionThreshold} yellow cards in ${leagueRuleSet.shortName} (Automatic 1-match suspension triggered!).`
-          : ` 🟨 BOOKING: Referee shows a yellow card! Season total: ${currentTotalYellows + 1}/${leagueRuleSet.yellowCardSuspensionThreshold} yellow cards.`;
+          ? ` 🟨 BOOKING: Referee shows a yellow card for a cynical foul! ${player.firstName} ${player.lastName} reaches ${presentationRules.yellowCardSuspensionThreshold} yellow cards in ${presentationRules.shortName} (Automatic 1-match suspension triggered!).`
+          : ` 🟨 BOOKING: Referee shows a yellow card! Season total: ${currentTotalYellows + 1}/${presentationRules.yellowCardSuspensionThreshold} yellow cards.`;
 
         if (isWorldMode && worldModel) {
           const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
@@ -823,7 +902,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         setPlayerSubbedOff(true);
         setSubbedOffMinute(momentMin);
         sounds.playWhistle();
-        bookingCommentary = ` 🟥 RED CARD! Second yellow card shown to ${player.firstName} ${player.lastName}! Dismissed under ${leagueRuleSet.suspensionPolicyName}! Down to 10 men!`;
+        bookingCommentary = ` 🟥 RED CARD! Second yellow card shown to ${player.firstName} ${player.lastName}! Dismissed under ${presentationRules.suspensionPolicyName}! Down to 10 men!`;
 
         if (isWorldMode && worldModel) {
           const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
@@ -1029,7 +1108,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
     if (currentMinute < 45) {
       additionalEvents.push({
         minute: 45,
-        text: `⏱️ Half-Time: ${homeClub.shortName} ${simHomeScore} - ${simAwayScore} ${awayClub.shortName}. Tactical debrief under ${leagueRuleSet.shortName} regulations.`,
+        text: `⏱️ Half-Time: ${homeClub.shortName} ${simHomeScore} - ${simAwayScore} ${awayClub.shortName}. Tactical debrief under ${presentationRules.shortName} regulations.`,
         type: 'commentary'
       });
     }
@@ -1064,37 +1143,43 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
       ? Math.max(1, 90 - playerSubbedMinute) 
       : 0;
 
-    const simResult = simulateMatch(
-      homeClub,
-      awayClub,
-      player,
-      resolvedMoments,
-      {
-        homeGoals: exactHScore,
-        awayGoals: exactAScore,
-        events,
-        playerGoals,
-        playerAssists,
+    if (isWorldMode && worldModel) {
+      // Direct world performance mapping — NO fake Club, NO fake reputation, NO fake rules
+      let userRating = 6.0;
+      if (isStarting) userRating += 0.5;
+      userRating += (playerGoals * 1.5);
+      userRating += (playerAssists * 0.8);
+      const isUserHome = worldModel.isUserHome;
+      const userWon = isUserHome ? exactHScore > exactAScore : exactAScore > exactHScore;
+      if (userWon) userRating += 0.5;
+      userRating = Math.max(4.0, Math.min(10.0, Math.round(userRating * 10) / 10));
+      if (minutesPlayed === 0) userRating = 0;
+
+      let matchRatingDetail = 'Solid professional display.';
+      if (userRating >= 8.5) matchRatingDetail = 'Man of the Match performance! Electrifying on the pitch.';
+      else if (userRating >= 7.5) matchRatingDetail = 'Superb performance, drove team attacks forward with confidence.';
+      else if (userRating <= 5.8 && minutesPlayed > 0) matchRatingDetail = 'Struggled to impose influence against aggressive pressing.';
+      else if (minutesPlayed === 0) matchRatingDetail = 'Unused squad member / Rested on manager rotation.';
+
+      const postMatchData: MatchPresentationResult = {
+        homeScore: exactHScore,
+        awayScore: exactAScore,
         playerMinutes: minutesPlayed,
         playerStarted: isStarting,
-      }
-    );
+        playerGoals,
+        playerAssists,
+        playerRating: userRating,
+        matchRatingDetail,
+        events,
+        playerYellowCards: playerYellowCardsMatch,
+        playerRedCards: playerRedCardsMatch,
+        isSuspendedNextMatch: playerRedCardsMatch > 0,
+        suspensionReason: playerRedCardsMatch > 0 ? `Red Card dismissal under ${presentationRules.suspensionPolicyName}` : undefined,
+        winningsPaid: 0,
+        managerTrustDelta: userRating >= 7.0 ? 3 : 0,
+        fanMoraleDelta: playerGoals > 0 ? 4 : 0,
+      };
 
-    // Apply Real-World Card Accumulation & Disciplinary Consequences
-    const totalSeasonYellows = (player.seasonStats?.yellowCards || 0) + playerYellowCardsMatch;
-    const isSuspendedNext = (playerRedCardsMatch > 0) || 
-      (totalSeasonYellows >= leagueRuleSet.yellowCardSuspensionThreshold && (player.seasonStats?.yellowCards || 0) < leagueRuleSet.yellowCardSuspensionThreshold);
-
-    const suspensionReason = playerRedCardsMatch > 0
-      ? `Red Card dismissal under ${leagueRuleSet.suspensionPolicyName}`
-      : `${leagueRuleSet.yellowCardSuspensionThreshold} Yellow Cards accumulated in ${leagueRuleSet.shortName}`;
-
-    simResult.playerYellowCards = playerYellowCardsMatch;
-    simResult.playerRedCards = playerRedCardsMatch;
-    simResult.isSuspendedNextMatch = isSuspendedNext;
-    simResult.suspensionReason = isSuspendedNext ? suspensionReason : undefined;
-
-    if (isWorldMode && worldModel) {
       const outcome: WorldInteractiveMatchOutcome = {
         fixtureId: worldModel.fixtureId,
         homeGoals: exactHScore,
@@ -1103,14 +1188,44 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         substitutions: worldSubs,
         dismissals: worldDismissals,
       };
-      setWorldMatchOutcome(outcome);
-      if (onWorldMatchComplete) {
-        onWorldMatchComplete(outcome);
-      }
-    }
 
-    setFinalResult(simResult);
-    setMatchPhase('POST_MATCH');
+      setWorldMatchOutcome(outcome);
+      setFinalResult(postMatchData);
+      setMatchPhase('POST_MATCH');
+    } else {
+      const simResult = simulateMatch(
+        props.homeClub!,
+        props.awayClub!,
+        player,
+        resolvedMoments,
+        {
+          homeGoals: exactHScore,
+          awayGoals: exactAScore,
+          events,
+          playerGoals,
+          playerAssists,
+          playerMinutes: minutesPlayed,
+          playerStarted: isStarting,
+        }
+      );
+
+      // Apply Real-World Card Accumulation & Disciplinary Consequences
+      const totalSeasonYellows = (player.seasonStats?.yellowCards || 0) + playerYellowCardsMatch;
+      const isSuspendedNext = (playerRedCardsMatch > 0) || 
+        (totalSeasonYellows >= presentationRules.yellowCardSuspensionThreshold && (player.seasonStats?.yellowCards || 0) < presentationRules.yellowCardSuspensionThreshold);
+
+      const suspensionReason = playerRedCardsMatch > 0
+        ? `Red Card dismissal under ${presentationRules.suspensionPolicyName}`
+        : `${presentationRules.yellowCardSuspensionThreshold} Yellow Cards accumulated in ${presentationRules.shortName}`;
+
+      simResult.playerYellowCards = playerYellowCardsMatch;
+      simResult.playerRedCards = playerRedCardsMatch;
+      simResult.isSuspendedNextMatch = isSuspendedNext;
+      simResult.suspensionReason = isSuspendedNext ? suspensionReason : undefined;
+
+      setFinalResult(simResult);
+      setMatchPhase('POST_MATCH');
+    }
   };
 
   return (
@@ -1124,12 +1239,12 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
               <span 
                 className="font-bold text-white uppercase tracking-wider font-mono px-2 py-0.5 rounded text-[11px]"
-                style={{ backgroundColor: competitionRules.badgeColor || '#047857' }}
+                style={{ backgroundColor: presentationRules.badgeColor || '#047857' }}
               >
-                {competitionRules.shortName}
+                {presentationRules.shortName}
               </span>
               <span className="font-bold text-white uppercase tracking-wider font-mono">
-                {competitionRules.competitionName}
+                {presentationRules.competitionName}
               </span>
               <span className="text-slate-500">·</span>
               <span className="text-emerald-400 font-mono text-[11px] flex items-center gap-1">
@@ -1140,20 +1255,20 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
 
             <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono flex-wrap">
               <span className="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 text-emerald-300 font-bold">
-                Subs: Max {competitionRules.maxSubs90Min} ({competitionRules.maxSubWindows} Windows{competitionRules.extraTimeSubAllowed ? ' +1 in ET' : ''})
+                Subs: Max {presentationRules.maxSubs90Min} ({presentationRules.maxSubWindows} Windows{presentationRules.extraTimeSubAllowed ? ' +1 in ET' : ''})
               </span>
               <span className="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                Bench: {competitionRules.benchSize} Players
+                Bench: {presentationRules.benchSize} Players
               </span>
               <span className="bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800">
-                VAR: {competitionRules.varEnabled ? 'Active' : 'No VAR'}
+                VAR: {presentationRules.varEnabled ? 'Active' : 'No VAR'}
               </span>
               <span className={`px-2.5 py-1 rounded-lg border font-bold ${
                 disciplinaryStatus.severity === 'danger' ? 'bg-rose-950 text-rose-300 border-rose-800' :
                 disciplinaryStatus.severity === 'warning' ? 'bg-amber-950 text-amber-300 border-amber-800' :
                 'bg-slate-950 text-slate-400 border-slate-800'
               }`}>
-                Cards: {player.seasonStats?.yellowCards || 0}/{leagueRuleSet.yellowCardSuspensionThreshold} 🟨
+                Cards: {player.seasonStats?.yellowCards || 0}/{presentationRules.yellowCardSuspensionThreshold} 🟨
               </span>
             </div>
           </div>
@@ -1163,7 +1278,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
               {homeClub.name} <span className="text-slate-500 font-normal text-2xl">vs</span> {awayClub.name}
             </h1>
             <p className="text-xs text-slate-400">
-              {homeClub.stadiumName} · Match Ball: <strong className="text-slate-200">{leagueRuleSet.matchBall}</strong>
+              {homeClub.stadiumName} · Match Ball: <strong className="text-slate-200">{presentationRules.matchBall}</strong>
             </p>
           </div>
 
@@ -1225,7 +1340,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
               }`}
             >
               <Users className="w-3.5 h-3.5" />
-              <span>Official Team Lineups ({leagueRuleSet.maxSubs} Subs)</span>
+              <span>Official Team Lineups ({presentationRules.maxSubs} Subs)</span>
             </button>
             <button
               onClick={() => setActivePreMatchTab('rules')}
@@ -1293,7 +1408,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
                 <div className="pt-2 border-t border-slate-800/80">
                   <span className="text-[11px] text-slate-400 font-bold block mb-1">Bench:</span>
                   <div className="text-[11px] text-slate-400 space-y-0.5">
-                    {homeRoster.bench.slice(0, leagueRuleSet.benchSize).map((b, i) => (
+                    {homeRoster.bench.slice(0, presentationRules.benchSize).map((b, i) => (
                       <div key={i} className="flex justify-between">
                         <span>#{b.number} {isPlayerHome && !isStarting && !isInjured && i === 0 ? `${player.firstName} ${player.lastName} (YOU)` : b.name} ({b.position})</span>
                         <span>{b.overall} OVR</span>
@@ -1331,7 +1446,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
                 <div className="pt-2 border-t border-slate-800/80">
                   <span className="text-[11px] text-slate-400 font-bold block mb-1">Bench:</span>
                   <div className="text-[11px] text-slate-400 space-y-0.5">
-                    {awayRoster.bench.slice(0, leagueRuleSet.benchSize).map((b, i) => (
+                    {awayRoster.bench.slice(0, presentationRules.benchSize).map((b, i) => (
                       <div key={i} className="flex justify-between">
                         <span>#{b.number} {!isPlayerHome && !isStarting && !isInjured && i === 0 ? `${player.firstName} ${player.lastName} (YOU)` : b.name} ({b.position})</span>
                         <span>{b.overall} OVR</span>
@@ -1347,27 +1462,27 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
           {activePreMatchTab === 'rules' && (
             <div className="p-5 bg-slate-950 rounded-2xl border border-slate-800 text-xs space-y-5">
               <div>
-                <h3 className="font-bold text-white text-sm">Official {leagueRuleSet.leagueName} Rules & Substitution Standards</h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">{leagueRuleSet.suspensionPolicyName}</p>
+                <h3 className="font-bold text-white text-sm">Official {presentationRules.leagueName} Rules & Substitution Standards</h3>
+                <p className="text-[11px] text-slate-400 mt-0.5">{presentationRules.suspensionPolicyName}</p>
               </div>
 
               {/* Substitution Standards Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-slate-300 font-mono">
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-850">
                   <span className="text-[10px] text-slate-500 block uppercase font-bold">Max Substitutions</span>
-                  <span className="text-lg font-black text-white">{leagueRuleSet.maxSubs} Players</span>
+                  <span className="text-lg font-black text-white">{presentationRules.maxSubs} Players</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-850">
                   <span className="text-[10px] text-slate-500 block uppercase font-bold">In-Play Stoppages</span>
-                  <span className="text-lg font-black text-white">{leagueRuleSet.maxSubWindows} Windows</span>
+                  <span className="text-lg font-black text-white">{presentationRules.maxSubWindows} Windows</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-850">
                   <span className="text-[10px] text-slate-500 block uppercase font-bold">Substitutes Bench</span>
-                  <span className="text-lg font-black text-white">{leagueRuleSet.benchSize} Players</span>
+                  <span className="text-lg font-black text-white">{presentationRules.benchSize} Players</span>
                 </div>
                 <div className="p-3 bg-slate-900 rounded-xl border border-slate-850">
                   <span className="text-[10px] text-slate-500 block uppercase font-bold">Video Match Ref</span>
-                  <span className="text-lg font-black text-emerald-400">{leagueRuleSet.varEnabled ? 'VAR Active' : 'No VAR'}</span>
+                  <span className="text-lg font-black text-emerald-400">{presentationRules.varEnabled ? 'VAR Active' : 'No VAR'}</span>
                 </div>
               </div>
 
@@ -1381,25 +1496,25 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-slate-300">
                   <div className="p-3 bg-slate-950 rounded-xl border border-slate-850">
                     <span className="text-[10px] text-slate-500 block uppercase font-bold">1st Yellow Card Ban</span>
-                    <span className="text-base font-black text-amber-400">{leagueRuleSet.yellowCardSuspensionThreshold} Yellow Cards</span>
+                    <span className="text-base font-black text-amber-400">{presentationRules.yellowCardSuspensionThreshold} Yellow Cards</span>
                     <span className="text-[10px] text-slate-400 block mt-0.5">Automatic 1-match suspension</span>
                   </div>
 
                   <div className="p-3 bg-slate-950 rounded-xl border border-slate-850">
                     <span className="text-[10px] text-slate-500 block uppercase font-bold">Secondary Threshold</span>
-                    <span className="text-base font-black text-amber-400">{leagueRuleSet.secondaryYellowThreshold} Yellow Cards</span>
+                    <span className="text-base font-black text-amber-400">{presentationRules.secondaryYellowThreshold} Yellow Cards</span>
                     <span className="text-[10px] text-slate-400 block mt-0.5">2-match domestic ban</span>
                   </div>
 
                   <div className="p-3 bg-slate-950 rounded-xl border border-slate-850">
                     <span className="text-[10px] text-slate-500 block uppercase font-bold">Straight Red Card</span>
-                    <span className="text-base font-black text-rose-500">{leagueRuleSet.straightRedMatches} Matches Ban</span>
+                    <span className="text-base font-black text-rose-500">{presentationRules.straightRedMatches} Matches Ban</span>
                     <span className="text-[10px] text-slate-400 block mt-0.5">Violent conduct / serious foul</span>
                   </div>
                 </div>
 
                 <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
-                  {leagueRuleSet.suspensionSummary} Disciplinary card fines of £{leagueRuleSet.cardDisciplinaryFineGBP.toLocaleString()} are deducted per infraction.
+                  {presentationRules.suspensionSummary} Disciplinary card fines of £{presentationRules.cardDisciplinaryFineGBP.toLocaleString()} are deducted per infraction.
                 </p>
               </div>
             </div>
@@ -1426,12 +1541,12 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
             {/* Top Match Bar with Competition Rules, Subs Counter & Disciplinary */}
             <div className="flex flex-wrap items-center justify-between text-xs text-slate-400 pb-4 mb-4 border-b border-slate-800 gap-2">
               <span className="font-bold text-emerald-400 uppercase tracking-widest font-mono">
-                {competitionRules.competitionName} · Matchday
+                {presentationRules.competitionName} · Matchday
               </span>
               <div className="flex items-center gap-4 font-mono text-[11px]">
-                <span>Subs: <strong className="text-white">{isPlayerHome ? homeSubsUsed : awaySubsUsed} / {competitionRules.maxSubs90Min}</strong> ({competitionRules.maxSubWindows} Windows{competitionRules.extraTimeSubAllowed ? ' +1 ET' : ''})</span>
-                <span>Disciplinary: <strong className="text-amber-400">🟨 {playerYellowCardsMatch}</strong> <strong className="text-rose-500">🟥 {playerRedCardsMatch}</strong> (Season: {currentTotalYellows}/{leagueRuleSet.yellowCardSuspensionThreshold})</span>
-                <span>Ball: <strong className="text-slate-300">{competitionRules.matchBall.split(' ')[0]}</strong></span>
+                <span>Subs: <strong className="text-white">{isPlayerHome ? homeSubsUsed : awaySubsUsed} / {presentationRules.maxSubs90Min}</strong> ({presentationRules.maxSubWindows} Windows{presentationRules.extraTimeSubAllowed ? ' +1 ET' : ''})</span>
+                <span>Disciplinary: <strong className="text-amber-400">🟨 {playerYellowCardsMatch}</strong> <strong className="text-rose-500">🟥 {playerRedCardsMatch}</strong> (Season: {currentTotalYellows}/{presentationRules.yellowCardSuspensionThreshold})</span>
+                <span>Ball: <strong className="text-slate-300">{presentationRules.matchBall.split(' ')[0]}</strong></span>
               </div>
             </div>
 
@@ -1844,7 +1959,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-10 space-y-8 shadow-2xl">
           <div className="text-center space-y-2">
             <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold font-mono">
-              {leagueRuleSet.leagueName} · Full-Time Result
+              {presentationRules.leagueName} · Full-Time Result
             </span>
             <div className="text-4xl md:text-6xl font-black text-white font-mono tracking-tight">
               {homeClub.shortName} {finalResult.homeScore} - {finalResult.awayScore} {awayClub.shortName}
@@ -1920,7 +2035,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
               <div className="flex items-center gap-2">
                 <Shield className={`w-4 h-4 ${finalResult.isSuspendedNextMatch ? 'text-rose-400 animate-pulse' : 'text-amber-400'}`} />
                 <span className="font-bold text-white uppercase">
-                  {leagueRuleSet.shortName} Disciplinary Record & Card Accumulation
+                  {presentationRules.shortName} Disciplinary Record & Card Accumulation
                 </span>
                 {finalResult.isSuspendedNextMatch && (
                   <span className="bg-rose-900 text-rose-200 border border-rose-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase animate-pulse">
@@ -1931,11 +2046,11 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
               <p className="text-[11px] text-slate-300">
                 {finalResult.isSuspendedNextMatch ? (
                   <strong className="text-rose-300">
-                    ⚠️ AUTOMATIC 1-MATCH DOMESTIC SUSPENSION TRIGGERED for next fixture ({finalResult.suspensionReason}). Disciplinary administrative fee of £{leagueRuleSet.cardDisciplinaryFineGBP.toLocaleString()} deducted.
+                    ⚠️ AUTOMATIC 1-MATCH DOMESTIC SUSPENSION TRIGGERED for next fixture ({finalResult.suspensionReason}). Disciplinary administrative fee of £{presentationRules.cardDisciplinaryFineGBP.toLocaleString()} deducted.
                   </strong>
                 ) : (
                   <span>
-                    Accumulated cards: <strong className="text-white">{(player.seasonStats?.yellowCards || 0) + (finalResult.playerYellowCards || 0)} / {leagueRuleSet.yellowCardSuspensionThreshold} Yellow Cards</strong> under {leagueRuleSet.suspensionPolicyName}.
+                    Accumulated cards: <strong className="text-white">{(player.seasonStats?.yellowCards || 0) + (finalResult.playerYellowCards || 0)} / {presentationRules.yellowCardSuspensionThreshold} Yellow Cards</strong> under {presentationRules.suspensionPolicyName}.
                   </span>
                 )}
               </p>
@@ -2012,7 +2127,7 @@ export const MatchView: React.FC<MatchViewProps> = (props) => {
                   onWorldMatchComplete?.(worldMatchOutcome);
                 }
                 if (onMatchComplete && finalResult) {
-                  onMatchComplete(finalResult);
+                  onMatchComplete(finalResult as unknown as MatchSimulationResult);
                 }
               }}
               className="py-3.5 px-8 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all cursor-pointer"

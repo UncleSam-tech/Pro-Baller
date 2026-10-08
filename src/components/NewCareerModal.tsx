@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlayerArchetype, PlayerOrigin, Position } from '../types/game';
 import { CLUBS_DATABASE, getClubById } from '../data/clubs';
+import { isLegacyClubSupported } from '../utils/worldClubCompatibility';
 import { WORLD_GEOGRAPHY, ContinentData, RegionData, CountryData } from '../data/geography';
 import { sounds } from '../utils/soundFx';
 import { calculateTaxBreakdown } from '../utils/taxResidency';
@@ -141,6 +142,12 @@ export const NewCareerModal: React.FC<NewCareerModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!isLegacyClubSupported(startingClubId)) {
+      alert('The selected starting club is not currently available in the Living World. Please choose a supported club.');
+      return;
+    }
+
     sounds.playWhistle();
 
     // Dual nationality comes naturally from ancestral diaspora!
@@ -427,11 +434,14 @@ export const NewCareerModal: React.FC<NewCareerModalProps> = ({
               onChange={e => setStartingClubId(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2.5 text-white text-xs focus:border-emerald-500 focus:outline-none font-medium"
             >
-              {starterClubs.map(c => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.city}, {c.country} · {c.league})
-                </option>
-              ))}
+              {starterClubs.map(c => {
+                const supported = isLegacyClubSupported(c.id);
+                return (
+                  <option key={c.id} value={c.id} disabled={!supported}>
+                    {c.name} ({c.city}, {c.country} · {c.league}){supported ? '' : ' — Not available in Living World yet'}
+                  </option>
+                );
+              })}
             </select>
 
             {/* Live Tax Residency Preview based on Club Location */}

@@ -31,7 +31,24 @@ import { ScoutingHub } from './components/ScoutingHub';
 import { AgentTerminal } from './components/AgentTerminal';
 import { getCurrentWeekFixture } from './utils/LeagueEngine';
 import { PostCareerProfile } from './types/game';
-import { ArrowRight, Award, Calendar, Heart, MessageSquare, Play, ShieldAlert, Sparkles, Stethoscope, Trophy, User, Zap } from 'lucide-react';
+import { loadDefaultFootballWorldPack } from './world/worldPackLoader';
+import {
+  createCareerWorldSession,
+  getNextCareerWorldFixture,
+  advanceCareerWorldToNextFixture,
+  resolveCareerInteractiveFixtureDay,
+  projectWorldFootballOutputsToCareerPlayer,
+  type CareerWorldSession,
+  type CareerInteractiveFixture,
+} from './career/worldCareerBridge';
+import {
+  createWorldMatchViewModel,
+  buildCareerWorldExternalResolution,
+  type WorldInteractiveMatchOutcome,
+} from './career/worldMatchViewAdapter';
+import type { WorldGoalEvent } from './world/types';
+import { isLegacyClubSupported } from './utils/worldClubCompatibility';
+import { ArrowRight, Award, Calendar, Heart, MessageSquare, Play, ShieldAlert, Sparkles, Stethoscope, Trophy, User, Zap, Loader2 } from 'lucide-react';
 
 export default function App() {
   const [player, setPlayer] = useState<Player | null>(null);
@@ -46,6 +63,13 @@ export default function App() {
     show: boolean;
     reason: 'AGE_35_PLUS' | 'SEVERE_RECURRING_INJURY' | 'VOLUNTARY_PINNACLE';
   } | null>(null);
+
+  // Living World State (Gate 2)
+  const [worldSession, setWorldSession] = useState<CareerWorldSession | null>(null);
+  const [activeWorldHandoff, setActiveWorldHandoff] = useState<CareerInteractiveFixture | null>(null);
+  const [worldLoading, setWorldLoading] = useState(false);
+  const [worldError, setWorldError] = useState<string | null>(null);
+  const isWorldCareer = worldSession !== null;
 
   // Sub-tab direct routing state
   const [clubRoomSubTab, setClubRoomSubTab] = useState<'contract' | 'medical' | 'transfers' | 'scouting' | 'agent' | 'news'>('contract');
@@ -64,6 +88,15 @@ export default function App() {
 
   // Load from storage on mount
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.search.includes('reset=1')) {
+      clearSavedPlayer();
+      setPlayer(null);
+      setWorldSession(null);
+      setActiveWorldHandoff(null);
+      setShowIntroStory(false);
+      setShowNewCareerModal(true);
+      return;
+    }
     const saved = loadPlayer();
     if (saved && saved.isUserCreated) {
       setPlayer(saved);
@@ -90,14 +123,70 @@ export default function App() {
 
   const currency = player?.preferredCurrency || 'GBP';
 
-  // Next fixture from LeagueEngine (strictly enforces competition calendar & legal matchups)
+  // Canonical living-world match presentation model
+  const worldModel = useMemo(() => {
+    if (!worldSession || !activeWorldHandoff) return null;
+    return createWorldMatchViewModel(worldSession, activeWorldHandoff);
+  }, [worldSession, activeWorldHandoff]);
+
+  // Next fixture from Living World calendar
+  const worldNextFixture = useMemo(() => {
+    if (!worldSession) return undefined;
+    return getNextCareerWorldFixture(worldSession);
+  }, [worldSession]);
+
+  const worldNextOpponentName = useMemo(() => {
+    if (!worldSession) return undefined;
+    if (activeWorldHandoff) {
+      const oppClub = worldSession.sessionPack.clubs.find(
+        (c) => c.id === activeWorldHandoff.opponentWorldClubId
+      );
+      return oppClub?.shortName || oppClub?.name || activeWorldHandoff.opponentWorldClubId;
+    }
+    if (worldNextFixture) {
+      const oppClub = worldSession.sessionPack.clubs.find(
+        (c) => c.id === worldNextFixture.opponentWorldClubId
+      );
+      return oppClub?.shortName || oppClub?.name || worldNextFixture.opponentWorldClubId;
+    }
+    return undefined;
+  }, [worldSession, activeWorldHandoff, worldNextFixture]);
+
+  const worldNextCompetitionName = useMemo(() => {
+    if (!worldSession) return undefined;
+    const compId = activeWorldHandoff?.competitionId || worldNextFixture?.competitionId;
+    if (!compId) return undefined;
+    const compDef = worldSession.sessionPack.competitionDefinitions.find((c) => c.id === compId);
+    return compDef?.name || compId;
+  }, [worldSession, activeWorldHandoff, worldNextFixture]);
+
+  // Next fixture from LeagueEngine (strictly for legacy careers)
   const currentScheduledFixture = useMemo(() => {
+    if (worldSession) return null;
     return getCurrentWeekFixture(currentClub, player?.currentWeek || 1);
-  }, [currentClub, player?.currentWeek]);
+  }, [worldSession, currentClub, player?.currentWeek]);
 
-  const nextOpponent = currentScheduledFixture.opponentClub;
+  const legacyNextOpponent = currentScheduledFixture?.opponentClub || currentClub;
 
-  const handleStartNewCareer = (
+  const effectiveOpponentClub = useMemo(() => {
+    if (isWorldCareer && worldSession) {
+      const oppWorldId = activeWorldHandoff?.opponentWorldClubId || worldNextFixture?.opponentWorldClubId;
+      if (oppWorldId) {
+        const matchedLegacyClub = CLUBS_DATABASE.find(
+          (c) =>
+            c.id === oppWorldId ||
+            c.name.toLowerCase() ===
+              worldSession.sessionPack.clubs
+                .find((wc) => wc.id === oppWorldId)
+                ?.name.toLowerCase()
+        );
+        if (matchedLegacyClub) return matchedLegacyClub;
+      }
+    }
+    return legacyNextOpponent;
+  }, [isWorldCareer, worldSession, activeWorldHandoff, worldNextFixture, legacyNextOpponent]);
+
+  const handleStartNewCareer = async (
     firstName: string,
     lastName: string,
     nationality: string,
@@ -111,27 +200,62 @@ export default function App() {
     secondaryCode?: string,
     startingAge?: number
   ) => {
-    clearSavedPlayer();
-    const fresh = createNewPlayer(
-      firstName,
-      lastName,
-      nationality,
-      nationCode,
-      position,
-      archetype,
-      origin,
-      startingClubId,
-      hometown,
-      secondaryNation,
-      secondaryCode,
-      startingAge || 14
-    );
-    setPlayer(fresh);
-    savePlayer(fresh);
-    setShowIntroStory(false);
-    setShowNewCareerModal(false);
-    setCurrentView('PERSONA');
-    setBannerNotice(`Welcome to your pro career, ${firstName} ${lastName}! Scholarship signed at ${getClubById(startingClubId).name}.`);
+    if (!isLegacyClubSupported(startingClubId)) {
+      setBannerNotice(`Club '${startingClubId}' is not yet available in the Living World.`);
+      return;
+    }
+
+    try {
+      setWorldLoading(true);
+      setWorldError(null);
+
+      const fresh = createNewPlayer(
+        firstName,
+        lastName,
+        nationality,
+        nationCode,
+        position,
+        archetype,
+        origin,
+        startingClubId,
+        hometown,
+        secondaryNation,
+        secondaryCode,
+        startingAge || 14
+      );
+
+      // Asynchronously load the Living World Data Pack
+      const pack = await loadDefaultFootballWorldPack();
+      const bootstrapRes = createCareerWorldSession(pack, fresh);
+
+      if (!bootstrapRes.accepted || !bootstrapRes.session) {
+        const errMsg = bootstrapRes.error || 'Failed to initialize Living World session.';
+        setWorldError(errMsg);
+        setWorldLoading(false);
+        setBannerNotice(`Living World Error: ${errMsg}`);
+        return;
+      }
+
+      clearSavedPlayer();
+      setPlayer(fresh);
+      savePlayer(fresh);
+      setWorldSession(bootstrapRes.session);
+      setActiveWorldHandoff(null);
+      setWorldLoading(false);
+
+      setShowIntroStory(false);
+      setShowNewCareerModal(false);
+      setCurrentView('PERSONA');
+      setBannerNotice(
+        `Welcome to your living world pro career, ${firstName} ${lastName}! Signed at ${getClubById(startingClubId)?.name || startingClubId}. Season 2026-27 active.`
+      );
+    } catch (err: any) {
+      console.error('Failed to initialize Living World session:', err);
+      const errMsg = err?.message || 'Error loading world pack asset.';
+      setWorldError(errMsg);
+      setWorldLoading(false);
+      setBannerNotice(`World Pack Error: ${errMsg}`);
+    }
   };
 
   const handleTeleport = (view: GameView, subTab?: string) => {
@@ -372,6 +496,141 @@ export default function App() {
     setShowPostMatchInterview(true);
   };
 
+  const handleAdvanceToNextWorldFixture = () => {
+    if (!worldSession) return;
+
+    if (activeWorldHandoff) {
+      setCurrentView('MATCH');
+      return;
+    }
+
+    sounds.playClick();
+    const advanceRes = advanceCareerWorldToNextFixture(worldSession);
+
+    if (!advanceRes.accepted || !advanceRes.session || !advanceRes.handoff) {
+      const errMsg = advanceRes.error || 'Failed to advance to next scheduled fixture.';
+      setWorldError(errMsg);
+      setBannerNotice(`Calendar Advance: ${errMsg}`);
+      return;
+    }
+
+    setWorldSession(advanceRes.session);
+    setActiveWorldHandoff(advanceRes.handoff);
+    setCurrentView('MATCH');
+
+    const oppDef = advanceRes.session.sessionPack.clubs.find(
+      (c) => c.id === advanceRes.handoff!.opponentWorldClubId
+    );
+    const oppName = oppDef?.shortName || oppDef?.name || advanceRes.handoff.opponentWorldClubId;
+
+    setBannerNotice(
+      `Advanced to matchday eve (${advanceRes.session.runtimeState.currentDate})! Next: ${advanceRes.handoff.competitionId} vs ${oppName} on ${advanceRes.handoff.scheduledDate}.`
+    );
+  };
+
+  const handleWorldMatchComplete = (outcome: WorldInteractiveMatchOutcome) => {
+    if (!worldSession || !activeWorldHandoff || !player) return;
+    sounds.playWhistle();
+
+    // 1. Build canonical WorldExternalFixtureResolution
+    const externalResolution = buildCareerWorldExternalResolution(
+      worldSession,
+      activeWorldHandoff,
+      outcome
+    );
+
+    // 2. Resolve fixture day atomically in world simulation
+    const resolveResult = resolveCareerInteractiveFixtureDay(
+      worldSession,
+      externalResolution
+    );
+
+    if (!resolveResult.accepted || !resolveResult.session) {
+      console.error('World matchday resolution failed:', resolveResult.error);
+      setBannerNotice(`World resolution error: ${resolveResult.error}`);
+      return;
+    }
+
+    const updatedSession = resolveResult.session;
+    setWorldSession(updatedSession);
+    setActiveWorldHandoff(null);
+
+    // 3. Project updated canonical football state to career player
+    const worldPlayerId = updatedSession.link.worldPlayerId;
+    const updatedWorldState = updatedSession.runtimeState.playerFootballStates.find(
+      (s) => s.playerId === worldPlayerId
+    );
+
+    let updatedPlayer = player;
+    if (updatedWorldState) {
+      updatedPlayer = projectWorldFootballOutputsToCareerPlayer(player, updatedWorldState);
+    }
+
+    // 4. Project seasonStats from canonical externalResolution
+    const userAppearance = externalResolution.participation?.playerAppearances.find(
+      (a) => a.playerId === worldPlayerId
+    );
+    const userRating = externalResolution.matchDetail?.playerRatings.find(
+      (r) => r.playerId === worldPlayerId
+    );
+    const matchEvents = externalResolution.matchDetail?.events ?? [];
+    const userYellows = matchEvents.filter(
+      (e) => e.type === 'YELLOW_CARD' && e.playerId === worldPlayerId
+    ).length;
+    const userReds = matchEvents.filter(
+      (e) =>
+        (e.type === 'SECOND_YELLOW_RED' || e.type === 'STRAIGHT_RED') &&
+        e.playerId === worldPlayerId
+    ).length;
+    const userGoals = matchEvents.filter(
+      (e) => e.type === 'GOAL' && e.playerId === worldPlayerId
+    ).length;
+    const userAssists = matchEvents.filter(
+      (e) => e.type === 'GOAL' && (e as WorldGoalEvent).assistPlayerId === worldPlayerId
+    ).length;
+
+    const prevStats = { ...updatedPlayer.seasonStats };
+    const userMinutes = userAppearance?.minutesPlayed ?? 0;
+    if (userMinutes > 0) {
+      prevStats.appearances += 1;
+      if (userAppearance?.started) {
+        prevStats.starts += 1;
+      }
+    }
+    prevStats.goals += userGoals;
+    prevStats.assists += userAssists;
+    prevStats.yellowCards = (prevStats.yellowCards || 0) + userYellows;
+    prevStats.redCards = (prevStats.redCards || 0) + userReds;
+
+    if (userRating && userMinutes > 0) {
+      const newRatings = [...prevStats.ratingsHistory, userRating.rating];
+      prevStats.ratingsHistory = newRatings;
+      prevStats.avgRating = Number(
+        (newRatings.reduce((a, b) => a + b, 0) / newRatings.length).toFixed(1)
+      );
+    }
+
+    // Save updated player (DO NOT decrement player.injuryWeeks or suspensionWeeks; preserve bank balance & career earnings untouched for Gate 4 finance integration)
+    setPlayer({
+      ...updatedPlayer,
+      seasonStats: prevStats,
+    });
+
+    const nextFixtureAfterMatch = getNextCareerWorldFixture(updatedSession);
+    const oppClub = nextFixtureAfterMatch
+      ? updatedSession.sessionPack.clubs.find(
+          (c) => c.id === nextFixtureAfterMatch.opponentWorldClubId
+        )
+      : undefined;
+    const oppName = oppClub?.name || nextFixtureAfterMatch?.opponentWorldClubId || 'Season End';
+
+    setBannerNotice(
+      `Match concluded! Final: ${externalResolution.result.homeGoals} - ${externalResolution.result.awayGoals}. Next: vs ${oppName} (${nextFixtureAfterMatch?.date || 'Season Complete'}).`
+    );
+
+    setShowPostMatchInterview(true);
+  };
+
   const handleSignContract = (signedContract: ContractClauses) => {
     if (reviewingContract) {
       // Transfer to new club!
@@ -514,15 +773,19 @@ export default function App() {
           player={player}
           currentView={currentView}
           onSelectView={setCurrentView}
-          onNextWeek={handleAdvanceWeek}
+          onNextWeek={isWorldCareer ? handleAdvanceToNextWorldFixture : handleAdvanceWeek}
           isMuted={isMuted}
           onToggleMute={handleToggleMute}
           onNewCareer={() => setShowNewCareerModal(true)}
           onSelectCurrency={handleSelectCurrency}
           onTeleport={handleTeleport}
-          nextOpponentName={nextOpponent.shortName || nextOpponent.name}
-          competitionName={currentScheduledFixture.competitionName}
+          nextOpponentName={isWorldCareer ? worldNextOpponentName : (legacyNextOpponent.shortName || legacyNextOpponent.name)}
+          competitionName={isWorldCareer ? worldNextCompetitionName : (currentScheduledFixture?.competitionName || 'League Match')}
           onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+          calendarLabel={isWorldCareer && worldSession ? worldSession.runtimeState.currentDate : undefined}
+          advanceLabel={isWorldCareer ? (activeWorldHandoff ? "Play Match ➔" : "Advance ➔") : undefined}
+          nextFixtureDate={isWorldCareer && worldNextFixture ? worldNextFixture.date : undefined}
+          onAdvance={isWorldCareer ? handleAdvanceToNextWorldFixture : undefined}
           activeSubTab={
             currentView === 'CLUB_ROOM' ? clubRoomSubTab :
             currentView === 'PERSONA' ? personaSubTab :
@@ -551,13 +814,90 @@ export default function App() {
           {/* 1. MATCHDAY STAGE */}
           {currentView === 'MATCH' && (
             <div className="space-y-6">
-              <MatchView
-                player={player}
-                homeClub={currentClub}
-                awayClub={nextOpponent}
-                competitionName={currentScheduledFixture.competitionName}
-                onMatchComplete={handleMatchComplete}
-              />
+              {isWorldCareer ? (
+                activeWorldHandoff && worldModel ? (
+                  <MatchView
+                    mode="world"
+                    player={player}
+                    worldModel={worldModel}
+                    onWorldMatchComplete={handleWorldMatchComplete}
+                  />
+                ) : (
+                  <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 lg:p-8 backdrop-blur shadow-2xl space-y-6">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="px-2.5 py-1 rounded-md text-[11px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
+                            {worldNextCompetitionName || 'League Competition'}
+                          </span>
+                          {worldNextFixture && (
+                            <span className="text-xs font-mono text-slate-400">
+                              Round {worldNextFixture.round}
+                            </span>
+                          )}
+                        </div>
+                        <h2 className="text-2xl font-black text-white tracking-tight">
+                          Upcoming Fixture Preview
+                        </h2>
+                        <p className="text-xs text-slate-400 mt-1">
+                          Current world date: <span className="font-mono text-slate-300 font-bold">{worldSession?.runtimeState.currentDate}</span>
+                          {worldNextFixture && (
+                            <> • Match date: <span className="font-mono text-emerald-400 font-bold">{worldNextFixture.date}</span></>
+                          )}
+                        </p>
+                      </div>
+
+                      {worldNextFixture && (
+                        <button
+                          onClick={handleAdvanceToNextWorldFixture}
+                          className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer font-mono active:scale-95"
+                        >
+                          <Calendar className="w-4 h-4" />
+                          <span>Advance to Matchday (D-1)</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {worldNextFixture ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Home Club */}
+                        <div className={`p-5 rounded-xl border ${worldNextFixture.isHome ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-slate-850/60 border-slate-800'}`}>
+                          <div className="text-[10px] font-mono uppercase text-slate-400 mb-1 font-bold">
+                            Home Club {worldNextFixture.isHome && <span className="text-emerald-400 font-black ml-1">(Your Club)</span>}
+                          </div>
+                          <div className="text-lg font-bold text-white">
+                            {worldSession?.sessionPack.clubs.find(c => c.id === worldNextFixture.homeClubId)?.name || worldNextFixture.homeClubId}
+                          </div>
+                        </div>
+
+                        {/* Away Club */}
+                        <div className={`p-5 rounded-xl border ${!worldNextFixture.isHome ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-slate-850/60 border-slate-800'}`}>
+                          <div className="text-[10px] font-mono uppercase text-slate-400 mb-1 font-bold">
+                            Away Club {!worldNextFixture.isHome && <span className="text-emerald-400 font-black ml-1">(Your Club)</span>}
+                          </div>
+                          <div className="text-lg font-bold text-white">
+                            {worldSession?.sessionPack.clubs.find(c => c.id === worldNextFixture.awayClubId)?.name || worldNextFixture.awayClubId}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-12 text-center text-slate-400">
+                        <Trophy className="w-12 h-12 text-slate-600 mx-auto mb-3" />
+                        <p className="text-sm font-medium">All scheduled fixtures for this season are complete.</p>
+                      </div>
+                    )}
+                  </div>
+                )
+              ) : (
+                <MatchView
+                  mode="legacy"
+                  player={player}
+                  homeClub={currentClub}
+                  awayClub={legacyNextOpponent}
+                  competitionName={currentScheduledFixture?.competitionName || 'League Match'}
+                  onMatchComplete={handleMatchComplete}
+                />
+              )}
 
               {/* Post-Match Flash Tunnel Interview & Brand Ambassador Deals */}
               {showPostMatchInterview && (
@@ -598,7 +938,7 @@ export default function App() {
               player={player}
               onUpdatePlayer={setPlayer}
               onProceedToMatch={() => setCurrentView('MATCH')}
-              opponentClub={nextOpponent}
+              opponentClub={effectiveOpponentClub}
               initialTab={trainingSubTab}
             />
           )}
@@ -744,6 +1084,17 @@ export default function App() {
               : undefined
           }
         />
+      )}
+
+      {/* Living World Loading Overlay */}
+      {worldLoading && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+          <Loader2 className="w-12 h-12 text-emerald-400 animate-spin mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2 font-mono">Initializing Living World...</h3>
+          <p className="text-sm text-slate-400 font-mono max-w-md">
+            Loading official 2026-27 football world data pack, scheduling fixtures, and establishing player identity link.
+          </p>
+        </div>
       )}
     </div>
   );

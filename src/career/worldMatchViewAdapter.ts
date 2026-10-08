@@ -144,49 +144,30 @@ export function createWorldMatchViewModel(
   );
   const clubMap = new Map(sessionPack.clubs.map((c) => [c.id, c]));
 
-  const defaultRuleSet: CompetitionRuleSet = {
-    id: handoff.competitionRuleSetId ?? 'default-rules',
-    competitionId: handoff.competitionId,
-    seasonLabel: '2026-27',
-    ruleVersion: 1,
-    verificationStatus: 'VERIFIED',
-    format: { type: 'DOUBLE_ROUND_ROBIN', extraTimeEnabled: false, penaltiesEnabled: false },
-    substitutions: {
-      maxSubsRegulation: 5,
-      maxStoppageWindows: 3,
-      benchSize: 9,
-      halfTimeCountsAsWindow: false,
-      extraTimeExtraSub: 1,
-    },
-    discipline: {
-      yellowThresholds: [{ cards: 5, suspensionMatches: 1 }],
-      straightRedDefaultMatches: 3,
-      secondYellowRedMatches: 1,
-      policyName: 'Standard Disciplinary Code',
-    },
-    technology: { varEnabled: false },
-    modifiers: {},
-    presentation: { matchBall: 'Official Match Ball' },
-  };
-
-  let resolvedRuleSet: CompetitionRuleSet | undefined;
-  if (handoff.competitionRuleSetId && staticContext?.competitionRuleSets) {
-    if (Array.isArray(staticContext.competitionRuleSets)) {
-      resolvedRuleSet = staticContext.competitionRuleSets.find(
-        (r) => r.id === handoff.competitionRuleSetId
-      );
-    } else {
-      resolvedRuleSet = (staticContext.competitionRuleSets as Record<string, CompetitionRuleSet>)[
-        handoff.competitionRuleSetId
-      ];
-    }
-  }
-  if (!resolvedRuleSet && handoff.competitionRuleSetId && sessionPack?.competitionRuleSets) {
-    resolvedRuleSet = sessionPack.competitionRuleSets.find(
-      (r) => r.id === handoff.competitionRuleSetId
+  const ruleSetId = handoff.competitionRuleSetId;
+  if (!ruleSetId) {
+    throw new Error(
+      `CareerInteractiveFixture '${handoff.fixtureId}' does not specify a competitionRuleSetId.`
     );
   }
-  const ruleSet = resolvedRuleSet ?? defaultRuleSet;
+
+  let resolvedRuleSet: CompetitionRuleSet | undefined;
+  if (staticContext?.competitionRuleSets) {
+    if (Array.isArray(staticContext.competitionRuleSets)) {
+      resolvedRuleSet = staticContext.competitionRuleSets.find((r) => r.id === ruleSetId);
+    } else {
+      resolvedRuleSet = (staticContext.competitionRuleSets as Record<string, CompetitionRuleSet>)[ruleSetId];
+    }
+  }
+  if (!resolvedRuleSet && sessionPack?.competitionRuleSets) {
+    resolvedRuleSet = sessionPack.competitionRuleSets.find((r) => r.id === ruleSetId);
+  }
+  if (!resolvedRuleSet) {
+    throw new Error(
+      `Cannot resolve canonical CompetitionRuleSet '${ruleSetId}' for fixture '${handoff.fixtureId}'.`
+    );
+  }
+  const ruleSet = resolvedRuleSet;
 
   const compState = runtimeState.competitionSeasonStates.find(
     (c) => c.competitionId === handoff.competitionId
@@ -199,12 +180,18 @@ export function createWorldMatchViewModel(
 
   const buildViewPlayer = (playerId: string): WorldMatchViewPlayer => {
     const def = playerDefMap.get(playerId);
+    if (!def) {
+      throw new Error(`Missing canonical WorldPlayerDefinition for player '${playerId}'.`);
+    }
     const footballState = playerStatesMap.get(playerId);
+    if (!footballState) {
+      throw new Error(`Missing canonical WorldPlayerFootballState for player '${playerId}'.`);
+    }
 
-    const firstName = def?.firstName ?? 'Player';
-    const lastName = def?.lastName ?? playerId;
+    const firstName = def.firstName;
+    const lastName = def.lastName;
     const displayName = `${firstName} ${lastName}`.trim();
-    const position = def?.primaryPosition ?? 'CM';
+    const position = def.primaryPosition;
     const isUser = playerId === session.link.worldPlayerId;
 
     return {
@@ -213,11 +200,11 @@ export function createWorldMatchViewModel(
       lastName,
       displayName,
       position,
-      ability: footballState?.ability ?? 65,
-      fitness: footballState?.fitness ?? 100,
-      sharpness: footballState?.sharpness ?? 70,
-      form: footballState?.form ?? 60,
-      morale: footballState?.morale ?? 70,
+      ability: footballState.ability,
+      fitness: footballState.fitness,
+      sharpness: footballState.sharpness,
+      form: footballState.form,
+      morale: footballState.morale,
       isUser,
     };
   };
@@ -228,6 +215,9 @@ export function createWorldMatchViewModel(
     managerPlan?: WorldManagerMatchPlan
   ): WorldMatchViewTeam => {
     const club = clubMap.get(clubId);
+    if (!club) {
+      throw new Error(`Missing canonical WorldClubDefinition for club '${clubId}'.`);
+    }
     const managerAssignment = sessionPack.managerAssignments?.find((m) => m.clubId === clubId);
     const managerDef = managerAssignment
       ? sessionPack.managers?.find((m) => m.id === managerAssignment.managerId)

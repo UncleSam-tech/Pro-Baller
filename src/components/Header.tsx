@@ -30,6 +30,10 @@ interface HeaderProps {
   nextOpponentName?: string;
   competitionName?: string;
   onOpenSidebar?: () => void;
+  calendarLabel?: string;
+  advanceLabel?: string;
+  nextFixtureDate?: string;
+  onAdvance?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -46,6 +50,10 @@ export const Header: React.FC<HeaderProps> = ({
   nextOpponentName,
   competitionName,
   onOpenSidebar,
+  calendarLabel,
+  advanceLabel,
+  nextFixtureDate,
+  onAdvance,
 }) => {
   const currency = player.preferredCurrency || 'GBP';
 
@@ -151,7 +159,18 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-slate-400">VS</span>
               <span className="text-white font-bold truncate max-w-[90px]">{nextOpponentName}</span>
+              {nextFixtureDate && (
+                <span className="text-slate-500 text-[10px] hidden xl:inline">({nextFixtureDate})</span>
+              )}
             </button>
+          )}
+
+          {/* Calendar Date Indicator when separate advance label is present */}
+          {calendarLabel && advanceLabel && (
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-[11px] font-mono text-slate-300">
+              <Calendar className="w-3 h-3 text-emerald-400" />
+              <span>{calendarLabel}</span>
+            </div>
           )}
 
           {/* Balance Preview */}
@@ -195,17 +214,21 @@ export const Header: React.FC<HeaderProps> = ({
             New Career
           </button>
 
-          {/* Advance Calendar Week Action */}
+          {/* Advance Calendar Week / Match Action */}
           <button
             onClick={() => {
               sounds.playClick();
-              onNextWeek();
+              if (onAdvance) {
+                onAdvance();
+              } else {
+                onNextWeek();
+              }
             }}
             className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap active:scale-95 font-mono"
-            title="Advance to next gameweek and collect weekly wage"
+            title={advanceLabel ? `Advance: ${advanceLabel}` : "Advance to next gameweek and collect weekly wage"}
           >
             <Calendar className="w-3.5 h-3.5" />
-            <span>W{player.currentWeek} ➔</span>
+            <span>{advanceLabel || (calendarLabel ? `${calendarLabel} ➔` : `W${player.currentWeek} ➔`)}</span>
           </button>
         </div>
       </div>

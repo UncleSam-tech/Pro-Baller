@@ -3,7 +3,7 @@ import { Club, MatchDecisionMoment, MatchLiveEvent, MatchSimulationResult, Playe
 /**
  * Creates rich interactive decision moments during a match
  */
-export function generateKeyMatchMoments(player: Player, opponent: Club): MatchDecisionMoment[] {
+export function generateKeyMatchMoments(player: Player, opponent: Pick<Club, 'name' | 'shortName'>): MatchDecisionMoment[] {
   const isAttacker = ['ST', 'LW', 'RW', 'CAM'].includes(player.position);
   const isMidfielder = ['CM', 'CDM'].includes(player.position);
   
