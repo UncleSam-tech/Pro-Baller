@@ -20,11 +20,24 @@ import type {
   FootballWorldStaticContext,
   WorldCountryDefinition,
   WorldFootballPosition,
+  WorldManagerMatchPlan,
+  WorldMatchTeamSelection,
+  WorldPlayerAvailabilityState,
   WorldPlayerDefinition,
   WorldPlayerFootballState,
 } from '../world/types';
 import { bootstrapFootballWorld } from '../world/worldRuntime';
-import { advanceFootballWorldStep } from '../world/worldProgression';
+import {
+  advanceFootballWorldStep,
+  buildCompetitionFixtureDateMap,
+  addDaysToDate,
+} from '../world/worldProgression';
+import {
+  resolveWorldManagerProfile,
+  selectMatchTeamSquadWithManager,
+} from '../world/managerAI';
+import { resolveRuleSetBenchSize } from '../world/matchSquadSelection';
+import { isPlayerAvailableForFixture } from '../world/playerAvailability';
 import type { Player, Position } from '../types/game';
 import { mapLegacyClubIdToWorldClubId } from '../utils/worldClubCompatibility';
 
@@ -52,6 +65,7 @@ export interface CareerWorldSession {
   readonly runtimeState: FootballWorldRuntimeState;
   readonly staticContext: FootballWorldStaticContext;
   readonly sessionPack: FootballWorldDataPack;
+  readonly reservedFixtureIds?: readonly string[];
 }
 
 /**
@@ -74,7 +88,55 @@ export interface AdvanceCareerWorldSessionResult {
   readonly accepted: boolean;
   readonly session?: CareerWorldSession;
   readonly error?: string;
-  readonly advanceResult: FootballWorldAdvanceResult;
+  readonly advanceResult?: FootballWorldAdvanceResult;
+}
+
+/**
+ * Result of querying the user's next scheduled world fixture.
+ */
+export interface CareerScheduledFixtureQuery {
+  readonly fixtureId: string;
+  readonly competitionId: string;
+  readonly date: string;
+  readonly round: number;
+  readonly homeClubId: string;
+  readonly awayClubId: string;
+  readonly isHome: boolean;
+  readonly opponentWorldClubId: string;
+}
+
+/**
+ * Pure, serializable handoff representation for interactive match presentation.
+ */
+export interface CareerInteractiveFixture {
+  readonly fixtureId: string;
+  readonly competitionId: string;
+  readonly scheduledDate: string;
+  readonly round: number;
+  readonly homeWorldClubId: string;
+  readonly awayWorldClubId: string;
+  readonly userWorldClubId: string;
+  readonly opponentWorldClubId: string;
+  readonly isUserHome: boolean;
+  readonly userAvailability: 'AVAILABLE' | 'INJURED' | 'SUSPENDED';
+  readonly userSelectionStatus: 'STARTER' | 'BENCH' | 'NOT_SELECTED' | 'UNAVAILABLE';
+  readonly userClubSelection?: WorldMatchTeamSelection;
+  readonly opponentClubSelection?: WorldMatchTeamSelection;
+  readonly userClubManagerPlan?: WorldManagerMatchPlan;
+  readonly opponentClubManagerPlan?: WorldManagerMatchPlan;
+  readonly competitionRuleSetId?: string;
+}
+
+/**
+ * Result of advancing the world to the user's next match.
+ */
+export interface AdvanceToNextFixtureResult {
+  readonly accepted: boolean;
+  readonly session?: CareerWorldSession;
+  readonly nextFixture?: CareerScheduledFixtureQuery;
+  readonly handoff?: CareerInteractiveFixture;
+  readonly error?: string;
+  readonly advanceResult?: FootballWorldAdvanceResult;
 }
 
 // ============================================================================
@@ -491,6 +553,29 @@ export function advanceCareerWorldSession(
   session: CareerWorldSession,
   nextDate: string
 ): AdvanceCareerWorldSessionResult {
+  // Reserved-date guard: prevent advancing across/onto any actively reserved unresolved fixture date
+  if (session.reservedFixtureIds && session.reservedFixtureIds.length > 0) {
+    const unresolvedReserved: Array<{ fixtureId: string; date: string }> = [];
+    for (const fId of session.reservedFixtureIds) {
+      const found = findScheduledFixture(session.runtimeState, fId);
+      if (!found) continue;
+      const isResolved = found.compState.results.some((r) => r.fixtureId === fId);
+      if (isResolved) continue;
+      unresolvedReserved.push({ fixtureId: fId, date: found.scheduledDate });
+    }
+
+    if (unresolvedReserved.length > 0) {
+      unresolvedReserved.sort((a, b) => a.date.localeCompare(b.date));
+      const earliest = unresolvedReserved[0];
+      if (nextDate >= earliest.date) {
+        return {
+          accepted: false,
+          error: `Cannot advance career world through reserved fixture '${earliest.fixtureId}' scheduled for ${earliest.date}.`,
+        };
+      }
+    }
+  }
+
   const advanceResult = advanceFootballWorldStep(
     session.runtimeState,
     nextDate,
@@ -505,12 +590,394 @@ export function advanceCareerWorldSession(
     };
   }
 
+  // Prune any reservations that have been resolved
+  let updatedReservations: string[] | undefined = undefined;
+  if (session.reservedFixtureIds && session.reservedFixtureIds.length > 0) {
+    const allResolvedIds = new Set(
+      advanceResult.state.competitionSeasonStates
+        .flatMap((c) => c.results)
+        .map((r) => r.fixtureId)
+    );
+    const remaining = session.reservedFixtureIds.filter((id) => !allResolvedIds.has(id));
+    if (remaining.length > 0) {
+      updatedReservations = remaining;
+    }
+  }
+
   return {
     accepted: true,
     session: {
       ...session,
       runtimeState: advanceResult.state,
+      reservedFixtureIds: updatedReservations,
     },
+    advanceResult,
+  };
+}
+
+// ============================================================================
+// 10. USER FIXTURE AUTHORITY & RESERVATION LIFECYCLE
+// ============================================================================
+
+/**
+ * Pure query identifying the earliest unresolved scheduled fixture involving the user's club.
+ *
+ * Deterministic tie-break order:
+ * 1. Earliest calendar date (YYYY-MM-DD ASC)
+ * 2. competitionId ASC (localeCompare)
+ * 3. round ASC (numeric)
+ * 4. fixtureId ASC (localeCompare)
+ */
+export function getNextCareerWorldFixture(
+  session: CareerWorldSession
+): CareerScheduledFixtureQuery | undefined {
+  const userClubId = session.link.worldClubId;
+  const currentDate = session.runtimeState.currentDate;
+  const candidates: CareerScheduledFixtureQuery[] = [];
+
+  for (const compState of session.runtimeState.competitionSeasonStates) {
+    const resolvedIds = new Set(compState.results.map((r) => r.fixtureId));
+    const dateMap = buildCompetitionFixtureDateMap(compState, currentDate);
+
+    for (const round of compState.schedule.rounds) {
+      for (const fixture of round.fixtures) {
+        if (resolvedIds.has(fixture.id)) continue;
+
+        const isHome = fixture.homeTeamId === userClubId;
+        const isAway = fixture.awayTeamId === userClubId;
+        if (!isHome && !isAway) continue;
+
+        const scheduledDate = dateMap.get(fixture.id);
+        if (!scheduledDate || scheduledDate < currentDate) continue;
+
+        candidates.push({
+          fixtureId: fixture.id,
+          competitionId: compState.competitionId,
+          date: scheduledDate,
+          round: fixture.round,
+          homeClubId: fixture.homeTeamId,
+          awayClubId: fixture.awayTeamId,
+          isHome,
+          opponentWorldClubId: isHome ? fixture.awayTeamId : fixture.homeTeamId,
+        });
+      }
+    }
+  }
+
+  if (candidates.length === 0) {
+    return undefined;
+  }
+
+  candidates.sort((a, b) => {
+    if (a.date !== b.date) {
+      return a.date.localeCompare(b.date);
+    }
+    if (a.competitionId !== b.competitionId) {
+      return a.competitionId.localeCompare(b.competitionId);
+    }
+    if (a.round !== b.round) {
+      return a.round - b.round;
+    }
+    return a.fixtureId.localeCompare(b.fixtureId);
+  });
+
+  return candidates[0];
+}
+
+/**
+ * Pure helper to mark a fixture reserved/deferred in session metadata.
+ * Does NOT mutate input session.
+ */
+export function reserveCareerFixture(
+  session: CareerWorldSession,
+  fixtureId: string
+): CareerWorldSession {
+  const currentSet = new Set(session.reservedFixtureIds ?? []);
+  currentSet.add(fixtureId);
+  return {
+    ...session,
+    reservedFixtureIds: Array.from(currentSet),
+  };
+}
+
+/**
+ * Pure helper to remove a fixture reservation from session metadata.
+ * If fixtureId is omitted, removes all reservations.
+ * Does NOT mutate input session.
+ */
+export function releaseCareerFixtureReservation(
+  session: CareerWorldSession,
+  fixtureId?: string
+): CareerWorldSession {
+  if (!fixtureId) {
+    const { reservedFixtureIds: _omitted, ...rest } = session;
+    return { ...rest };
+  }
+
+  const updated = (session.reservedFixtureIds ?? []).filter((id) => id !== fixtureId);
+  return {
+    ...session,
+    reservedFixtureIds: updated.length > 0 ? updated : undefined,
+  };
+}
+
+/**
+ * Internal helper to locate a scheduled fixture across active competition season states.
+ */
+function findScheduledFixture(
+  runtimeState: FootballWorldRuntimeState,
+  fixtureId: string
+): {
+  compState: (typeof runtimeState.competitionSeasonStates)[number];
+  fixture: (typeof runtimeState.competitionSeasonStates)[number]['schedule']['rounds'][number]['fixtures'][number];
+  scheduledDate: string;
+} | undefined {
+  for (const compState of runtimeState.competitionSeasonStates) {
+    const dMap = buildCompetitionFixtureDateMap(compState, runtimeState.currentDate);
+    for (const round of compState.schedule.rounds) {
+      const found = round.fixtures.find((f) => f.id === fixtureId);
+      if (found) {
+        const scheduledDate = dMap.get(found.id) ?? runtimeState.currentDate;
+        return { compState, fixture: found, scheduledDate };
+      }
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Pure generator creating a serializable interactive match handoff object.
+ * Computes user availability, manager pre-match squad selection, and tactical plans
+ * from the pre-match (D-1 end / D beginning) snapshot without simulating match scores.
+ */
+export function createCareerInteractiveHandoff(
+  session: CareerWorldSession,
+  fixtureId: string
+): CareerInteractiveFixture | undefined {
+  const target = findScheduledFixture(session.runtimeState, fixtureId);
+  if (!target) return undefined;
+
+  const { compState: targetCompState, fixture: targetFixture, scheduledDate } = target;
+  const userClubId = session.link.worldClubId;
+  const userPlayerId = session.link.worldPlayerId;
+
+  // 1. User Availability Check
+  const userAvailState = session.runtimeState.playerAvailabilityStates?.find(
+    (a) => a.playerId === userPlayerId
+  );
+  const availResult = isPlayerAvailableForFixture(
+    userPlayerId,
+    scheduledDate,
+    targetCompState.competitionId,
+    userAvailState
+  );
+  const userAvailability: 'AVAILABLE' | 'INJURED' | 'SUSPENDED' = availResult.available
+    ? 'AVAILABLE'
+    : availResult.reason === 'INJURED'
+    ? 'INJURED'
+    : 'SUSPENDED';
+
+  // 2. Pre-Match Manager AI Squad Selection & Plan Generation
+  const squadMap = new Map((session.runtimeState.squadAssignments ?? []).map((s) => [s.clubId, s.playerIds]));
+  const clubManagerMap = new Map((session.runtimeState.managerAssignments ?? []).map((m) => [m.clubId, m.managerId]));
+
+  const ruleSets = session.staticContext.ruleSets ?? session.staticContext.competitionRuleSets;
+  const benchSize = resolveRuleSetBenchSize(targetCompState.ruleSetId, ruleSets);
+
+  let playerPositions: Map<string, WorldFootballPosition>;
+  if (session.staticContext.playerPositions instanceof Map) {
+    playerPositions = session.staticContext.playerPositions;
+  } else if (session.staticContext.playerPositions) {
+    playerPositions = new Map(Object.entries(session.staticContext.playerPositions));
+  } else {
+    playerPositions = new Map();
+    for (const p of session.staticContext.players ?? []) {
+      if (p.primaryPosition) playerPositions.set(p.id, p.primaryPosition);
+    }
+  }
+
+  const playerBirthDates = new Map<string, string>();
+  for (const p of session.staticContext.players ?? []) {
+    if (p.dateOfBirth) playerBirthDates.set(p.id, p.dateOfBirth);
+  }
+
+  const playerStatesMap = new Map((session.runtimeState.playerFootballStates ?? []).map((s) => [s.playerId, s]));
+
+  const makeAvailFn = (compId: string) => (pId: string) => {
+    const a = session.runtimeState.playerAvailabilityStates?.find((av) => av.playerId === pId);
+    return isPlayerAvailableForFixture(pId, scheduledDate, compId, a).available;
+  };
+
+  // Build Home & Away Selections and Manager Plans
+  const buildTeamSquadPlan = (teamId: string) => {
+    const squad = squadMap.get(teamId) ?? [];
+    const managerId = clubManagerMap.get(teamId);
+    const managerProfile = resolveWorldManagerProfile(managerId);
+    return selectMatchTeamSquadWithManager(teamId, squad, playerStatesMap, {
+      fixtureId: targetFixture.id,
+      benchSize,
+      playerPositions,
+      isPlayerAvailable: makeAvailFn(targetCompState.competitionId),
+      playerBirthDates,
+      calendarDate: scheduledDate,
+      managerProfile,
+    });
+  };
+
+  const homeSquadResult = buildTeamSquadPlan(targetFixture.homeTeamId);
+  const awaySquadResult = buildTeamSquadPlan(targetFixture.awayTeamId);
+
+  const isUserHome = targetFixture.homeTeamId === userClubId;
+  const userClubSquadResult = isUserHome ? homeSquadResult : awaySquadResult;
+  const opponentClubSquadResult = isUserHome ? awaySquadResult : homeSquadResult;
+
+  // 3. User Selection Authority (Starter vs Bench vs Not Selected)
+  let userSelectionStatus: 'STARTER' | 'BENCH' | 'NOT_SELECTED' | 'UNAVAILABLE';
+  if (userAvailability !== 'AVAILABLE') {
+    userSelectionStatus = 'UNAVAILABLE';
+  } else if (userClubSquadResult.selection.startingPlayerIds.includes(userPlayerId)) {
+    userSelectionStatus = 'STARTER';
+  } else if (userClubSquadResult.selection.benchPlayerIds.includes(userPlayerId)) {
+    userSelectionStatus = 'BENCH';
+  } else {
+    userSelectionStatus = 'NOT_SELECTED';
+  }
+
+  return {
+    fixtureId: targetFixture.id,
+    competitionId: targetCompState.competitionId,
+    scheduledDate,
+    round: targetFixture.round,
+    homeWorldClubId: targetFixture.homeTeamId,
+    awayWorldClubId: targetFixture.awayTeamId,
+    userWorldClubId: userClubId,
+    opponentWorldClubId: isUserHome ? targetFixture.awayTeamId : targetFixture.homeTeamId,
+    isUserHome,
+    userAvailability,
+    userSelectionStatus,
+    userClubSelection: userClubSquadResult.selection,
+    opponentClubSelection: opponentClubSquadResult.selection,
+    userClubManagerPlan: userClubSquadResult.matchPlan,
+    opponentClubManagerPlan: opponentClubSquadResult.matchPlan,
+    competitionRuleSetId: targetCompState.ruleSetId,
+  };
+}
+
+/**
+ * Pure helper advancing background world chronology toward the user's next fixture.
+ *
+ * New Semantics (Phase 3R Day-Boundary Invariant):
+ * - Stops strictly at D - 1 (the calendar day preceding target fixture date D).
+ * - Leaves all fixtures on date D completely unresolved to avoid premature condition recovery
+ *   or stranding unresolved fixtures.
+ * - The returned session has currentDate === D - 1, with fixture D reserved in reservedFixtureIds.
+ * - The generated handoff exposes manager pre-match selections from the pristine start-of-D state.
+ * - If currentDate is already >= D, returns an explicit lifecycle error.
+ */
+export function advanceCareerWorldToNextFixture(
+  session: CareerWorldSession,
+  targetFixtureId?: string
+): AdvanceToNextFixtureResult {
+  let targetQuery: CareerScheduledFixtureQuery | undefined;
+
+  if (targetFixtureId) {
+    const target = findScheduledFixture(session.runtimeState, targetFixtureId);
+    if (!target) {
+      return {
+        accepted: false,
+        error: `Target fixture '${targetFixtureId}' was not found in active competitions.`,
+      };
+    }
+    const { compState, fixture, scheduledDate } = target;
+    const isResolved = compState.results.some((r) => r.fixtureId === targetFixtureId);
+    if (isResolved) {
+      return {
+        accepted: false,
+        error: `Target fixture '${targetFixtureId}' has already been resolved in competition '${compState.competitionId}'.`,
+      };
+    }
+    const isHome = fixture.homeTeamId === session.link.worldClubId;
+    const isAway = fixture.awayTeamId === session.link.worldClubId;
+    if (!isHome && !isAway) {
+      return {
+        accepted: false,
+        error: `Target fixture '${targetFixtureId}' does not involve user club '${session.link.worldClubId}'.`,
+      };
+    }
+    targetQuery = {
+      fixtureId: fixture.id,
+      competitionId: compState.competitionId,
+      date: scheduledDate,
+      round: fixture.round,
+      homeClubId: fixture.homeTeamId,
+      awayClubId: fixture.awayTeamId,
+      isHome,
+      opponentWorldClubId: isHome ? fixture.awayTeamId : fixture.homeTeamId,
+    };
+  } else {
+    targetQuery = getNextCareerWorldFixture(session);
+    if (!targetQuery) {
+      return {
+        accepted: false,
+        error: 'No upcoming scheduled fixtures found for user club.',
+      };
+    }
+  }
+
+  const targetDate = targetQuery.date;
+  const previousDate = addDaysToDate(targetDate, -1);
+  const currentDate = session.runtimeState.currentDate;
+
+  // Lifecycle check: cannot advance to D if currentDate is already at or past D
+  if (currentDate >= targetDate) {
+    return {
+      accepted: false,
+      error: `Lifecycle error: Current date '${currentDate}' is already at or past target fixture date '${targetDate}'.`,
+    };
+  }
+
+  const reservedSet = new Set<string>([
+    ...(session.reservedFixtureIds ?? []),
+    targetQuery.fixtureId,
+  ]);
+
+  let currentSession: CareerWorldSession;
+  let advanceResult: FootballWorldAdvanceResult | undefined;
+
+  if (currentDate < previousDate) {
+    const adv = advanceFootballWorldStep(
+      session.runtimeState,
+      previousDate,
+      session.staticContext
+    );
+    if (!adv.accepted || !adv.state) {
+      return {
+        accepted: false,
+        error: adv.error || `Failed to advance world to date ${previousDate}.`,
+        advanceResult: adv,
+      };
+    }
+    advanceResult = adv;
+    currentSession = {
+      ...session,
+      runtimeState: adv.state,
+      reservedFixtureIds: Array.from(reservedSet),
+    };
+  } else {
+    // Already on previousDate (D - 1): no world advancement required
+    currentSession = {
+      ...session,
+      reservedFixtureIds: Array.from(reservedSet),
+    };
+  }
+
+  const handoff = createCareerInteractiveHandoff(currentSession, targetQuery.fixtureId);
+
+  return {
+    accepted: true,
+    session: currentSession,
+    nextFixture: targetQuery,
+    handoff,
     advanceResult,
   };
 }
