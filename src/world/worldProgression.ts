@@ -17,7 +17,9 @@ import type {
   WorldFootballPosition,
   WorldManagerMatchPlan,
   WorldPlayerFootballState,
+  WorldExternalFixtureResolution,
 } from './types';
+import { validateExternalFixtureResolutions } from './externalFixtureValidation';
 import {
   selectMatchTeamSquad,
   createFixtureParticipation,
@@ -372,10 +374,11 @@ export function prepareCompetitionFixtureDates(
  * @param context Required static world context (descriptors, player positions, rule sets, or data pack).
  * @returns FootballWorldAdvanceResult containing the updated state or rejection reason.
  */
-export function advanceFootballWorldStep(
+function advanceFootballWorldStepInternal(
   state: FootballWorldRuntimeState,
   nextDate: string,
-  context: FootballWorldStaticContext | FootballWorldDataPack
+  context: FootballWorldStaticContext | FootballWorldDataPack,
+  externalResolutions?: readonly WorldExternalFixtureResolution[]
 ): FootballWorldAdvanceResult {
   // 1. Validate date structure & calendar validity
   if (!isValidCalendarDate(nextDate)) {
@@ -566,6 +569,14 @@ export function advanceFootballWorldStep(
     clubManagerMap.set(m.clubId, m.managerId);
   }
 
+  const externalResolutionsMap =
+    externalResolutions && externalResolutions.length > 0
+      ? new Map<string, WorldExternalFixtureResolution>(
+          externalResolutions.map((r) => [r.fixtureId, r])
+        )
+      : undefined;
+  const consumedResolutionFixtureIds = externalResolutionsMap ? new Set<string>() : undefined;
+
   const playerBirthDates = new Map<string, string>();
   if (context.players) {
     for (const p of context.players) {
@@ -722,168 +733,207 @@ export function advanceFootballWorldStep(
 
       // Deterministic stable RNG seed (independent of caller nextDate)
       const baseFixtureKey = `${state.dataPackId}:${entry.compState.seasonLabel}:${compId}:${fixture.id}:${calendarDate}`;
-      const seed = hashString(baseFixtureKey);
-      const rng = createRng(seed);
 
-      // Squad selection using player states & availability at the beginning of this date
-      const homeSquad = squadMap.get(fixture.homeTeamId) ?? [];
-      const awaySquad = squadMap.get(fixture.awayTeamId) ?? [];
+      const externalResolution = externalResolutionsMap?.get(fixture.id);
 
-      const isPlayerAvailableHome = (playerId: string) =>
-        isPlayerAvailableForFixture(
-          playerId,
-          calendarDate,
-          compId,
-          beginningOfDayAvailabilityMap.get(playerId)
-        ).available;
-      const isPlayerAvailableAway = (playerId: string) =>
-        isPlayerAvailableForFixture(
-          playerId,
-          calendarDate,
-          compId,
-          beginningOfDayAvailabilityMap.get(playerId)
-        ).available;
-
-      const homeManagerId = clubManagerMap.get(fixture.homeTeamId);
-      const awayManagerId = clubManagerMap.get(fixture.awayTeamId);
-
-      const homeManagerProfile = resolveWorldManagerProfile(homeManagerId);
-      const awayManagerProfile = resolveWorldManagerProfile(awayManagerId);
-
-      const homeSquadResult = selectMatchTeamSquadWithManager(
-        fixture.homeTeamId,
-        homeSquad,
-        beginningOfDayPlayerStates,
-        {
-          fixtureId: fixture.id,
-          benchSize,
-          playerPositions,
-          isPlayerAvailable: isPlayerAvailableHome,
-          playerBirthDates,
-          calendarDate,
-          managerProfile: homeManagerProfile,
-        }
-      );
-      const awaySquadResult = selectMatchTeamSquadWithManager(
-        fixture.awayTeamId,
-        awaySquad,
-        beginningOfDayPlayerStates,
-        {
-          fixtureId: fixture.id,
-          benchSize,
-          playerPositions,
-          isPlayerAvailable: isPlayerAvailableAway,
-          playerBirthDates,
-          calendarDate,
-          managerProfile: awayManagerProfile,
-        }
-      );
-
-      const homeSelection = homeSquadResult.selection;
-      const awaySelection = awaySquadResult.selection;
-
-      newlySimulatedManagerPlans.push(homeSquadResult.matchPlan);
-      newlySimulatedManagerPlans.push(awaySquadResult.matchPlan);
-
-      // Phase 3L: Selected XI Lineup Quality and Bounded Modifiers
-      const homeTodayQuality = computeLineupQuality(
-        homeSelection.startingPlayerIds,
-        beginningOfDayPlayerStates,
-        playerPositions
-      );
-      const awayTodayQuality = computeLineupQuality(
-        awaySelection.startingPlayerIds,
-        beginningOfDayPlayerStates,
-        playerPositions
-      );
-
-      let homeRefQuality = clubReferenceQualities.get(fixture.homeTeamId);
-      if (!homeRefQuality) {
-        homeRefQuality = computeClubReferenceLineupQuality(
-          fixture.homeTeamId,
-          homeSquad,
-          beginningOfDayPlayerStates,
-          { playerPositions }
-        );
-        clubReferenceQualities.set(fixture.homeTeamId, homeRefQuality);
-      }
-
-      let awayRefQuality = clubReferenceQualities.get(fixture.awayTeamId);
-      if (!awayRefQuality) {
-        awayRefQuality = computeClubReferenceLineupQuality(
-          fixture.awayTeamId,
-          awaySquad,
-          beginningOfDayPlayerStates,
-          { playerPositions }
-        );
-        clubReferenceQualities.set(fixture.awayTeamId, awayRefQuality);
-      }
-
-      const homeModifiers = computeLineupStrengthModifiers(
-        homeTodayQuality,
-        homeRefQuality
-      );
-      const awayModifiers = computeLineupStrengthModifiers(
-        awayTodayQuality,
-        awayRefQuality
-      );
-
-      // Phase 3P: Tactical Intent Modifiers
-      const homeTactical = computeTacticalIntentModifiers(
-        homeSquadResult.matchPlan.tacticalIntent
-      );
-      const awayTactical = computeTacticalIntentModifiers(
-        awaySquadResult.matchPlan.tacticalIntent
-      );
-
-      const { homeXg, awayXg } = computeExpectedGoals(
-        strengthSnapshot,
-        fixture.homeTeamId,
-        fixture.awayTeamId,
-        {
-          homeAttackMultiplier:
-            homeModifiers.attackStrengthMultiplier * homeTactical.attackMultiplier,
-          homeDefensiveResistanceMultiplier:
-            homeModifiers.defensiveResistanceMultiplier *
-            homeTactical.defensiveResistanceMultiplier,
-          awayAttackMultiplier:
-            awayModifiers.attackStrengthMultiplier * awayTactical.attackMultiplier,
-          awayDefensiveResistanceMultiplier:
-            awayModifiers.defensiveResistanceMultiplier *
-            awayTactical.defensiveResistanceMultiplier,
-        }
-      );
-
-      const homeGoals = samplePoisson(homeXg, rng);
-      const awayGoals = samplePoisson(awayXg, rng);
-
-      const participation = createFixtureParticipation(
-        fixture.id,
-        homeSelection,
-        awaySelection
-      );
-      newlySimulatedParticipations.push(participation);
-
+      let homeGoals: number;
+      let awayGoals: number;
+      let participation: WorldFixtureParticipation;
       let matchDetail: WorldFixtureMatchDetail | null | undefined = undefined;
-      if (!existingDetailFixtureIds.has(fixture.id)) {
-        matchDetail = generateFixtureMatchDetail({
-          fixture: {
-            id: fixture.id,
-            homeTeamId: fixture.homeTeamId,
-            awayTeamId: fixture.awayTeamId,
-          },
-          homeGoals,
-          awayGoals,
-          homeSelection,
-          awaySelection,
-          playerStates: beginningOfDayPlayerStates,
-          playerPositions,
-          baseFixtureSeedKey: baseFixtureKey,
-        });
-        if (matchDetail) {
+      let resultToAppend: CompetitionFixtureResult;
+
+      if (externalResolution) {
+        consumedResolutionFixtureIds?.add(fixture.id);
+        newlySimulatedManagerPlans.push(externalResolution.managerPlans[0]);
+        newlySimulatedManagerPlans.push(externalResolution.managerPlans[1]);
+
+        homeGoals = externalResolution.result.homeGoals;
+        awayGoals = externalResolution.result.awayGoals;
+        participation = externalResolution.participation;
+        newlySimulatedParticipations.push(participation);
+
+        matchDetail = externalResolution.matchDetail;
+        if (!existingDetailFixtureIds.has(fixture.id)) {
           newlySimulatedMatchDetails.push(matchDetail);
           existingDetailFixtureIds.add(fixture.id);
         }
+
+        resultToAppend = externalResolution.result;
+      } else {
+        const seed = hashString(baseFixtureKey);
+        const rng = createRng(seed);
+
+        // Squad selection using player states & availability at the beginning of this date
+        const homeSquad = squadMap.get(fixture.homeTeamId) ?? [];
+        const awaySquad = squadMap.get(fixture.awayTeamId) ?? [];
+
+        const isPlayerAvailableHome = (playerId: string) =>
+          isPlayerAvailableForFixture(
+            playerId,
+            calendarDate,
+            compId,
+            beginningOfDayAvailabilityMap.get(playerId)
+          ).available;
+        const isPlayerAvailableAway = (playerId: string) =>
+          isPlayerAvailableForFixture(
+            playerId,
+            calendarDate,
+            compId,
+            beginningOfDayAvailabilityMap.get(playerId)
+          ).available;
+
+        const homeManagerId = clubManagerMap.get(fixture.homeTeamId);
+        const awayManagerId = clubManagerMap.get(fixture.awayTeamId);
+
+        const homeManagerProfile = resolveWorldManagerProfile(homeManagerId);
+        const awayManagerProfile = resolveWorldManagerProfile(awayManagerId);
+
+        const homeSquadResult = selectMatchTeamSquadWithManager(
+          fixture.homeTeamId,
+          homeSquad,
+          beginningOfDayPlayerStates,
+          {
+            fixtureId: fixture.id,
+            benchSize,
+            playerPositions,
+            isPlayerAvailable: isPlayerAvailableHome,
+            playerBirthDates,
+            calendarDate,
+            managerProfile: homeManagerProfile,
+          }
+        );
+        const awaySquadResult = selectMatchTeamSquadWithManager(
+          fixture.awayTeamId,
+          awaySquad,
+          beginningOfDayPlayerStates,
+          {
+            fixtureId: fixture.id,
+            benchSize,
+            playerPositions,
+            isPlayerAvailable: isPlayerAvailableAway,
+            playerBirthDates,
+            calendarDate,
+            managerProfile: awayManagerProfile,
+          }
+        );
+
+        const homeSelection = homeSquadResult.selection;
+        const awaySelection = awaySquadResult.selection;
+
+        newlySimulatedManagerPlans.push(homeSquadResult.matchPlan);
+        newlySimulatedManagerPlans.push(awaySquadResult.matchPlan);
+
+        // Phase 3L: Selected XI Lineup Quality and Bounded Modifiers
+        const homeTodayQuality = computeLineupQuality(
+          homeSelection.startingPlayerIds,
+          beginningOfDayPlayerStates,
+          playerPositions
+        );
+        const awayTodayQuality = computeLineupQuality(
+          awaySelection.startingPlayerIds,
+          beginningOfDayPlayerStates,
+          playerPositions
+        );
+
+        let homeRefQuality = clubReferenceQualities.get(fixture.homeTeamId);
+        if (!homeRefQuality) {
+          homeRefQuality = computeClubReferenceLineupQuality(
+            fixture.homeTeamId,
+            homeSquad,
+            beginningOfDayPlayerStates,
+            { playerPositions }
+          );
+          clubReferenceQualities.set(fixture.homeTeamId, homeRefQuality);
+        }
+
+        let awayRefQuality = clubReferenceQualities.get(fixture.awayTeamId);
+        if (!awayRefQuality) {
+          awayRefQuality = computeClubReferenceLineupQuality(
+            fixture.awayTeamId,
+            awaySquad,
+            beginningOfDayPlayerStates,
+            { playerPositions }
+          );
+          clubReferenceQualities.set(fixture.awayTeamId, awayRefQuality);
+        }
+
+        const homeModifiers = computeLineupStrengthModifiers(
+          homeTodayQuality,
+          homeRefQuality
+        );
+        const awayModifiers = computeLineupStrengthModifiers(
+          awayTodayQuality,
+          awayRefQuality
+        );
+
+        // Phase 3P: Tactical Intent Modifiers
+        const homeTactical = computeTacticalIntentModifiers(
+          homeSquadResult.matchPlan.tacticalIntent
+        );
+        const awayTactical = computeTacticalIntentModifiers(
+          awaySquadResult.matchPlan.tacticalIntent
+        );
+
+        const { homeXg, awayXg } = computeExpectedGoals(
+          strengthSnapshot,
+          fixture.homeTeamId,
+          fixture.awayTeamId,
+          {
+            homeAttackMultiplier:
+              homeModifiers.attackStrengthMultiplier * homeTactical.attackMultiplier,
+            homeDefensiveResistanceMultiplier:
+              homeModifiers.defensiveResistanceMultiplier *
+              homeTactical.defensiveResistanceMultiplier,
+            awayAttackMultiplier:
+              awayModifiers.attackStrengthMultiplier * awayTactical.attackMultiplier,
+            awayDefensiveResistanceMultiplier:
+              awayModifiers.defensiveResistanceMultiplier *
+              awayTactical.defensiveResistanceMultiplier,
+          }
+        );
+
+        homeGoals = samplePoisson(homeXg, rng);
+        awayGoals = samplePoisson(awayXg, rng);
+
+        participation = createFixtureParticipation(
+          fixture.id,
+          homeSelection,
+          awaySelection
+        );
+        newlySimulatedParticipations.push(participation);
+
+        if (!existingDetailFixtureIds.has(fixture.id)) {
+          matchDetail = generateFixtureMatchDetail({
+            fixture: {
+              id: fixture.id,
+              homeTeamId: fixture.homeTeamId,
+              awayTeamId: fixture.awayTeamId,
+            },
+            homeGoals,
+            awayGoals,
+            homeSelection,
+            awaySelection,
+            playerStates: beginningOfDayPlayerStates,
+            playerPositions,
+            baseFixtureSeedKey: baseFixtureKey,
+          });
+          if (matchDetail) {
+            newlySimulatedMatchDetails.push(matchDetail);
+            existingDetailFixtureIds.add(fixture.id);
+          }
+        }
+
+        resultToAppend = {
+          fixtureId: fixture.id,
+          competitionId: compId,
+          seasonLabel: entry.compState.seasonLabel,
+          ruleSetId: entry.compState.ruleSetId,
+          round: fixture.round,
+          homeTeamId: fixture.homeTeamId,
+          awayTeamId: fixture.awayTeamId,
+          homeGoals,
+          awayGoals,
+        };
       }
 
       // Stage match injuries for appearing players
@@ -947,17 +997,7 @@ export function advanceFootballWorldStep(
       }
 
       // Append fixture result
-      currentCompResults.get(compId)!.push({
-        fixtureId: fixture.id,
-        competitionId: compId,
-        seasonLabel: entry.compState.seasonLabel,
-        ruleSetId: entry.compState.ruleSetId,
-        round: fixture.round,
-        homeTeamId: fixture.homeTeamId,
-        awayTeamId: fixture.awayTeamId,
-        homeGoals,
-        awayGoals,
-      });
+      currentCompResults.get(compId)!.push(resultToAppend);
 
       // Update simulation counts and date bounds
       const curCount = currentCompSimulatedCounts.get(compId) ?? 0;
@@ -1049,6 +1089,18 @@ export function advanceFootballWorldStep(
     for (const avail of currentAvailabilityMap.values()) {
       if (avail.injury && calendarDate >= avail.injury.availableFromDate) {
         avail.injury = undefined;
+      }
+    }
+  }
+
+  // Ensure all supplied external resolutions were consumed
+  if (externalResolutions && consumedResolutionFixtureIds) {
+    for (const r of externalResolutions) {
+      if (!consumedResolutionFixtureIds.has(r.fixtureId)) {
+        return {
+          accepted: false,
+          error: `External resolution fixture '${r.fixtureId}' was not scheduled or due on the simulated calendar date.`,
+        };
       }
     }
   }
@@ -1161,4 +1213,74 @@ export function advanceFootballWorldStep(
     state: nextState,
     competitionProgressSummaries: progressSummaries,
   };
+}
+
+/**
+ * Advances every active competition in the football world by simulating fixtures
+ * that are actually due in the calendar interval (state.currentDate, nextDate].
+ * Does NOT mutate the input state.
+ *
+ * @param state The current immutable runtime world state.
+ * @param nextDate The caller-supplied target simulation date (must be strictly after state.currentDate).
+ * @param context Required static world context (descriptors, player positions, rule sets, or data pack).
+ * @returns FootballWorldAdvanceResult containing the updated state or rejection reason.
+ */
+export function advanceFootballWorldStep(
+  state: FootballWorldRuntimeState,
+  nextDate: string,
+  context: FootballWorldStaticContext | FootballWorldDataPack
+): FootballWorldAdvanceResult {
+  return advanceFootballWorldStepInternal(state, nextDate, context);
+}
+
+/**
+ * Phase 3S: Atomically resolves exactly one calendar day (currentDate + 1) with externally
+ * supplied authoritative fixture outcomes alongside deterministic background simulation
+ * of all other due fixtures on that date.
+ *
+ * @param state The current immutable runtime world state (at D - 1).
+ * @param nextDate Target date (strictly required to equal currentDate + 1 calendar day).
+ * @param context Required static world context.
+ * @param externalResolutions Authoritative external resolutions for one or more fixtures on nextDate.
+ * @returns FootballWorldAdvanceResult containing the updated state at nextDate or rejection reason.
+ */
+export function advanceFootballWorldDayWithExternalResolutions(
+  state: FootballWorldRuntimeState,
+  nextDate: string,
+  context: FootballWorldStaticContext | FootballWorldDataPack,
+  externalResolutions: readonly WorldExternalFixtureResolution[]
+): FootballWorldAdvanceResult {
+  if (!isValidCalendarDate(nextDate)) {
+    return {
+      accepted: false,
+      error: `Invalid nextDate '${nextDate}'. Must be a valid YYYY-MM-DD calendar date string.`,
+    };
+  }
+
+  const expectedNextDate = addDaysToDate(state.currentDate, 1);
+  if (nextDate !== expectedNextDate) {
+    return {
+      accepted: false,
+      error: `advanceFootballWorldDayWithExternalResolutions only supports single-day progression (currentDate + 1 day). Expected '${expectedNextDate}', received '${nextDate}'.`,
+    };
+  }
+
+  if (!externalResolutions || externalResolutions.length === 0) {
+    return advanceFootballWorldStepInternal(state, nextDate, context);
+  }
+
+  const validation = validateExternalFixtureResolutions(
+    state,
+    nextDate,
+    context,
+    externalResolutions
+  );
+  if (!validation.valid) {
+    return {
+      accepted: false,
+      error: `External fixture resolution validation failed: ${validation.errors.join('; ')}`,
+    };
+  }
+
+  return advanceFootballWorldStepInternal(state, nextDate, context, externalResolutions);
 }

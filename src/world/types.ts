@@ -399,3 +399,15 @@ export interface FootballWorldAdvanceResult {
   error?: string;
   competitionProgressSummaries?: CompetitionProgressSummary[];
 }
+
+/**
+ * Complete, authoritative plain-data resolution for a single due world fixture.
+ * Supplies predetermined match score, participation, event detail, and manager plans.
+ */
+export interface WorldExternalFixtureResolution {
+  readonly fixtureId: string;
+  readonly result: CompetitionFixtureResult;
+  readonly participation: WorldFixtureParticipation;
+  readonly matchDetail: WorldFixtureMatchDetail;
+  readonly managerPlans: readonly [WorldManagerMatchPlan, WorldManagerMatchPlan];
+}

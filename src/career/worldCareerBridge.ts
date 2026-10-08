@@ -25,10 +25,12 @@ import type {
   WorldPlayerAvailabilityState,
   WorldPlayerDefinition,
   WorldPlayerFootballState,
+  WorldExternalFixtureResolution,
 } from '../world/types';
 import { bootstrapFootballWorld } from '../world/worldRuntime';
 import {
   advanceFootballWorldStep,
+  advanceFootballWorldDayWithExternalResolutions,
   buildCompetitionFixtureDateMap,
   addDaysToDate,
 } from '../world/worldProgression';
@@ -85,6 +87,16 @@ export interface CareerWorldSessionBootstrapResult {
  * Result of advancing an active career-world session.
  */
 export interface AdvanceCareerWorldSessionResult {
+  readonly accepted: boolean;
+  readonly session?: CareerWorldSession;
+  readonly error?: string;
+  readonly advanceResult?: FootballWorldAdvanceResult;
+}
+
+/**
+ * Result of atomically resolving an interactive fixture day.
+ */
+export interface ResolveCareerInteractiveFixtureResult {
   readonly accepted: boolean;
   readonly session?: CareerWorldSession;
   readonly error?: string;
@@ -978,6 +990,231 @@ export function advanceCareerWorldToNextFixture(
     session: currentSession,
     nextFixture: targetQuery,
     handoff,
+    advanceResult,
+  };
+}
+
+/**
+ * Phase 3S: Atomically resolves an externally decided interactive fixture for the user's club
+ * and closes the entire match date D.
+ *
+ * Requirements:
+ * - Session must currently be stopped at D - 1 (the calendar barrier established in Phase 3R).
+ * - Target fixture must be present in session.reservedFixtureIds.
+ * - Target fixture must involve user's world club (session.link.worldClubId).
+ * - Fixture must not have already been resolved in competition results.
+ * - Calls advanceFootballWorldDayWithExternalResolutions to simulate date D atomically.
+ * - On success: removes fixture reservation and returns updated session with currentDate === D.
+ * - On failure: leaves session and reservation completely unchanged.
+ */
+export function resolveCareerInteractiveFixtureDay(
+  session: CareerWorldSession,
+  externalResolution: WorldExternalFixtureResolution
+): ResolveCareerInteractiveFixtureResult {
+  if (!session || !session.runtimeState) {
+    return {
+      accepted: false,
+      error: 'Valid CareerWorldSession is required.',
+    };
+  }
+
+  if (!externalResolution || !externalResolution.fixtureId) {
+    return {
+      accepted: false,
+      error: 'Valid WorldExternalFixtureResolution is required.',
+    };
+  }
+
+  const reservedFixtureIds = session.reservedFixtureIds ?? [];
+  if (!reservedFixtureIds.includes(externalResolution.fixtureId)) {
+    return {
+      accepted: false,
+      error: `Fixture '${externalResolution.fixtureId}' is not reserved in session. Current reserved fixtures: [${reservedFixtureIds.join(', ')}].`,
+    };
+  }
+
+  const target = findScheduledFixture(session.runtimeState, externalResolution.fixtureId);
+  if (!target) {
+    return {
+      accepted: false,
+      error: `Fixture '${externalResolution.fixtureId}' not found in active competitions.`,
+    };
+  }
+
+  const { compState, fixture, scheduledDate } = target;
+
+  // Duplicate safety: fixture must not already be resolved
+  const isAlreadyResolved = compState.results.some((r) => r.fixtureId === externalResolution.fixtureId);
+  if (isAlreadyResolved) {
+    return {
+      accepted: false,
+      error: `Fixture '${externalResolution.fixtureId}' has already been resolved in competition '${compState.competitionId}'.`,
+    };
+  }
+
+  // Session currentDate must equal D - 1
+  const expectedPreviousDate = addDaysToDate(scheduledDate, -1);
+  if (session.runtimeState.currentDate !== expectedPreviousDate) {
+    return {
+      accepted: false,
+      error: `Session currentDate '${session.runtimeState.currentDate}' must equal D-1 of scheduled fixture date '${scheduledDate}'.`,
+    };
+  }
+
+  // Fixture must involve user club
+  const isHome = fixture.homeTeamId === session.link.worldClubId;
+  const isAway = fixture.awayTeamId === session.link.worldClubId;
+  if (!isHome && !isAway) {
+    return {
+      accepted: false,
+      error: `Fixture '${externalResolution.fixtureId}' does not involve user club '${session.link.worldClubId}'.`,
+    };
+  }
+
+  // Reconstruct Phase 3R handoff for exact reservation to enforce career manager authority
+  const handoff = createCareerInteractiveHandoff(session, externalResolution.fixtureId);
+  if (!handoff) {
+    return {
+      accepted: false,
+      error: `Failed to create Phase 3R interactive handoff for fixture '${externalResolution.fixtureId}'.`,
+    };
+  }
+
+  const expectedHomeSelection = handoff.isUserHome
+    ? handoff.userClubSelection
+    : handoff.opponentClubSelection;
+  const expectedAwaySelection = handoff.isUserHome
+    ? handoff.opponentClubSelection
+    : handoff.userClubSelection;
+
+  const actualHomeSel = externalResolution.participation?.homeSelection;
+  const actualAwaySel = externalResolution.participation?.awaySelection;
+
+  if (!actualHomeSel || !actualAwaySel) {
+    return {
+      accepted: false,
+      error: 'Career external resolution must supply home and away selections.',
+    };
+  }
+
+  const arraysEqual = (a: readonly string[], b: readonly string[]) =>
+    a.length === b.length && a.every((v, i) => v === b[i]);
+
+  if (!expectedHomeSelection || !arraysEqual(actualHomeSel.startingPlayerIds, expectedHomeSelection.startingPlayerIds)) {
+    return {
+      accepted: false,
+      error: 'Career external resolution home startingPlayerIds must match Phase 3R handoff exactly.',
+    };
+  }
+  if (!expectedHomeSelection || !arraysEqual(actualHomeSel.benchPlayerIds, expectedHomeSelection.benchPlayerIds)) {
+    return {
+      accepted: false,
+      error: 'Career external resolution home benchPlayerIds must match Phase 3R handoff exactly.',
+    };
+  }
+  if (!expectedAwaySelection || !arraysEqual(actualAwaySel.startingPlayerIds, expectedAwaySelection.startingPlayerIds)) {
+    return {
+      accepted: false,
+      error: 'Career external resolution away startingPlayerIds must match Phase 3R handoff exactly.',
+    };
+  }
+  if (!expectedAwaySelection || !arraysEqual(actualAwaySel.benchPlayerIds, expectedAwaySelection.benchPlayerIds)) {
+    return {
+      accepted: false,
+      error: 'Career external resolution away benchPlayerIds must match Phase 3R handoff exactly.',
+    };
+  }
+
+  // Enforce Phase 3R manager match plans equality
+  const expectedHomePlan = handoff.isUserHome
+    ? handoff.userClubManagerPlan
+    : handoff.opponentClubManagerPlan;
+  const expectedAwayPlan = handoff.isUserHome
+    ? handoff.opponentClubManagerPlan
+    : handoff.userClubManagerPlan;
+
+  if (!externalResolution.managerPlans || externalResolution.managerPlans.length !== 2) {
+    return {
+      accepted: false,
+      error: 'Career external resolution must supply exactly 2 manager plans.',
+    };
+  }
+
+  const actualHomePlan = externalResolution.managerPlans.find((m) => m.teamId === fixture.homeTeamId);
+  const actualAwayPlan = externalResolution.managerPlans.find((m) => m.teamId === fixture.awayTeamId);
+
+  if (!actualHomePlan || !actualAwayPlan) {
+    return {
+      accepted: false,
+      error: 'Career external resolution must supply manager plans for both home and away teams.',
+    };
+  }
+
+  const validatePlanMatches = (
+    actual: WorldManagerMatchPlan,
+    expected?: WorldManagerMatchPlan,
+    side?: 'home' | 'away'
+  ) => {
+    if (!expected) {
+      return `Missing expected handoff manager plan for ${side} team.`;
+    }
+    if (actual.fixtureId !== expected.fixtureId) {
+      return `Career external resolution ${side} manager plan fixtureId '${actual.fixtureId}' does not match handoff '${expected.fixtureId}'.`;
+    }
+    if (actual.teamId !== expected.teamId) {
+      return `Career external resolution ${side} manager plan teamId '${actual.teamId}' does not match handoff '${expected.teamId}'.`;
+    }
+    if (actual.managerId !== expected.managerId) {
+      return `Career external resolution ${side} manager plan managerId '${actual.managerId}' does not match handoff '${expected.managerId}'.`;
+    }
+    if (actual.formation !== expected.formation) {
+      return `Career external resolution ${side} manager plan formation '${actual.formation}' does not match handoff '${expected.formation}'.`;
+    }
+    if (actual.tacticalIntent !== expected.tacticalIntent) {
+      return `Career external resolution ${side} manager plan tacticalIntent '${actual.tacticalIntent}' does not match handoff '${expected.tacticalIntent}'.`;
+    }
+    return null;
+  };
+
+  const homePlanErr = validatePlanMatches(actualHomePlan, expectedHomePlan, 'home');
+  if (homePlanErr) {
+    return { accepted: false, error: homePlanErr };
+  }
+  const awayPlanErr = validatePlanMatches(actualAwayPlan, expectedAwayPlan, 'away');
+  if (awayPlanErr) {
+    return { accepted: false, error: awayPlanErr };
+  }
+
+  // Perform atomic one-day world progression with external resolution
+  const advanceResult = advanceFootballWorldDayWithExternalResolutions(
+    session.runtimeState,
+    scheduledDate,
+    session.staticContext,
+    [externalResolution]
+  );
+
+  if (!advanceResult.accepted || !advanceResult.state) {
+    return {
+      accepted: false,
+      error: advanceResult.error || `Failed to advance world for fixture '${externalResolution.fixtureId}'.`,
+      advanceResult,
+    };
+  }
+
+  // On success: remove the fixture reservation
+  const nextReserved = reservedFixtureIds.filter((id) => id !== externalResolution.fixtureId);
+
+  const nextSession: CareerWorldSession = {
+    link: session.link,
+    runtimeState: advanceResult.state,
+    staticContext: session.staticContext,
+    sessionPack: session.sessionPack,
+    ...(nextReserved.length > 0 ? { reservedFixtureIds: nextReserved } : {}),
+  };
+
+  return {
+    accepted: true,
+    session: nextSession,
     advanceResult,
   };
 }
