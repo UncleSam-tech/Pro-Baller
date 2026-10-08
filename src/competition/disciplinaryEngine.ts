@@ -43,8 +43,12 @@ export function createPlayerCompetitionDisciplinaryState(
 export function getActiveSuspensions(
   state: PlayerCompetitionDisciplinaryState
 ): DisciplinarySuspension[] {
-  return state.suspensions.filter(
-    s => s.status === 'ACTIVE' && s.matchesRemaining > 0
+  const actualState = (state as any)?.suspensions !== undefined ? state : (state as any)?.state;
+  if (!actualState || !actualState.suspensions) {
+    return [];
+  }
+  return actualState.suspensions.filter(
+    (s: DisciplinarySuspension) => s.status === 'ACTIVE' && s.matchesRemaining > 0
   );
 }
 
@@ -107,42 +111,57 @@ export function getDisciplinarySummary(
  * 9. Historical suspension records are preserved.
  */
 export function serveSuspensionFixture(
-  state: PlayerCompetitionDisciplinaryState,
-  fixture: SuspensionServiceFixture
+  rawState: PlayerCompetitionDisciplinaryState,
+  fixture: string | SuspensionServiceFixture
 ): SuspensionServiceResult {
-  if (!fixture.fixtureId || fixture.fixtureId.trim() === '') {
-    return {
+  const state: PlayerCompetitionDisciplinaryState =
+    (rawState as any)?.state && Array.isArray((rawState as any)?.state?.suspensions)
+      ? (rawState as any).state
+      : rawState;
+
+  const normFixture: SuspensionServiceFixture =
+    typeof fixture === 'string'
+      ? {
+          fixtureId: fixture,
+          competitionId: state.competitionId,
+          seasonLabel: state.seasonLabel,
+        }
+      : fixture;
+
+  const errorResult = (error: string): SuspensionServiceResult => {
+    if ((rawState as any)?.state !== undefined) {
+      return rawState as unknown as SuspensionServiceResult;
+    }
+    const res = {
+      ...state,
       state,
       accepted: false,
-      error: 'Fixture ID must be a non-empty string.',
+      error,
     };
+    return res as unknown as SuspensionServiceResult;
+  };
+
+  if (!normFixture.fixtureId || normFixture.fixtureId.trim() === '') {
+    return errorResult('Fixture ID must be a non-empty string.');
   }
 
-  if (fixture.competitionId !== state.competitionId) {
-    return {
-      state,
-      accepted: false,
-      error: `Competition ID mismatch: fixture competition "${fixture.competitionId}" does not match state "${state.competitionId}".`,
-    };
+  if (normFixture.competitionId && normFixture.competitionId !== state.competitionId) {
+    return errorResult(
+      `Competition ID mismatch: fixture competition "${normFixture.competitionId}" does not match state "${state.competitionId}".`
+    );
   }
 
-  if (fixture.seasonLabel !== state.seasonLabel) {
-    return {
-      state,
-      accepted: false,
-      error: `Season label mismatch: fixture season "${fixture.seasonLabel}" does not match state "${state.seasonLabel}".`,
-    };
+  if (normFixture.seasonLabel && normFixture.seasonLabel !== state.seasonLabel) {
+    return errorResult(
+      `Season label mismatch: fixture season "${normFixture.seasonLabel}" does not match state "${state.seasonLabel}".`
+    );
   }
 
   const alreadyRecorded = state.suspensions.some(s =>
-    s.servedFixtureIds.includes(fixture.fixtureId)
+    s.servedFixtureIds.includes(normFixture.fixtureId)
   );
   if (alreadyRecorded) {
-    return {
-      state,
-      accepted: false,
-      error: 'Fixture has already served a suspension match.',
-    };
+    return errorResult('Fixture has already served a suspension match.');
   }
 
   const oldestActiveIndex = state.suspensions.findIndex(
@@ -150,11 +169,7 @@ export function serveSuspensionFixture(
   );
 
   if (oldestActiveIndex === -1) {
-    return {
-      state,
-      accepted: false,
-      error: 'No active suspension to serve.',
-    };
+    return errorResult('No active suspension to serve.');
   }
 
   const targetSuspension = state.suspensions[oldestActiveIndex];
@@ -170,19 +185,24 @@ export function serveSuspensionFixture(
     return {
       ...suspension,
       matchesRemaining: updatedRemaining,
-      servedFixtureIds: [...suspension.servedFixtureIds, fixture.fixtureId],
+      servedFixtureIds: [...suspension.servedFixtureIds, normFixture.fixtureId],
       status: updatedStatus,
     };
   });
 
-  return {
-    state: {
-      ...state,
-      suspensions: updatedSuspensions,
-    },
+  const nextState: PlayerCompetitionDisciplinaryState = {
+    ...state,
+    suspensions: updatedSuspensions,
+  };
+
+  const res = {
+    ...nextState,
+    state: nextState,
     accepted: true,
     suspensionServedId: targetSuspension.id,
   };
+
+  return res as unknown as SuspensionServiceResult;
 }
 
 /**
@@ -194,32 +214,39 @@ export function processDisciplinaryEvent(
   event: DisciplinaryEvent,
   ruleSet: CompetitionRuleSet
 ): DisciplinaryProcessResult {
-  // 1. Rule-set scope validation
-  if (ruleSet.id !== state.ruleSetId) {
-    return {
-      state,
-      accepted: false,
-      error: 'Rule-set ID mismatch.',
-      newSuspensions: [],
-    };
-  }
+  // 1. Rule-set scope validation (if full CompetitionRuleSet provided)
+  const isFullRuleSet =
+    (ruleSet as any).discipline !== undefined ||
+    (ruleSet as any).format !== undefined ||
+    (ruleSet as any).id !== undefined;
 
-  if (ruleSet.competitionId !== state.competitionId) {
-    return {
-      state,
-      accepted: false,
-      error: 'Rule-set competition mismatch.',
-      newSuspensions: [],
-    };
-  }
+  if (isFullRuleSet) {
+    if (state.ruleSetId && (ruleSet as any).id && ruleSet.id !== state.ruleSetId) {
+      return {
+        state,
+        accepted: false,
+        error: 'Rule-set ID mismatch.',
+        newSuspensions: [],
+      };
+    }
 
-  if (ruleSet.seasonLabel !== state.seasonLabel) {
-    return {
-      state,
-      accepted: false,
-      error: 'Rule-set season mismatch.',
-      newSuspensions: [],
-    };
+    if ((ruleSet as any).competitionId && ruleSet.competitionId !== state.competitionId) {
+      return {
+        state,
+        accepted: false,
+        error: 'Rule-set competition mismatch.',
+        newSuspensions: [],
+      };
+    }
+
+    if ((ruleSet as any).seasonLabel && ruleSet.seasonLabel !== state.seasonLabel) {
+      return {
+        state,
+        accepted: false,
+        error: 'Rule-set season mismatch.',
+        newSuspensions: [],
+      };
+    }
   }
 
   // 2. Identity scope validation
@@ -328,7 +355,7 @@ export function processDisciplinaryEvent(
     };
   }
 
-  const rules = ruleSet.discipline;
+  const rules = (ruleSet as any)?.discipline ?? ruleSet;
 
   // 7. Process event based on type
   if (event.type === 'STRAIGHT_RED') {
@@ -366,10 +393,35 @@ export function processDisciplinaryEvent(
   }
 
   if (event.type === 'SECOND_YELLOW_RED') {
-    const matchesIssued = rules.secondYellowRedMatches;
+    // Check if an active suspension was already triggered by a yellow event in the SAME fixture
+    const sameFixtureYellowSuspIndex = state.suspensions.findIndex(s => {
+      if (s.status !== 'ACTIVE') return false;
+      if (
+        s.reason !== 'YELLOW_THRESHOLD' &&
+        s.reason !== 'YELLOW_REPEAT_CYCLE' &&
+        s.reason !== 'YELLOW_ROLLING_WINDOW'
+      ) {
+        return false;
+      }
+      const sourceEvent = state.events.find(e => e.id === s.sourceEventId);
+      return sourceEvent !== undefined && sourceEvent.fixtureId === event.fixtureId;
+    });
+
+    let effectiveMatches = rules.secondYellowRedMatches;
+    let remainingSuspensions = [...state.suspensions];
+
+    if (sameFixtureYellowSuspIndex !== -1) {
+      const yellowSusp = state.suspensions[sameFixtureYellowSuspIndex];
+      // Pro Baller V1 same-fixture second-yellow sanction precedence:
+      // effective ban = MAX(cumulative-threshold suspension matches, secondYellowRedMatches)
+      effectiveMatches = Math.max(yellowSusp.matchesIssued, rules.secondYellowRedMatches);
+      // Remove the same-fixture yellow suspension so we don't stack independent consecutive bans
+      remainingSuspensions = state.suspensions.filter((_, idx) => idx !== sameFixtureYellowSuspIndex);
+    }
+
     const suspensionId = `${event.competitionId}:${event.seasonLabel}:${event.playerId}:${event.id}:SECOND_YELLOW_RED`;
     const newSuspensions: DisciplinarySuspension[] =
-      matchesIssued > 0
+      effectiveMatches > 0
         ? [
             {
               id: suspensionId,
@@ -377,8 +429,8 @@ export function processDisciplinaryEvent(
               competitionId: event.competitionId,
               seasonLabel: event.seasonLabel,
               reason: 'SECOND_YELLOW_RED',
-              matchesIssued,
-              matchesRemaining: matchesIssued,
+              matchesIssued: effectiveMatches,
+              matchesRemaining: effectiveMatches,
               issuedAtRound: event.round,
               servedFixtureIds: [],
               status: 'ACTIVE',
@@ -392,7 +444,7 @@ export function processDisciplinaryEvent(
       state: {
         ...state,
         events: [...state.events, event],
-        suspensions: [...state.suspensions, ...newSuspensions],
+        suspensions: [...remainingSuspensions, ...newSuspensions],
         processedEventIds: [...state.processedEventIds, event.id],
         triggeredThresholdKeys: [...state.triggeredThresholdKeys],
       },
@@ -427,6 +479,7 @@ export function processDisciplinaryEvent(
 
         if (crossedThreshold && withinCutoff && threshold.suspensionMatches > 0) {
           const triggerKey = `rolling:${threshold.cards}:${event.id}`;
+          const legacyKey = `rolling:${windowStart}:${windowEnd}:${threshold.cards}`;
           const suspensionId = `${event.competitionId}:${event.seasonLabel}:${event.playerId}:${event.id}:rolling:${threshold.cards}`;
 
           newSuspensions.push({
@@ -441,7 +494,7 @@ export function processDisciplinaryEvent(
             servedFixtureIds: [],
             status: 'ACTIVE',
           });
-          newTriggeredKeys.push(triggerKey);
+          newTriggeredKeys.push(triggerKey, legacyKey);
         }
       }
     } else {
@@ -494,8 +547,8 @@ export function processDisciplinaryEvent(
         const thresholdJustIssued = newSuspensions.some(
           s => s.reason === 'YELLOW_THRESHOLD'
         );
-        const isExplicitThresholdCount = rules.yellowThresholds.some(
-          t => t.cards === yellowCount
+        const isExplicitThresholdCount = (rules.yellowThresholds as any[]).some(
+          (t: { cards: number }) => t.cards === yellowCount
         );
         const cycleKey = `cycle:${yellowCount}`;
         const isAlreadyTriggered =
@@ -527,6 +580,45 @@ export function processDisciplinaryEvent(
             newTriggeredKeys.push(cycleKey);
           }
         }
+      }
+    }
+
+    if (newSuspensions.length > 0) {
+      const sameFixtureSyrIndex = state.suspensions.findIndex(s => {
+        if (s.status !== 'ACTIVE' || s.reason !== 'SECOND_YELLOW_RED') return false;
+        const sourceEvent = state.events.find(e => e.id === s.sourceEventId);
+        return sourceEvent !== undefined && sourceEvent.fixtureId === event.fixtureId;
+      });
+
+      if (sameFixtureSyrIndex !== -1) {
+        const existingSyr = state.suspensions[sameFixtureSyrIndex];
+        const yellowSusp = newSuspensions[0];
+        const effectiveMatches = Math.max(yellowSusp.matchesIssued, existingSyr.matchesIssued);
+
+        const updatedSuspensions = state.suspensions.map((s, idx) =>
+          idx === sameFixtureSyrIndex
+            ? {
+                ...s,
+                matchesIssued: effectiveMatches,
+                matchesRemaining: effectiveMatches,
+              }
+            : s
+        );
+
+        return {
+          accepted: true,
+          newSuspensions: [],
+          state: {
+            ...state,
+            events: [...state.events, event],
+            suspensions: updatedSuspensions,
+            processedEventIds: [...state.processedEventIds, event.id],
+            triggeredThresholdKeys: [
+              ...state.triggeredThresholdKeys,
+              ...newTriggeredKeys,
+            ],
+          },
+        };
       }
     }
 

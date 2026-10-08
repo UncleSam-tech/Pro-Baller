@@ -49,9 +49,17 @@ import {
 import {
   isPlayerAvailableForFixture,
   generateMatchInjury,
-  processYellowCardDiscipline,
-  serveCompetitionSuspension,
 } from './playerAvailability';
+import {
+  createPlayerCompetitionDisciplinaryState,
+  processDisciplinaryEvent,
+  serveSuspensionFixture,
+  getActiveSuspensions,
+} from '../competition/disciplinaryEngine';
+import type {
+  DisciplinaryEvent,
+  DisciplinaryEventType,
+} from '../competition/types';
 import type {
   WorldPlayerAvailabilityState,
   WorldPlayerInjury,
@@ -604,9 +612,21 @@ function advanceFootballWorldStepInternal(
       currentAvailabilityMap.set(a.playerId, {
         playerId: a.playerId,
         injury: a.injury ? { ...a.injury } : undefined,
-        suspensions: a.suspensions ? a.suspensions.map((s) => ({ ...s })) : undefined,
-        competitionYellows: a.competitionYellows ? { ...a.competitionYellows } : undefined,
-        triggeredThresholds: a.triggeredThresholds ? { ...a.triggeredThresholds } : undefined,
+        disciplinaryStates: a.disciplinaryStates
+          ? a.disciplinaryStates.map((d) => ({
+              playerId: d.playerId,
+              competitionId: d.competitionId,
+              seasonLabel: d.seasonLabel,
+              ruleSetId: d.ruleSetId,
+              events: d.events.map((e) => ({ ...e })),
+              suspensions: d.suspensions.map((sub) => ({
+                ...sub,
+                servedFixtureIds: [...sub.servedFixtureIds],
+              })),
+              processedEventIds: [...d.processedEventIds],
+              triggeredThresholdKeys: [...d.triggeredThresholdKeys],
+            }))
+          : undefined,
       });
     }
   }
@@ -663,9 +683,21 @@ function advanceFootballWorldStepInternal(
       beginningOfDayAvailabilityMap.set(pId, {
         playerId: a.playerId,
         injury: a.injury ? { ...a.injury } : undefined,
-        suspensions: a.suspensions ? a.suspensions.map((s) => ({ ...s })) : undefined,
-        competitionYellows: a.competitionYellows ? { ...a.competitionYellows } : undefined,
-        triggeredThresholds: a.triggeredThresholds ? { ...a.triggeredThresholds } : undefined,
+        disciplinaryStates: a.disciplinaryStates
+          ? a.disciplinaryStates.map((d) => ({
+              playerId: d.playerId,
+              competitionId: d.competitionId,
+              seasonLabel: d.seasonLabel,
+              ruleSetId: d.ruleSetId,
+              events: d.events.map((e) => ({ ...e })),
+              suspensions: d.suspensions.map((sub) => ({
+                ...sub,
+                servedFixtureIds: [...sub.servedFixtureIds],
+              })),
+              processedEventIds: [...d.processedEventIds],
+              triggeredThresholdKeys: [...d.triggeredThresholdKeys],
+            }))
+          : undefined,
       });
     }
 
@@ -692,8 +724,17 @@ function advanceFootballWorldStepInternal(
 
     // Staging collections for post-match consequences applied at end of calendar date
     const stagedInjuriesOnDate: Array<{ playerId: string; injury: WorldPlayerInjury }> = [];
-    const stagedYellowsOnDate: Array<{ playerId: string; competitionId: string; round: number }> = [];
-    const stagedClubsPlayedCompOnDate: Array<{ clubId: string; competitionId: string }> = [];
+    const stagedDisciplinaryEventsOnDate: Array<{
+      event: DisciplinaryEvent;
+      minute: number;
+      ruleSetId: string;
+    }> = [];
+    const stagedClubsPlayedCompOnDate: Array<{
+      clubId: string;
+      competitionId: string;
+      fixtureId: string;
+      seasonLabel: string;
+    }> = [];
 
     // Compute strength snapshots for competitions active on this date
     // from completed results prior to this date.
@@ -956,22 +997,55 @@ function advanceFootballWorldStepInternal(
         }
       }
 
-      // Stage yellow card events
+      // Stage disciplinary card events
       if (matchDetail) {
         for (const event of matchDetail.events) {
-          if (event.type === 'YELLOW_CARD') {
-            stagedYellowsOnDate.push({
+          if (
+            event.type === 'YELLOW_CARD' ||
+            event.type === 'SECOND_YELLOW_RED' ||
+            event.type === 'STRAIGHT_RED'
+          ) {
+            const priorTeamResultsCount = (currentCompResults.get(compId) ?? []).filter(
+              (r) => r.homeTeamId === event.teamId || r.awayTeamId === event.teamId
+            ).length;
+            const matchSequence = priorTeamResultsCount + 1;
+
+            const discType: DisciplinaryEventType =
+              event.type === 'YELLOW_CARD' ? 'YELLOW' : event.type;
+
+            const discEvent: DisciplinaryEvent = {
+              id: `${fixture.id}:${event.type}:${event.playerId}:${event.minute}`,
               playerId: event.playerId,
               competitionId: compId,
+              seasonLabel: entry.compState.seasonLabel,
+              fixtureId: fixture.id,
               round: fixture.round,
+              matchSequence,
+              type: discType,
+            };
+
+            stagedDisciplinaryEventsOnDate.push({
+              event: discEvent,
+              minute: event.minute,
+              ruleSetId: entry.compState.ruleSetId,
             });
           }
         }
       }
 
       // Stage clubs playing in this competition
-      stagedClubsPlayedCompOnDate.push({ clubId: fixture.homeTeamId, competitionId: compId });
-      stagedClubsPlayedCompOnDate.push({ clubId: fixture.awayTeamId, competitionId: compId });
+      stagedClubsPlayedCompOnDate.push({
+        clubId: fixture.homeTeamId,
+        competitionId: compId,
+        fixtureId: fixture.id,
+        seasonLabel: entry.compState.seasonLabel,
+      });
+      stagedClubsPlayedCompOnDate.push({
+        clubId: fixture.awayTeamId,
+        competitionId: compId,
+        fixtureId: fixture.id,
+        seasonLabel: entry.compState.seasonLabel,
+      });
 
       // Determine team match results
       let homeResult: 'win' | 'draw' | 'loss' = 'draw';
@@ -1030,48 +1104,96 @@ function advanceFootballWorldStepInternal(
     // End-of-date availability updates:
     // 1. Serve suspensions for clubs that played in each competition
     const uniqueClubsPlayed = new Set<string>();
-    for (const { clubId, competitionId } of stagedClubsPlayedCompOnDate) {
+    for (const { clubId, competitionId, fixtureId, seasonLabel } of stagedClubsPlayedCompOnDate) {
       const key = `${clubId}:${competitionId}`;
       if (!uniqueClubsPlayed.has(key)) {
         uniqueClubsPlayed.add(key);
         const clubPlayerIds = squadMap.get(clubId) ?? [];
         for (const playerId of clubPlayerIds) {
           const avail = currentAvailabilityMap.get(playerId);
-          if (avail && avail.suspensions && avail.suspensions.length > 0) {
-            avail.suspensions = serveCompetitionSuspension(avail.suspensions, competitionId);
+          if (avail?.disciplinaryStates) {
+            const discState = avail.disciplinaryStates.find(
+              (s) => s.competitionId === competitionId
+            );
+            if (discState && getActiveSuspensions(discState).length > 0) {
+              const serveRes = serveSuspensionFixture(discState, {
+                fixtureId,
+                competitionId,
+                seasonLabel,
+              });
+              if (serveRes.accepted) {
+                const idx = avail.disciplinaryStates.findIndex(
+                  (s) => s.competitionId === competitionId
+                );
+                avail.disciplinaryStates[idx] = serveRes.state;
+              }
+            }
           }
         }
       }
     }
 
-    // 2. Process staged yellow cards and new suspensions
-    for (const { playerId, competitionId, round } of stagedYellowsOnDate) {
-      let avail = currentAvailabilityMap.get(playerId);
-      if (!avail) {
-        avail = { playerId };
-        currentAvailabilityMap.set(playerId, avail);
+    // 2. Process staged disciplinary cards and new suspensions
+    const typePriority: Record<DisciplinaryEventType, number> = {
+      YELLOW: 1,
+      SECOND_YELLOW_RED: 2,
+      STRAIGHT_RED: 3,
+    };
+
+    stagedDisciplinaryEventsOnDate.sort((a, b) => {
+      if (a.event.matchSequence !== b.event.matchSequence) {
+        return a.event.matchSequence - b.event.matchSequence;
       }
-      if (!avail.competitionYellows) avail.competitionYellows = {};
-      if (!avail.triggeredThresholds) avail.triggeredThresholds = {};
-      const curYellows = avail.competitionYellows[competitionId] ?? 0;
-      const curTriggered = avail.triggeredThresholds[competitionId] ?? [];
-      const ruleSet = compRuleSets.get(competitionId);
+      if (a.minute !== b.minute) {
+        return a.minute - b.minute;
+      }
+      const pA = typePriority[a.event.type] ?? 99;
+      const pB = typePriority[b.event.type] ?? 99;
+      if (pA !== pB) {
+        return pA - pB;
+      }
+      if (a.event.playerId !== b.event.playerId) {
+        return a.event.playerId.localeCompare(b.event.playerId);
+      }
+      return a.event.id.localeCompare(b.event.id);
+    });
 
-      const result = processYellowCardDiscipline({
-        playerId,
-        competitionId,
-        currentYellows: curYellows,
-        triggeredThresholds: curTriggered,
-        round,
-        ruleSet,
-      });
+    for (const { event, ruleSetId } of stagedDisciplinaryEventsOnDate) {
+      let avail = currentAvailabilityMap.get(event.playerId);
+      if (!avail) {
+        avail = { playerId: event.playerId };
+        currentAvailabilityMap.set(event.playerId, avail);
+      }
+      if (!avail.disciplinaryStates) {
+        avail.disciplinaryStates = [];
+      }
 
-      avail.competitionYellows[competitionId] = result.newYellowCount;
-      avail.triggeredThresholds[competitionId] = result.newTriggeredThresholds;
+      let discState = avail.disciplinaryStates.find(
+        (s) => s.competitionId === event.competitionId
+      );
+      if (!discState) {
+        discState = createPlayerCompetitionDisciplinaryState(
+          event.playerId,
+          event.competitionId,
+          event.seasonLabel,
+          ruleSetId
+        );
+        avail.disciplinaryStates.push(discState);
+      }
 
-      if (result.newSuspension) {
-        if (!avail.suspensions) avail.suspensions = [];
-        avail.suspensions.push(result.newSuspension);
+      const ruleSet = compRuleSets.get(event.competitionId);
+      if (!ruleSet) {
+        throw new Error(
+          `Missing required rule set for competition '${event.competitionId}' during disciplinary event processing.`
+        );
+      }
+
+      const procResult = processDisciplinaryEvent(discState, event, ruleSet);
+      if (procResult.accepted) {
+        const idx = avail.disciplinaryStates.findIndex(
+          (s) => s.competitionId === event.competitionId
+        );
+        avail.disciplinaryStates[idx] = procResult.state;
       }
     }
 
@@ -1180,24 +1302,30 @@ function advanceFootballWorldStepInternal(
       .filter(
         (s) =>
           s.injury !== undefined ||
-          (s.suspensions && s.suspensions.length > 0) ||
-          (s.competitionYellows && Object.keys(s.competitionYellows).length > 0)
+          (s.disciplinaryStates &&
+            s.disciplinaryStates.some(
+              (d) => d.events.length > 0 || d.suspensions.length > 0
+            ))
       )
       .sort((a, b) => a.playerId.localeCompare(b.playerId))
       .map((s) => ({
         playerId: s.playerId,
         ...(s.injury ? { injury: { ...s.injury } } : {}),
-        ...(s.suspensions && s.suspensions.length > 0
-          ? { suspensions: s.suspensions.map((sub) => ({ ...sub })) }
-          : {}),
-        ...(s.competitionYellows && Object.keys(s.competitionYellows).length > 0
-          ? { competitionYellows: { ...s.competitionYellows } }
-          : {}),
-        ...(s.triggeredThresholds && Object.keys(s.triggeredThresholds).length > 0
+        ...(s.disciplinaryStates && s.disciplinaryStates.length > 0
           ? {
-              triggeredThresholds: Object.fromEntries(
-                Object.entries(s.triggeredThresholds).map(([k, v]) => [k, [...v]])
-              ),
+              disciplinaryStates: s.disciplinaryStates.map((d) => ({
+                playerId: d.playerId,
+                competitionId: d.competitionId,
+                seasonLabel: d.seasonLabel,
+                ruleSetId: d.ruleSetId,
+                events: d.events.map((e) => ({ ...e })),
+                suspensions: d.suspensions.map((sub) => ({
+                  ...sub,
+                  servedFixtureIds: [...sub.servedFixtureIds],
+                })),
+                processedEventIds: [...d.processedEventIds],
+                triggeredThresholdKeys: [...d.triggeredThresholdKeys],
+              })),
             }
           : {}),
       })),

@@ -6,6 +6,7 @@ import type {
   CompetitionSchedule,
   CompetitionSeasonState,
   DomesticLeagueMembershipState,
+  PlayerCompetitionDisciplinaryState,
 } from '../competition/types';
 
 // ============================================================================
@@ -237,7 +238,11 @@ export interface WorldFixtureParticipation {
 // PART 11.6 — MATCH EVENTS & RATINGS (PHASE 3M)
 // ============================================================================
 
-export type WorldMatchEventType = 'GOAL' | 'YELLOW_CARD';
+export type WorldMatchEventType =
+  | 'GOAL'
+  | 'YELLOW_CARD'
+  | 'SECOND_YELLOW_RED'
+  | 'STRAIGHT_RED';
 
 export interface WorldGoalEvent {
   type: 'GOAL';
@@ -254,7 +259,25 @@ export interface WorldYellowCardEvent {
   minute: number;
 }
 
-export type WorldMatchEvent = WorldGoalEvent | WorldYellowCardEvent;
+export interface WorldSecondYellowRedEvent {
+  type: 'SECOND_YELLOW_RED';
+  teamId: string;
+  playerId: string;
+  minute: number;
+}
+
+export interface WorldStraightRedEvent {
+  type: 'STRAIGHT_RED';
+  teamId: string;
+  playerId: string;
+  minute: number;
+}
+
+export type WorldMatchEvent =
+  | WorldGoalEvent
+  | WorldYellowCardEvent
+  | WorldSecondYellowRedEvent
+  | WorldStraightRedEvent;
 
 export interface WorldPlayerMatchRating {
   playerId: string;
@@ -269,7 +292,7 @@ export interface WorldFixtureMatchDetail {
 }
 
 // ============================================================================
-// PART 11.7 — PLAYER AVAILABILITY: INJURIES & SUSPENSIONS (PHASE 3O)
+// PART 11.7 — PLAYER AVAILABILITY: INJURIES & SUSPENSIONS (PHASE 3O / 3T)
 // ============================================================================
 
 export interface WorldPlayerInjury {
@@ -281,17 +304,10 @@ export interface WorldPlayerInjury {
   severity: 'minor' | 'moderate' | 'serious';
 }
 
-export interface WorldCompetitionSuspension {
-  competitionId: string;
-  matchesRemaining: number;
-}
-
 export interface WorldPlayerAvailabilityState {
   playerId: string;
   injury?: WorldPlayerInjury;
-  suspensions?: WorldCompetitionSuspension[];
-  competitionYellows?: Record<string, number>;
-  triggeredThresholds?: Record<string, number[]>;
+  disciplinaryStates?: PlayerCompetitionDisciplinaryState[];
 }
 
 // ============================================================================

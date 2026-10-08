@@ -1,7 +1,6 @@
 import { addDaysToDate, createRng, hashString } from './worldProgression';
-import type { CompetitionRuleSet } from '../competition/types';
+import { getActiveSuspensions } from '../competition/disciplinaryEngine';
 import type {
-  WorldCompetitionSuspension,
   WorldPlayerAvailabilityState,
   WorldPlayerInjury,
 } from './types';
@@ -83,6 +82,7 @@ export interface PlayerAvailabilityCheckResult {
  *   On and after availableFromDate, player is available.
  * - Active suspension: player is UNAVAILABLE if they have an active suspension
  *   in this competition with matchesRemaining > 0.
+ *   Uses canonical PlayerCompetitionDisciplinaryState when present.
  *   Suspension in competition A does NOT block selection in competition B.
  */
 export function isPlayerAvailableForFixture(
@@ -102,13 +102,16 @@ export function isPlayerAvailableForFixture(
     }
   }
 
-  // 2. Competition suspension check
-  if (availabilityState.suspensions && availabilityState.suspensions.length > 0) {
-    const activeBan = availabilityState.suspensions.find(
-      s => s.competitionId === competitionId && s.matchesRemaining > 0
+  // 2. Canonical competition disciplinary state check (Phase 3T)
+  if (availabilityState.disciplinaryStates && availabilityState.disciplinaryStates.length > 0) {
+    const discState = availabilityState.disciplinaryStates.find(
+      s => s.competitionId === competitionId
     );
-    if (activeBan) {
-      return { available: false, reason: 'SUSPENDED' };
+    if (discState) {
+      const activeBans = getActiveSuspensions(discState);
+      if (activeBans.length > 0) {
+        return { available: false, reason: 'SUSPENDED' };
+      }
     }
   }
 
@@ -212,103 +215,7 @@ export function generateMatchInjury(
 }
 
 // ============================================================================
-// 3. DISCIPLINE & SUSPENSION PROCESSING
-// ============================================================================
-
-export interface ProcessYellowCardDisciplineParams {
-  playerId: string;
-  competitionId: string;
-  currentYellows: number;
-  triggeredThresholds: number[];
-  round: number;
-  ruleSet?: CompetitionRuleSet;
-}
-
-export interface ProcessYellowCardResult {
-  newYellowCount: number;
-  newTriggeredThresholds: number[];
-  newSuspension?: WorldCompetitionSuspension;
-}
-
-/**
- * Purely processes a newly received yellow card in a competition.
- * Evaluates competition yellow thresholds from ruleSet.discipline.
- * Strict rule authority: competition ruleSet must configure discipline.yellowThresholds.
- */
-export function processYellowCardDiscipline(
-  params: ProcessYellowCardDisciplineParams
-): ProcessYellowCardResult {
-  const {
-    currentYellows,
-    triggeredThresholds,
-    round,
-    ruleSet,
-    competitionId,
-  } = params;
-
-  if (!ruleSet?.discipline || !Array.isArray(ruleSet.discipline.yellowThresholds)) {
-    throw new Error(
-      `processYellowCardDiscipline: Missing required discipline configuration for competition '${competitionId}' (ruleSet: '${ruleSet?.id ?? 'undefined'}').`
-    );
-  }
-
-  const newYellowCount = currentYellows + 1;
-  const newTriggeredThresholds = [...triggeredThresholds];
-  let newSuspension: WorldCompetitionSuspension | undefined;
-
-  const thresholds = ruleSet.discipline.yellowThresholds;
-
-  for (const t of thresholds) {
-    if (
-      newYellowCount >= t.cards &&
-      !triggeredThresholds.includes(t.cards) &&
-      (t.cutoffRound === undefined || round <= t.cutoffRound)
-    ) {
-      newTriggeredThresholds.push(t.cards);
-      newSuspension = {
-        competitionId,
-        matchesRemaining: t.suspensionMatches,
-      };
-      break; // One threshold triggered per yellow event
-    }
-  }
-
-  return {
-    newYellowCount,
-    newTriggeredThresholds,
-    newSuspension,
-  };
-}
-
-/**
- * Decrements matchesRemaining by 1 for any active suspension in the specified competition.
- * Returns the updated list of suspensions (or undefined if none remain active).
- */
-export function serveCompetitionSuspension(
-  suspensions: WorldCompetitionSuspension[] | undefined,
-  competitionId: string
-): WorldCompetitionSuspension[] | undefined {
-  if (!suspensions || suspensions.length === 0) return undefined;
-
-  const updated: WorldCompetitionSuspension[] = [];
-
-  for (const s of suspensions) {
-    if (s.competitionId === competitionId && s.matchesRemaining > 0) {
-      const remaining = s.matchesRemaining - 1;
-      if (remaining > 0) {
-        updated.push({ ...s, matchesRemaining: remaining });
-      }
-      // If remaining reaches 0, the suspension is served and removed
-    } else {
-      updated.push(s);
-    }
-  }
-
-  return updated.length > 0 ? updated : undefined;
-}
-
-// ============================================================================
-// 4. SNAPSHOT & IMMUTABLE HELPERS
+// 3. SNAPSHOT & IMMUTABLE HELPERS
 // ============================================================================
 
 /**
@@ -321,8 +228,20 @@ export function cloneAvailabilityStates(
   return states.map(s => ({
     playerId: s.playerId,
     injury: s.injury ? { ...s.injury } : undefined,
-    suspensions: s.suspensions ? s.suspensions.map(sub => ({ ...sub })) : undefined,
-    competitionYellows: s.competitionYellows ? { ...s.competitionYellows } : undefined,
-    triggeredThresholds: s.triggeredThresholds ? { ...s.triggeredThresholds } : undefined,
+    disciplinaryStates: s.disciplinaryStates
+      ? s.disciplinaryStates.map(d => ({
+          playerId: d.playerId,
+          competitionId: d.competitionId,
+          seasonLabel: d.seasonLabel,
+          ruleSetId: d.ruleSetId,
+          events: d.events.map(e => ({ ...e })),
+          suspensions: d.suspensions.map(sub => ({
+            ...sub,
+            servedFixtureIds: [...sub.servedFixtureIds],
+          })),
+          processedEventIds: [...d.processedEventIds],
+          triggeredThresholdKeys: [...d.triggeredThresholdKeys],
+        }))
+      : undefined,
   }));
 }

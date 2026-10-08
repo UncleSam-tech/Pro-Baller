@@ -329,19 +329,136 @@ export function validateExternalFixtureResolutions(
       }
     }
 
-    // Team Minutes Coherence:
-    // Expected total minutes = starters.length * 90 (e.g. 11 * 90 = 990)
-    const expectedHomeMinutes = part.homeSelection.startingPlayerIds.length * 90;
-    const expectedAwayMinutes = part.awaySelection.startingPlayerIds.length * 90;
+    // 8. Validate Match Detail (Events & Ratings)
+    const detail = ext.matchDetail;
+    if (detail.fixtureId !== ext.fixtureId) {
+      errors.push(`MatchDetail fixtureId '${detail.fixtureId}' does not match '${ext.fixtureId}'.`);
+    }
+
+    let homeGoalEventsCount = 0;
+    let awayGoalEventsCount = 0;
+    const redCardsByPlayer = new Map<string, { minute: number; teamId: string; type: string }>();
+
+    for (const ev of detail.events ?? []) {
+      if (
+        ev.type !== 'GOAL' &&
+        ev.type !== 'YELLOW_CARD' &&
+        ev.type !== 'SECOND_YELLOW_RED' &&
+        ev.type !== 'STRAIGHT_RED'
+      ) {
+        errors.push(
+          `Unsupported match event type '${(ev as any).type}'. Only 'GOAL', 'YELLOW_CARD', 'SECOND_YELLOW_RED', and 'STRAIGHT_RED' are supported.`
+        );
+        continue;
+      }
+
+      if (!Number.isInteger(ev.minute) || ev.minute < 1 || ev.minute > 90) {
+        errors.push(`Event minute must be an integer between 1 and 90, got ${ev.minute}.`);
+      }
+
+      const isHomeEvent = ev.teamId === scheduledFixture.homeTeamId;
+      const isAwayEvent = ev.teamId === scheduledFixture.awayTeamId;
+
+      if (!isHomeEvent && !isAwayEvent) {
+        errors.push(`Event player '${ev.playerId}' teamId '${ev.teamId}' does not match fixture teams.`);
+      }
+
+      const app = appearancesByPlayer.get(ev.playerId);
+      if (!app || app.minutesPlayed === 0) {
+        errors.push(`Event player '${ev.playerId}' did not appear in the match.`);
+      } else if (app.teamId !== ev.teamId) {
+        errors.push(`Event player '${ev.playerId}' appeared for team '${app.teamId}' but event is for team '${ev.teamId}'.`);
+      }
+
+      if (ev.type === 'GOAL') {
+        if (isHomeEvent) homeGoalEventsCount++;
+        if (isAwayEvent) awayGoalEventsCount++;
+
+        if (ev.assistPlayerId) {
+          const assistApp = appearancesByPlayer.get(ev.assistPlayerId);
+          if (!assistApp || assistApp.minutesPlayed === 0) {
+            errors.push(`Assist player '${ev.assistPlayerId}' did not appear in the match.`);
+          } else if (assistApp.teamId !== ev.teamId) {
+            errors.push(`Assist player '${ev.assistPlayerId}' belongs to team '${assistApp.teamId}', not goal team '${ev.teamId}'.`);
+          }
+        }
+      }
+
+      if (ev.type === 'SECOND_YELLOW_RED' || ev.type === 'STRAIGHT_RED') {
+        if (redCardsByPlayer.has(ev.playerId)) {
+          errors.push(
+            `Multiple dismissal/red-card events reported for player '${ev.playerId}'. A player cannot be dismissed twice in one match.`
+          );
+        }
+        redCardsByPlayer.set(ev.playerId, { minute: ev.minute, teamId: ev.teamId, type: ev.type });
+
+        if (ev.type === 'SECOND_YELLOW_RED') {
+          const samePlayerYellows = (detail.events ?? []).filter(
+            other =>
+              other.type === 'YELLOW_CARD' &&
+              other.playerId === ev.playerId &&
+              other.teamId === ev.teamId
+          );
+          if (samePlayerYellows.length === 0) {
+            errors.push(
+              `Second yellow red card for player '${ev.playerId}' requires a preceding yellow card event in the match.`
+            );
+          } else {
+            const hasPreceding = samePlayerYellows.some(other => other.minute <= ev.minute);
+            if (!hasPreceding) {
+              errors.push(
+                `Second yellow red card for player '${ev.playerId}' at minute ${ev.minute} occurs before its first caution.`
+              );
+            }
+          }
+        }
+
+        if (app && app.minutesPlayed > 0) {
+          if (app.minutesPlayed > ev.minute) {
+            errors.push(
+              `Player '${ev.playerId}' dismissed at minute ${ev.minute} but appearance record has ${app.minutesPlayed} minutes played.`
+            );
+          }
+          if (app.started === true && app.minutesPlayed !== ev.minute) {
+            errors.push(
+              `Starting player '${ev.playerId}' dismissed at minute ${ev.minute} must have exactly ${ev.minute} minutes played, got ${app.minutesPlayed}.`
+            );
+          }
+        }
+      }
+    }
+
+    if (homeGoalEventsCount !== r.homeGoals) {
+      errors.push(`Home goal event count (${homeGoalEventsCount}) does not match homeGoals score (${r.homeGoals}).`);
+    }
+    if (awayGoalEventsCount !== r.awayGoals) {
+      errors.push(`Away goal event count (${awayGoalEventsCount}) does not match awayGoals score (${r.awayGoals}).`);
+    }
+
+    // Team Minutes Coherence (Red-Card Aware):
+    // For each dismissed player at minute M, team loses unplayed remainder (90 - M)
+    let homeRedDeductions = 0;
+    let awayRedDeductions = 0;
+    for (const red of redCardsByPlayer.values()) {
+      const deduction = Math.max(0, 90 - red.minute);
+      if (red.teamId === scheduledFixture.homeTeamId) {
+        homeRedDeductions += deduction;
+      } else if (red.teamId === scheduledFixture.awayTeamId) {
+        awayRedDeductions += deduction;
+      }
+    }
+
+    const expectedHomeMinutes = part.homeSelection.startingPlayerIds.length * 90 - homeRedDeductions;
+    const expectedAwayMinutes = part.awaySelection.startingPlayerIds.length * 90 - awayRedDeductions;
 
     if (homeTotalMinutes !== expectedHomeMinutes) {
       errors.push(
-        `Home team appearance minutes total ${homeTotalMinutes}, expected ${expectedHomeMinutes} (${part.homeSelection.startingPlayerIds.length} starters * 90 min).`
+        `Home team appearance minutes total ${homeTotalMinutes}, expected ${expectedHomeMinutes} (${part.homeSelection.startingPlayerIds.length} starters * 90 min - ${homeRedDeductions} red card unplayed min).`
       );
     }
     if (awayTotalMinutes !== expectedAwayMinutes) {
       errors.push(
-        `Away team appearance minutes total ${awayTotalMinutes}, expected ${expectedAwayMinutes} (${part.awaySelection.startingPlayerIds.length} starters * 90 min).`
+        `Away team appearance minutes total ${awayTotalMinutes}, expected ${expectedAwayMinutes} (${part.awaySelection.startingPlayerIds.length} starters * 90 min - ${awayRedDeductions} red card unplayed min).`
       );
     }
 
@@ -378,61 +495,6 @@ export function validateExternalFixtureResolutions(
           errors.push(`Away starting player '${pid}' must have minutesPlayed > 0 in appearances, got ${app.minutesPlayed}.`);
         }
       }
-    }
-
-    // 8. Validate Match Detail (Events & Ratings)
-    const detail = ext.matchDetail;
-    if (detail.fixtureId !== ext.fixtureId) {
-      errors.push(`MatchDetail fixtureId '${detail.fixtureId}' does not match '${ext.fixtureId}'.`);
-    }
-
-    let homeGoalEventsCount = 0;
-    let awayGoalEventsCount = 0;
-
-    for (const ev of detail.events ?? []) {
-      if (ev.type !== 'GOAL' && ev.type !== 'YELLOW_CARD') {
-        errors.push(`Unsupported match event type '${(ev as any).type}'. Only 'GOAL' and 'YELLOW_CARD' are supported.`);
-        continue;
-      }
-
-      if (!Number.isInteger(ev.minute) || ev.minute < 1 || ev.minute > 90) {
-        errors.push(`Event minute must be an integer between 1 and 90, got ${ev.minute}.`);
-      }
-
-      const isHomeEvent = ev.teamId === scheduledFixture.homeTeamId;
-      const isAwayEvent = ev.teamId === scheduledFixture.awayTeamId;
-
-      if (!isHomeEvent && !isAwayEvent) {
-        errors.push(`Event player '${ev.playerId}' teamId '${ev.teamId}' does not match fixture teams.`);
-      }
-
-      const app = appearancesByPlayer.get(ev.playerId);
-      if (!app || app.minutesPlayed === 0) {
-        errors.push(`Event player '${ev.playerId}' did not appear in the match.`);
-      } else if (app.teamId !== ev.teamId) {
-        errors.push(`Event player '${ev.playerId}' appeared for team '${app.teamId}' but event is for team '${ev.teamId}'.`);
-      }
-
-      if (ev.type === 'GOAL') {
-        if (isHomeEvent) homeGoalEventsCount++;
-        if (isAwayEvent) awayGoalEventsCount++;
-
-        if (ev.assistPlayerId) {
-          const assistApp = appearancesByPlayer.get(ev.assistPlayerId);
-          if (!assistApp || assistApp.minutesPlayed === 0) {
-            errors.push(`Assist player '${ev.assistPlayerId}' did not appear in the match.`);
-          } else if (assistApp.teamId !== ev.teamId) {
-            errors.push(`Assist player '${ev.assistPlayerId}' belongs to team '${assistApp.teamId}', not goal team '${ev.teamId}'.`);
-          }
-        }
-      }
-    }
-
-    if (homeGoalEventsCount !== r.homeGoals) {
-      errors.push(`Home goal event count (${homeGoalEventsCount}) does not match homeGoals score (${r.homeGoals}).`);
-    }
-    if (awayGoalEventsCount !== r.awayGoals) {
-      errors.push(`Away goal event count (${awayGoalEventsCount}) does not match awayGoals score (${r.awayGoals}).`);
     }
 
     // Ratings validation
