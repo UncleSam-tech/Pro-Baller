@@ -48,7 +48,14 @@ import {
 } from './career/worldMatchViewAdapter';
 import type { WorldGoalEvent } from './world/types';
 import { isLegacyClubSupported } from './utils/worldClubCompatibility';
-import { ArrowRight, Award, Calendar, Heart, MessageSquare, Play, ShieldAlert, Sparkles, Stethoscope, Trophy, User, Zap, Loader2 } from 'lucide-react';
+import { loadWorldCareer, saveWorldCareer, deleteWorldCareer } from './utils/worldCareerStorage';
+import {
+  createWorldCareerSaveRecord,
+  validateWorldCareerSave,
+  restoreCareerWorldSessionFromSave,
+  type WorldCareerSaveV1,
+} from './career/worldCareerSave';
+import { ArrowRight, Award, Calendar, Heart, MessageSquare, Play, ShieldAlert, Sparkles, Stethoscope, Trophy, User, Zap, Loader2, AlertTriangle } from 'lucide-react';
 
 export default function App() {
   const [player, setPlayer] = useState<Player | null>(null);
@@ -86,35 +93,129 @@ export default function App() {
   // Notice ticker message
   const [bannerNotice, setBannerNotice] = useState<string | null>(null);
 
-  // Load from storage on mount
+  const [storageHydrated, setStorageHydrated] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const writeSequenceRef = React.useRef(0);
+
+  // Asynchronous and ordered hydration flow
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.search.includes('reset=1')) {
-      clearSavedPlayer();
-      setPlayer(null);
-      setWorldSession(null);
-      setActiveWorldHandoff(null);
-      setShowIntroStory(false);
-      setShowNewCareerModal(true);
-      return;
+    let isCancelled = false;
+
+    async function hydrateApp() {
+      // 1. Check for intentional reset parameter
+      if (typeof window !== 'undefined' && window.location.search.includes('reset=1')) {
+        await deleteWorldCareer().catch((err) => console.error('Failed to delete world career:', err));
+        clearSavedPlayer();
+        if (!isCancelled) {
+          setPlayer(null);
+          setWorldSession(null);
+          setActiveWorldHandoff(null);
+          setShowIntroStory(false);
+          setShowNewCareerModal(true);
+          setStorageHydrated(true);
+        }
+        return;
+      }
+
+      // 2. Priority check: Living World IndexedDB Save
+      let worldSave: WorldCareerSaveV1 | null = null;
+      try {
+        worldSave = await loadWorldCareer();
+      } catch (err: any) {
+        console.error('Failed to read IndexedDB world save:', err);
+        if (!isCancelled) {
+          setSaveError(`Failed to access world career database: ${err?.message || err}`);
+          setStorageHydrated(true);
+        }
+        return;
+      }
+
+      if (worldSave) {
+        try {
+          const pack = await loadDefaultFootballWorldPack();
+          const validation = validateWorldCareerSave(worldSave, pack);
+          if (!validation.valid) {
+            if (!isCancelled) {
+              setSaveError(`Corrupted or incompatible living-world save: ${validation.error}`);
+              setStorageHydrated(true);
+            }
+            return;
+          }
+
+          const restored = restoreCareerWorldSessionFromSave(pack, worldSave);
+          if (!isCancelled) {
+            setPlayer(worldSave.player);
+            setWorldSession(restored.session);
+            setActiveWorldHandoff(restored.activeHandoff ?? null);
+            if (restored.activeHandoff) {
+              setCurrentView('MATCH');
+            }
+            setShowIntroStory(false);
+            setShowNewCareerModal(false);
+            setStorageHydrated(true);
+          }
+          return;
+        } catch (err: any) {
+          console.error('Failed to restore living-world session from save:', err);
+          if (!isCancelled) {
+            setSaveError(`Failed to reconstruct living-world career: ${err?.message || err}`);
+            setStorageHydrated(true);
+          }
+          return;
+        }
+      }
+
+      // 3. Fallback check: Legacy Player-only localStorage Save
+      const savedLegacy = loadPlayer();
+      if (savedLegacy && savedLegacy.isUserCreated) {
+        if (!isCancelled) {
+          setPlayer(savedLegacy);
+          setWorldSession(null);
+          setActiveWorldHandoff(null);
+          setShowIntroStory(false);
+          setShowNewCareerModal(false);
+          setStorageHydrated(true);
+        }
+      } else {
+        if (!isCancelled) {
+          setShowIntroStory(true);
+          setShowNewCareerModal(false);
+          setStorageHydrated(true);
+        }
+      }
     }
-    const saved = loadPlayer();
-    if (saved && saved.isUserCreated) {
-      setPlayer(saved);
-      setShowIntroStory(false);
-      setShowNewCareerModal(false);
-    } else {
-      // First screen: The beautiful 3D intro story!
-      setShowIntroStory(true);
-      setShowNewCareerModal(false);
-    }
+
+    hydrateApp();
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
-  // Auto-save on player change
+  // Auto-save on player change (debounced for living-world, immediate for legacy)
   useEffect(() => {
-    if (player) {
+    if (!storageHydrated || !player) return;
+
+    if (isWorldCareer && worldSession) {
+      const seq = ++writeSequenceRef.current;
+      const timer = setTimeout(async () => {
+        if (seq !== writeSequenceRef.current) return;
+        try {
+          const record = createWorldCareerSaveRecord(
+            player,
+            worldSession,
+            activeWorldHandoff?.fixtureId
+          );
+          await saveWorldCareer(record);
+        } catch (err) {
+          console.error('World career autosave failed:', err);
+        }
+      }, 400);
+      return () => clearTimeout(timer);
+    } else if (!isWorldCareer) {
+      // Legacy mode autosave
       savePlayer(player);
     }
-  }, [player]);
+  }, [player, storageHydrated, isWorldCareer, worldSession, activeWorldHandoff]);
 
   const currentClub = useMemo(() => {
     if (!player) return CLUBS_DATABASE[0];
@@ -236,9 +337,16 @@ export default function App() {
         return;
       }
 
+      // 1. Create authoritative save record & persist to IndexedDB BEFORE activating
+      const newSave = createWorldCareerSaveRecord(fresh, bootstrapRes.session, undefined);
+      await saveWorldCareer(newSave);
+
+      // 2. Clear stale legacy save so no ghost save remains
       clearSavedPlayer();
+
+      // 3. Update memory state atomically
+      writeSequenceRef.current++;
       setPlayer(fresh);
-      savePlayer(fresh);
       setWorldSession(bootstrapRes.session);
       setActiveWorldHandoff(null);
       setWorldLoading(false);
@@ -496,8 +604,8 @@ export default function App() {
     setShowPostMatchInterview(true);
   };
 
-  const handleAdvanceToNextWorldFixture = () => {
-    if (!worldSession) return;
+  const handleAdvanceToNextWorldFixture = async () => {
+    if (!worldSession || !player) return;
 
     if (activeWorldHandoff) {
       setCurrentView('MATCH');
@@ -518,6 +626,18 @@ export default function App() {
     setActiveWorldHandoff(advanceRes.handoff);
     setCurrentView('MATCH');
 
+    // Immediate atomic persistence of D-1 reservation
+    writeSequenceRef.current++;
+    const dMinus1Save = createWorldCareerSaveRecord(
+      player,
+      advanceRes.session,
+      advanceRes.handoff.fixtureId
+    );
+    await saveWorldCareer(dMinus1Save).catch((err) => {
+      console.error('Failed to save D-1 world career state:', err);
+      setBannerNotice(`Save Warning: D-1 state autosave failed: ${err.message}`);
+    });
+
     const oppDef = advanceRes.session.sessionPack.clubs.find(
       (c) => c.id === advanceRes.handoff!.opponentWorldClubId
     );
@@ -528,7 +648,7 @@ export default function App() {
     );
   };
 
-  const handleWorldMatchComplete = (outcome: WorldInteractiveMatchOutcome) => {
+  const handleWorldMatchComplete = async (outcome: WorldInteractiveMatchOutcome) => {
     if (!worldSession || !activeWorldHandoff || !player) return;
     sounds.playWhistle();
 
@@ -610,10 +730,23 @@ export default function App() {
       );
     }
 
-    // Save updated player (DO NOT decrement player.injuryWeeks or suspensionWeeks; preserve bank balance & career earnings untouched for Gate 4 finance integration)
-    setPlayer({
+    // Save updated player
+    const finalPlayer = {
       ...updatedPlayer,
       seasonStats: prevStats,
+    };
+    setPlayer(finalPlayer);
+
+    // 5. Immediate atomic persistence of post-match resolution (cleared reservation, no active handoff)
+    writeSequenceRef.current++;
+    const postMatchSave = createWorldCareerSaveRecord(
+      finalPlayer,
+      updatedSession,
+      undefined
+    );
+    await saveWorldCareer(postMatchSave).catch((err) => {
+      console.error('Failed to save post-match world career state:', err);
+      setBannerNotice(`Save Warning: Post-match state autosave failed: ${err.message}`);
     });
 
     const nextFixtureAfterMatch = getNextCareerWorldFixture(updatedSession);
@@ -751,6 +884,19 @@ export default function App() {
       `Retirement Ceremony Concluded! You have been inducted into the Hall of Fame as a ${postCareer.legacyStatus.replace('_', ' ')}. Your new vocation as ${postCareer.chosenRole.replace('_', ' ')} is now active!`
     );
   };
+
+  // Guard rendering until persistence hydration completes
+  if (!storageHydrated) {
+    return (
+      <div className="min-h-screen bg-[#080c14] flex flex-col items-center justify-center p-6 text-center">
+        <Loader2 className="w-12 h-12 text-emerald-400 animate-spin mb-4" />
+        <h3 className="text-xl font-bold text-white mb-2 font-mono">Loading Career Data...</h3>
+        <p className="text-sm text-slate-400 font-mono">
+          Checking persistent living-world saves and storage integrity.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#080c14] text-slate-100 flex font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
@@ -1094,6 +1240,38 @@ export default function App() {
           <p className="text-sm text-slate-400 font-mono max-w-md">
             Loading official 2026-27 football world data pack, scheduling fixtures, and establishing player identity link.
           </p>
+        </div>
+      )}
+
+      {/* Save Failure / Corrupt World Save Recovery Modal */}
+      {saveError && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+          <div className="bg-slate-900 border border-rose-500/30 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="w-12 h-12 rounded-full bg-rose-500/10 border border-rose-500/30 text-rose-400 flex items-center justify-center mx-auto">
+              <AlertTriangle className="w-6 h-6" />
+            </div>
+            <h3 className="text-xl font-bold text-white font-mono">World Career Save Error</h3>
+            <p className="text-sm text-slate-300 font-mono text-left bg-slate-950 p-3 rounded-lg border border-slate-800 break-words">
+              {saveError}
+            </p>
+            <div className="pt-2">
+              <button
+                onClick={async () => {
+                  await deleteWorldCareer().catch(console.error);
+                  clearSavedPlayer();
+                  setSaveError(null);
+                  setPlayer(null);
+                  setWorldSession(null);
+                  setActiveWorldHandoff(null);
+                  setShowIntroStory(false);
+                  setShowNewCareerModal(true);
+                }}
+                className="w-full py-2.5 px-4 bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-lg transition font-mono cursor-pointer"
+              >
+                Clear Broken Save & Start New Career
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
