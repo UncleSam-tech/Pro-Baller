@@ -6,10 +6,16 @@ import {
   ArrowRight, Users, Compass, Layers, ShieldAlert 
 } from 'lucide-react';
 
+export interface TacticalBriefingClubPresentation {
+  name: string;
+  shortName: string;
+  managerName?: string;
+}
+
 interface PreMatchTacticalBriefingProps {
   player: Player;
-  club: Club;
-  opponentClub: Club;
+  club: Club | TacticalBriefingClubPresentation;
+  opponentClub: Club | TacticalBriefingClubPresentation;
   selectedFormation: FormationType;
   onSelectFormation: (formation: FormationType) => void;
   tacticalMentality: 'ATTACKING' | 'BALANCED' | 'DEFENSIVE';
@@ -22,6 +28,7 @@ interface PreMatchTacticalBriefingProps {
   isStarting: boolean;
   isInjured: boolean;
   isSuspended: boolean;
+  isTacticsLocked?: boolean;
 }
 
 export const PreMatchTacticalBriefing: React.FC<PreMatchTacticalBriefingProps> = ({
@@ -40,6 +47,7 @@ export const PreMatchTacticalBriefing: React.FC<PreMatchTacticalBriefingProps> =
   isStarting,
   isInjured,
   isSuspended,
+  isTacticsLocked = false,
 }) => {
   const FORMATION_CONFIGS: {
     name: FormationType;

@@ -330,54 +330,21 @@ export function generateFixtureMatchDetail(
       const pos = resolvePlayerPosition(playerId, playerPositions);
       const role = mapPositionToBroadRole(pos);
 
-      let rating = RATING_BASELINE;
-
-      // Result modifier
-      if (isWinner) {
-        rating += RATING_WIN_BONUS;
-      } else if (isLoser) {
-        rating += RATING_LOSS_PENALTY;
-      } else {
-        rating += RATING_DRAW_BONUS;
-      }
-
-      // Goals modifier
-      const goals = goalsByPlayer.get(playerId) ?? 0;
-      rating += goals * RATING_GOAL_BONUS;
-
-      // Assists modifier
-      const assists = assistsByPlayer.get(playerId) ?? 0;
-      rating += assists * RATING_ASSIST_BONUS;
-
-      // Yellow card penalty
-      if (yellowsByPlayer.has(playerId)) {
-        rating += RATING_YELLOW_CARD_PENALTY;
-      }
-
-      // Defensive / Offensive role nuances
-      if (role === 'GK' || role === 'DEF') {
-        if (teamGoalsConceded === 0) {
-          rating += RATING_CLEAN_SHEET_BONUS;
-        } else if (teamGoalsConceded > 1) {
-          rating += Math.max(-1.0, (teamGoalsConceded - 1) * RATING_CONCEDED_GOAL_PENALTY);
-        }
-      } else if (role === 'ATT' || role === 'MID') {
-        if (teamGoalsScored >= 3) {
-          rating += 0.2;
-        }
-      }
-
-      // Subtle ability nuance
-      const ability = pState?.ability ?? 50;
-      rating += ((ability - 50) / 100) * 0.2;
-
       // Subtle deterministic match noise bounded to ±0.1
       const noise = (rngRatings() - 0.5) * 0.2;
-      rating += noise;
 
-      // Clamp to [MIN_RATING, MAX_RATING] and round to exactly 1 decimal place
-      const clamped = Math.max(MIN_RATING, Math.min(MAX_RATING, rating));
-      const rounded = Number(clamped.toFixed(1));
+      const rounded = computeParticipantRating({
+        role,
+        ability: pState?.ability ?? 50,
+        isWinner,
+        isLoser,
+        teamGoalsScored,
+        teamGoalsConceded,
+        goals: goalsByPlayer.get(playerId) ?? 0,
+        assists: assistsByPlayer.get(playerId) ?? 0,
+        hasYellowCard: yellowsByPlayer.has(playerId),
+        noise,
+      });
 
       playerRatings.push({
         playerId,
@@ -409,6 +376,191 @@ export function generateFixtureMatchDetail(
     events,
     playerRatings,
   };
+}
+
+// ============================================================================
+// PURE RATINGS HELPERS (SHARED WITH EXTERNAL MATCH RESOLUTION)
+// ============================================================================
+
+export interface ComputeParticipantRatingOptions {
+  role: WorldBroadRole;
+  ability: number;
+  isWinner: boolean;
+  isLoser: boolean;
+  teamGoalsScored: number;
+  teamGoalsConceded: number;
+  goals: number;
+  assists: number;
+  hasYellowCard: boolean;
+  hasRedCard?: boolean;
+  noise?: number;
+}
+
+/**
+ * Pure calculation of a player match rating on the canonical 1.0 - 10.0 scale.
+ */
+export function computeParticipantRating(options: ComputeParticipantRatingOptions): number {
+  let rating = RATING_BASELINE;
+
+  // Result modifier
+  if (options.isWinner) {
+    rating += RATING_WIN_BONUS;
+  } else if (options.isLoser) {
+    rating += RATING_LOSS_PENALTY;
+  } else {
+    rating += RATING_DRAW_BONUS;
+  }
+
+  // Goals modifier
+  rating += options.goals * RATING_GOAL_BONUS;
+
+  // Assists modifier
+  rating += options.assists * RATING_ASSIST_BONUS;
+
+  // Yellow card penalty
+  if (options.hasYellowCard) {
+    rating += RATING_YELLOW_CARD_PENALTY;
+  }
+
+  // Red card penalty
+  if (options.hasRedCard) {
+    rating += -1.0;
+  }
+
+  // Defensive / Offensive role nuances
+  if (options.role === 'GK' || options.role === 'DEF') {
+    if (options.teamGoalsConceded === 0) {
+      rating += RATING_CLEAN_SHEET_BONUS;
+    } else if (options.teamGoalsConceded > 1) {
+      rating += Math.max(-1.0, (options.teamGoalsConceded - 1) * RATING_CONCEDED_GOAL_PENALTY);
+    }
+  } else if (options.role === 'ATT' || options.role === 'MID') {
+    if (options.teamGoalsScored >= 3) {
+      rating += 0.2;
+    }
+  }
+
+  // Subtle ability nuance
+  rating += ((options.ability - 50) / 100) * 0.2;
+
+  // Optional noise
+  if (options.noise !== undefined) {
+    rating += options.noise;
+  }
+
+  // Clamp to [MIN_RATING, MAX_RATING] and round to exactly 1 decimal place
+  const clamped = Math.max(MIN_RATING, Math.min(MAX_RATING, rating));
+  return Number(clamped.toFixed(1));
+}
+
+export interface ComputeExternalMatchRatingsInput {
+  homeTeamId: string;
+  awayTeamId: string;
+  homeGoals: number;
+  awayGoals: number;
+  appearances: Array<{
+    playerId: string;
+    teamId: string;
+    minutesPlayed: number;
+    started?: boolean;
+    yellowCards?: number;
+    redCard?: boolean;
+  }>;
+  events: WorldMatchEvent[];
+  playerStates: Map<string, WorldPlayerFootballState>;
+  playerPositions?:
+    | Map<string, WorldFootballPosition>
+    | Record<string, WorldFootballPosition>
+    | ((id: string) => WorldFootballPosition | undefined);
+}
+
+/**
+ * Pure calculation of canonical match ratings for an externally resolved fixture.
+ * Only players with minutesPlayed > 0 receive ratings.
+ */
+export function computeExternalMatchRatings(
+  input: ComputeExternalMatchRatingsInput
+): WorldPlayerMatchRating[] {
+  const {
+    homeTeamId,
+    awayTeamId,
+    homeGoals,
+    awayGoals,
+    appearances,
+    events,
+    playerStates,
+    playerPositions,
+  } = input;
+
+  const goalsByPlayer = new Map<string, number>();
+  const assistsByPlayer = new Map<string, number>();
+  const yellowsByPlayer = new Set<string>();
+  const redsByPlayer = new Set<string>();
+
+  for (const ev of events) {
+    if (ev.type === 'GOAL') {
+      goalsByPlayer.set(ev.playerId, (goalsByPlayer.get(ev.playerId) ?? 0) + 1);
+      if (ev.assistPlayerId) {
+        assistsByPlayer.set(ev.assistPlayerId, (assistsByPlayer.get(ev.assistPlayerId) ?? 0) + 1);
+      }
+    } else if (ev.type === 'YELLOW_CARD') {
+      yellowsByPlayer.add(ev.playerId);
+    } else if (ev.type === 'SECOND_YELLOW_RED' || ev.type === 'STRAIGHT_RED') {
+      redsByPlayer.add(ev.playerId);
+    }
+  }
+
+  const homeWon = homeGoals > awayGoals;
+  const awayWon = awayGoals > homeGoals;
+
+  const ratings: WorldPlayerMatchRating[] = [];
+
+  for (const app of appearances) {
+    if (app.minutesPlayed <= 0) {
+      continue;
+    }
+
+    const isHome = app.teamId === homeTeamId;
+    const isWinner = isHome ? homeWon : awayWon;
+    const isLoser = isHome ? awayWon : homeWon;
+    const teamGoalsScored = isHome ? homeGoals : awayGoals;
+    const teamGoalsConceded = isHome ? awayGoals : homeGoals;
+
+    const pState = playerStates.get(app.playerId);
+    let pos: WorldFootballPosition | undefined;
+    if (playerPositions) {
+      if (typeof playerPositions === 'function') {
+        pos = playerPositions(app.playerId);
+      } else if (playerPositions instanceof Map) {
+        pos = playerPositions.get(app.playerId);
+      } else {
+        pos = playerPositions[app.playerId];
+      }
+    }
+    const role = mapPositionToBroadRole(pos);
+
+    const rating = computeParticipantRating({
+      role,
+      ability: pState?.ability ?? 50,
+      isWinner,
+      isLoser,
+      teamGoalsScored,
+      teamGoalsConceded,
+      goals: goalsByPlayer.get(app.playerId) ?? 0,
+      assists: assistsByPlayer.get(app.playerId) ?? 0,
+      hasYellowCard: yellowsByPlayer.has(app.playerId) || (app.yellowCards ?? 0) > 0,
+      hasRedCard: redsByPlayer.has(app.playerId) || Boolean(app.redCard),
+      noise: 0,
+    });
+
+    ratings.push({
+      playerId: app.playerId,
+      teamId: app.teamId,
+      rating,
+    });
+  }
+
+  return ratings;
 }
 
 // ============================================================================

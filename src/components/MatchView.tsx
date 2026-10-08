@@ -32,7 +32,30 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-interface MatchViewProps {
+import type {
+  WorldMatchViewModel,
+  WorldMatchViewPlayer,
+  WorldInteractiveMatchOutcome,
+  WorldInteractiveSubstitutionRecord,
+  WorldInteractiveDismissalRecord,
+} from '../career/worldMatchViewAdapter';
+import {
+  selectTeammateScorerForUserAssist,
+  selectBackgroundGoalScorer,
+  selectOutgoingPlayerForUserEntry,
+} from '../career/worldMatchViewAdapter';
+import type { WorldFootballPosition, WorldMatchEvent } from '../world/types';
+import {
+  createFixtureTeamSubstitutionState,
+  processSubstitutionRequest,
+} from '../competition/substitutionEngine';
+import type {
+  FixtureTeamSubstitutionState,
+  SubstitutionRequest,
+} from '../competition/types';
+
+export interface LegacyMatchViewProps {
+  mode?: 'legacy';
   player: Player;
   homeClub: Club;
   awayClub: Club;
@@ -41,43 +64,198 @@ interface MatchViewProps {
   onSkipMatch?: () => void;
 }
 
-export const MatchView: React.FC<MatchViewProps> = ({
-  player,
-  homeClub,
-  awayClub,
-  competitionName,
-  onMatchComplete,
-}) => {
-  const isPlayerHome = player.currentClubId === homeClub.id;
+export interface WorldMatchViewProps {
+  mode: 'world';
+  player: Player;
+  worldModel: WorldMatchViewModel;
+  onWorldMatchComplete: (outcome: WorldInteractiveMatchOutcome) => void;
+  homeClub?: Club;
+  awayClub?: Club;
+  competitionName?: string;
+  onMatchComplete?: (result: MatchSimulationResult) => void;
+  onSkipMatch?: () => void;
+}
+
+export type MatchViewProps = LegacyMatchViewProps | WorldMatchViewProps;
+
+export function isWorldMatchViewProps(props: MatchViewProps): props is WorldMatchViewProps {
+  return props.mode === 'world';
+}
+
+export const MatchView: React.FC<MatchViewProps> = (props) => {
+  const { player } = props;
+  const isWorldMode = isWorldMatchViewProps(props);
+  const worldModel = isWorldMode ? props.worldModel : undefined;
+  const onMatchComplete = props.onMatchComplete;
+  const onWorldMatchComplete = isWorldMode ? props.onWorldMatchComplete : undefined;
+
+  const isPlayerHome = isWorldMode
+    ? worldModel!.isUserHome
+    : (player.currentClubId === props.homeClub?.id);
+
+  // Presentation clubs (does NOT fabricate fake legacy Club objects)
+  const homeClub = useMemo(() => {
+    if (isWorldMode && worldModel) {
+      return {
+        id: worldModel.home.clubId,
+        name: worldModel.home.name,
+        shortName: worldModel.home.shortName,
+        stadiumName: 'Home venue',
+        primaryColor: '#334155',
+        secondaryColor: '#64748b',
+        managerName: worldModel.home.managerName,
+        league: worldModel.competitionShortName,
+        reputation: 75,
+      } as unknown as Club;
+    }
+    return props.homeClub!;
+  }, [isWorldMode, worldModel, props.homeClub]);
+
+  const awayClub = useMemo(() => {
+    if (isWorldMode && worldModel) {
+      return {
+        id: worldModel.away.clubId,
+        name: worldModel.away.name,
+        shortName: worldModel.away.shortName,
+        stadiumName: 'Away venue',
+        primaryColor: '#475569',
+        secondaryColor: '#64748b',
+        managerName: worldModel.away.managerName,
+        league: worldModel.competitionShortName,
+        reputation: 75,
+      } as unknown as Club;
+    }
+    return props.awayClub!;
+  }, [isWorldMode, worldModel, props.awayClub]);
+
   const playerClub = isPlayerHome ? homeClub : awayClub;
   const opponentClub = isPlayerHome ? awayClub : homeClub;
 
   // Real-World League Rules and Disciplinary Accumulation Set
   const leagueRuleSet: LeagueRuleSet = useMemo(() => {
+    if (isWorldMode && worldModel) {
+      return {
+        id: worldModel.ruleSet.id,
+        name: worldModel.competitionName,
+        shortName: worldModel.competitionShortName,
+        leagueName: worldModel.competitionName,
+        country: 'Global',
+        tier: 1,
+        matchBall: worldModel.ruleSet.presentation?.matchBall || 'Official Match Ball',
+        maxSubs: worldModel.ruleSet.substitutions.maxSubsRegulation,
+        maxSubs90Min: worldModel.ruleSet.substitutions.maxSubsRegulation,
+        maxSubWindows: worldModel.ruleSet.substitutions.maxStoppageWindows,
+        benchSize: worldModel.ruleSet.substitutions.benchSize,
+        extraTimeSubAllowed: worldModel.ruleSet.substitutions.extraTimeExtraSub > 0,
+        maxYellowsPerSeason: worldModel.ruleSet.discipline.yellowThresholds[0]?.cards ?? 5,
+        yellowCardSuspensionThreshold: worldModel.ruleSet.discipline.yellowThresholds[0]?.cards ?? 5,
+        redCardMatchSuspension: worldModel.ruleSet.discipline.straightRedDefaultMatches,
+        secondYellowSuspensionMatches: worldModel.ruleSet.discipline.secondYellowRedMatches,
+        suspensionPolicyName: worldModel.ruleSet.discipline.policyName,
+      } as unknown as LeagueRuleSet;
+    }
     return getLeagueRuleSet(playerClub.league);
-  }, [playerClub.league]);
+  }, [isWorldMode, worldModel, playerClub.league]);
 
-  // Competition Rules (e.g. UEFA Champions League vs Premier League vs NPFL)
+  // Competition Rules
   const competitionRules: CompetitionRules = useMemo(() => {
-    return getCompetitionRules(competitionName || playerClub.league, playerClub.league);
-  }, [competitionName, playerClub.league]);
+    if (isWorldMode && worldModel) {
+      return {
+        competitionName: worldModel.competitionName,
+        shortName: worldModel.competitionShortName,
+        category: 'LEAGUE',
+        maxSubs90Min: worldModel.ruleSet.substitutions.maxSubsRegulation,
+        maxSubWindows: worldModel.ruleSet.substitutions.maxStoppageWindows,
+        benchSize: worldModel.ruleSet.substitutions.benchSize,
+        extraTimeSubAllowed: worldModel.ruleSet.substitutions.extraTimeExtraSub > 0,
+        extraTimeEnabled: worldModel.ruleSet.format.extraTimeEnabled,
+        penaltiesEnabled: worldModel.ruleSet.format.penaltiesEnabled,
+        varEnabled: worldModel.ruleSet.technology.varEnabled,
+        matchBall: worldModel.ruleSet.presentation?.matchBall || 'Official Match Ball',
+        badgeColor: worldModel.ruleSet.presentation?.primaryColor || '#047857',
+      } as unknown as CompetitionRules;
+    }
+    return getCompetitionRules(props.competitionName || playerClub.league, playerClub.league);
+  }, [isWorldMode, worldModel, props.competitionName, playerClub.league]);
 
-  // LeagueEngine Matchup Validation (strictly validates legal league/tournament rivals)
+  // LeagueEngine Matchup Validation
   const matchupValidation = useMemo(() => {
-    return validateFixtureMatchup(homeClub, awayClub, competitionRules.competitionName);
-  }, [homeClub, awayClub, competitionRules.competitionName]);
+    if (isWorldMode) {
+      return { isValid: true };
+    }
+    return validateFixtureMatchup(props.homeClub!, props.awayClub!, competitionRules.competitionName);
+  }, [isWorldMode, props.homeClub, props.awayClub, competitionRules.competitionName]);
 
-  // Squad Rosters Mapped to Tournament Squad Limits (e.g. 20-man / 9 bench for EPL vs 23-man / 12 bench for UCL)
-  const rawHomeRoster = useMemo(() => getClubRoster(homeClub.id, homeClub.name, homeClub.reputation), [homeClub]);
-  const rawAwayRoster = useMemo(() => getClubRoster(awayClub.id, awayClub.name, awayClub.reputation), [awayClub]);
+  // Squad Rosters (In WORLD mode: NEVER call getClubRoster)
+  const rawHomeRoster = useMemo(() => {
+    if (isWorldMode) return null;
+    return getClubRoster(props.homeClub!.id, props.homeClub!.name, props.homeClub!.reputation);
+  }, [isWorldMode, props.homeClub]);
 
-  const homeRoster = useMemo(() => mapCompetitionRoster(rawHomeRoster, competitionRules), [rawHomeRoster, competitionRules]);
-  const awayRoster = useMemo(() => mapCompetitionRoster(rawAwayRoster, competitionRules), [rawAwayRoster, competitionRules]);
+  const rawAwayRoster = useMemo(() => {
+    if (isWorldMode) return null;
+    return getClubRoster(props.awayClub!.id, props.awayClub!.name, props.awayClub!.reputation);
+  }, [isWorldMode, props.awayClub]);
+
+  const homeRoster = useMemo(() => {
+    if (isWorldMode && worldModel) {
+      return {
+        startingXI: worldModel.home.startingXI.map((p, idx) => ({
+          number: p.number ?? (idx + 1),
+          name: p.displayName,
+          position: p.position,
+        } as SquadPlayer)),
+        bench: worldModel.home.bench.map((p, idx) => ({
+          number: p.number ?? (idx + 12),
+          name: p.displayName,
+          position: p.position,
+        } as SquadPlayer)),
+      };
+    }
+    return mapCompetitionRoster(rawHomeRoster!, competitionRules);
+  }, [isWorldMode, worldModel, rawHomeRoster, competitionRules]);
+
+  const awayRoster = useMemo(() => {
+    if (isWorldMode && worldModel) {
+      return {
+        startingXI: worldModel.away.startingXI.map((p, idx) => ({
+          number: p.number ?? (idx + 1),
+          name: p.displayName,
+          position: p.position,
+        } as SquadPlayer)),
+        bench: worldModel.away.bench.map((p, idx) => ({
+          number: p.number ?? (idx + 12),
+          name: p.displayName,
+          position: p.position,
+        } as SquadPlayer)),
+      };
+    }
+    return mapCompetitionRoster(rawAwayRoster!, competitionRules);
+  }, [isWorldMode, worldModel, rawAwayRoster, competitionRules]);
 
   // Player's Match & Disciplinary Role
-  const isInjured = (player.injuryWeeks || 0) > 0;
-  const isSuspended = (player.suspensionWeeks || 0) > 0;
-  const isStarting = !isInjured && !isSuspended && player.managerTrust >= 40 && player.energy >= 40;
+  const isInjured = isWorldMode
+    ? worldModel!.userAvailability === 'INJURED'
+    : (player.injuryWeeks || 0) > 0;
+
+  const isSuspended = isWorldMode
+    ? worldModel!.userAvailability === 'SUSPENDED'
+    : (player.suspensionWeeks || 0) > 0;
+
+  const isStarting = isWorldMode
+    ? worldModel!.userSelectionStatus === 'STARTER'
+    : (!isInjured && !isSuspended && player.managerTrust >= 40 && player.energy >= 40);
+
+  const isBench = isWorldMode
+    ? worldModel!.userSelectionStatus === 'BENCH'
+    : false;
+
+  const isNotSelectedOrUnavailable = isWorldMode
+    ? (worldModel!.userSelectionStatus === 'NOT_SELECTED' ||
+       worldModel!.userSelectionStatus === 'UNAVAILABLE' ||
+       worldModel!.userAvailability !== 'AVAILABLE')
+    : false;
+
   const [playerSubbedIn, setPlayerSubbedIn] = useState<boolean>(isStarting);
   const [playerSubbedMinute, setPlayerSubbedMinute] = useState<number>(isStarting ? 1 : 0);
   const [playerSubbedOff, setPlayerSubbedOff] = useState<boolean>(false);
@@ -86,27 +264,104 @@ export const MatchView: React.FC<MatchViewProps> = ({
   // In-Match Cards Disciplinary Tracking
   const [playerYellowCardsMatch, setPlayerYellowCardsMatch] = useState<number>(0);
   const [playerRedCardsMatch, setPlayerRedCardsMatch] = useState<number>(0);
+  const [isDismissed, setIsDismissed] = useState<boolean>(false);
+  const [dismissalMinute, setDismissalMinute] = useState<number | null>(null);
+
+  // WORLD MODE: On-Pitch Rosters and Substitution Engine State
+  const [onPitchHomeIds, setOnPitchHomeIds] = useState<string[]>(() => {
+    return isWorldMode && worldModel ? worldModel.home.startingXI.map(p => p.playerId) : [];
+  });
+  const [onPitchAwayIds, setOnPitchAwayIds] = useState<string[]>(() => {
+    return isWorldMode && worldModel ? worldModel.away.startingXI.map(p => p.playerId) : [];
+  });
+
+  const [userTeamSubState, setUserTeamSubState] = useState<FixtureTeamSubstitutionState | null>(() => {
+    if (!isWorldMode || !worldModel) return null;
+    const userTeam = isPlayerHome ? worldModel.home : worldModel.away;
+    return createFixtureTeamSubstitutionState(
+      worldModel.fixtureId,
+      userTeam.clubId,
+      worldModel.competitionId,
+      '2026-27',
+      worldModel.ruleSet.id,
+      userTeam.startingXI.map(p => p.playerId),
+      userTeam.bench.map(p => p.playerId)
+    );
+  });
+
+  const [worldEvents, setWorldEvents] = useState<WorldMatchEvent[]>([]);
+  const [worldSubs, setWorldSubs] = useState<WorldInteractiveSubstitutionRecord[]>([]);
+  const [worldDismissals, setWorldDismissals] = useState<WorldInteractiveDismissalRecord[]>([]);
+  const [worldMatchOutcome, setWorldMatchOutcome] = useState<WorldInteractiveMatchOutcome | null>(null);
+
+  // Position and State Maps for World Mode Player Lookups
+  const worldPosMap = useMemo(() => {
+    if (!isWorldMode || !worldModel) return new Map<string, WorldFootballPosition>();
+    const map = new Map<string, WorldFootballPosition>();
+    for (const p of [...worldModel.home.startingXI, ...worldModel.home.bench, ...worldModel.away.startingXI, ...worldModel.away.bench]) {
+      map.set(p.playerId, p.position);
+    }
+    return map;
+  }, [isWorldMode, worldModel]);
+
+  const worldStateMap = useMemo(() => {
+    if (!isWorldMode || !worldModel) return new Map();
+    const map = new Map();
+    for (const p of [...worldModel.home.startingXI, ...worldModel.home.bench, ...worldModel.away.startingXI, ...worldModel.away.bench]) {
+      map.set(p.playerId, { ability: p.ability, fitness: p.fitness, sharpness: p.sharpness, form: p.form, morale: p.morale });
+    }
+    return map;
+  }, [isWorldMode, worldModel]);
 
   const currentTotalYellows = (player.seasonStats?.yellowCards || 0) + playerYellowCardsMatch;
   const disciplinaryStatus = useMemo(() => {
     return getLeagueDisciplinaryStatus(leagueRuleSet, currentTotalYellows, player.currentWeek);
   }, [leagueRuleSet, currentTotalYellows, player.currentWeek]);
+
   const [tacticalSubPrompt, setTacticalSubPrompt] = useState<{
     minute: number;
     replacement: SquadPlayer;
   } | null>(null);
 
   // Derby & Rivalry Detection
-  const derbyInfo = useMemo(() => getDerbyMatchDetails(homeClub, awayClub), [homeClub, awayClub]);
+  const derbyInfo = useMemo(() => {
+    if (isWorldMode) return { isDerby: false, derbyTitle: undefined };
+    return getDerbyMatchDetails(props.homeClub!, props.awayClub!);
+  }, [isWorldMode, props.homeClub, props.awayClub]);
 
-  // Tactical Blueprint & Coach Instructions
-  const [selectedFormation, setSelectedFormation] = useState<FormationType>(() => getManagerMandatedFormation(playerClub));
-  const [tacticalMentality, setTacticalMentality] = useState<'ATTACKING' | 'BALANCED' | 'DEFENSIVE'>('BALANCED');
+  // Tactical Blueprint & Coach Instructions (In WORLD mode: Manager Authority is Locked)
+  const managerMandatedFormation = useMemo<FormationType>(() => {
+    if (isWorldMode && worldModel) {
+      const userTeam = isPlayerHome ? worldModel.home : worldModel.away;
+      switch (userTeam.formation) {
+        case '4-3-3': return '4-3-3 Attacking';
+        case '4-2-3-1': return '4-2-3-1 Balanced';
+        case '3-5-2': return '3-5-2 Wing-backs';
+        case '4-4-2': return '4-4-2 Diamond';
+        case '5-3-2': return '5-3-2 Park The Bus';
+        case '4-1-4-1': return '4-2-3-1 Balanced';
+        default: return '4-3-3 Attacking';
+      }
+    }
+    return getManagerMandatedFormation(playerClub);
+  }, [isWorldMode, worldModel, isPlayerHome, playerClub]);
+
+  const managerMandatedMentality = useMemo<'ATTACKING' | 'BALANCED' | 'DEFENSIVE'>(() => {
+    if (isWorldMode && worldModel) {
+      const userTeam = isPlayerHome ? worldModel.home : worldModel.away;
+      return userTeam.tacticalIntent;
+    }
+    return 'BALANCED';
+  }, [isWorldMode, worldModel, isPlayerHome]);
+
+  const [selectedFormation, setSelectedFormation] = useState<FormationType>(managerMandatedFormation);
+  const [tacticalMentality, setTacticalMentality] = useState<'ATTACKING' | 'BALANCED' | 'DEFENSIVE'>(managerMandatedMentality);
   const [tacticalPressing, setTacticalPressing] = useState<'HIGH_PRESS' | 'MID_BLOCK' | 'LOW_BLOCK'>('HIGH_PRESS');
 
   useEffect(() => {
-    setSelectedFormation(getManagerMandatedFormation(playerClub));
-  }, [playerClub]);
+    setSelectedFormation(managerMandatedFormation);
+    setTacticalMentality(managerMandatedMentality);
+  }, [managerMandatedFormation, managerMandatedMentality]);
 
   const [selectedFocus, setSelectedFocus] = useState<TacticalFocusType>('HIGH_PRESS');
   const activeFocusConfig = useMemo(() => {
@@ -198,22 +453,28 @@ export const MatchView: React.FC<MatchViewProps> = ({
 
   // Initialize moments on mount if player is active
   useEffect(() => {
-    if (!isInjured) {
+    if (!isInjured && !isSuspended && !isNotSelectedOrUnavailable) {
       const generated = generateKeyMatchMoments(player, opponentClub);
-      setMoments(generated);
+      if (isWorldMode && isBench) {
+        setMoments(generated.filter(m => m.minute >= 60));
+      } else {
+        setMoments(generated);
+      }
     } else {
       setMoments([]);
     }
-  }, [player, opponentClub, isInjured]);
+  }, [player, opponentClub, isInjured, isSuspended, isNotSelectedOrUnavailable, isWorldMode, isBench]);
 
   const startMatch = () => {
     sounds.playWhistle();
     setMatchPhase('LIVE_SIM');
     setCurrentMinute(1);
+    const venueText = isWorldMode ? 'Home venue' : homeClub.stadiumName;
+    const attendanceText = isWorldMode ? '45,000' : Math.round(homeClub.reputation * 620).toLocaleString();
     setEvents([
       { 
         minute: 1, 
-        text: `Kick-off at ${homeClub.stadiumName}! ${homeClub.name} vs ${awayClub.name} (${competitionRules.competitionName}). Official Ball: ${competitionRules.matchBall}. Rules: Max ${competitionRules.maxSubs90Min} substitutions in ${competitionRules.maxSubWindows} windows${competitionRules.extraTimeSubAllowed ? ' (+1 extra in ET)' : ''}. Attendance: ${Math.round(homeClub.reputation * 620).toLocaleString()}.`, 
+        text: `Kick-off at ${venueText}! ${homeClub.name} vs ${awayClub.name} (${competitionRules.competitionName}). Official Ball: ${competitionRules.matchBall}. Rules: Max ${competitionRules.maxSubs90Min} substitutions in ${competitionRules.maxSubWindows} windows${competitionRules.extraTimeSubAllowed ? ' (+1 extra in ET)' : ''}. Attendance: ${attendanceText}.`, 
         type: 'commentary' 
       }
     ]);
@@ -228,7 +489,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
         const nextMin = prev + 3;
 
         // Check if an interactive decision moment is scheduled at this minute
-        if (playerSubbedIn && !isInjured) {
+        if (playerSubbedIn && !isInjured && !isDismissed && !isNotSelectedOrUnavailable) {
           const nextMoment = moments[currentMomentIndex];
           if (nextMoment && nextMin >= nextMoment.minute && nextMin <= nextMoment.minute + 4) {
             clearInterval(timer);
@@ -237,63 +498,144 @@ export const MatchView: React.FC<MatchViewProps> = ({
           }
         }
 
-        // Tactical Sub: If player is on bench and not injured, manager brings them on around minute 60
-        // Enforced against real-world Competition substitution limits & stoppage windows (e.g. UCL vs Premier League)
-        const homeCanSub = validateCompetitionSubstitution(competitionRules, homeSubsUsed, homeSubWindowsUsed, nextMin > 90, nextMin === 45);
-        const awayCanSub = validateCompetitionSubstitution(competitionRules, awaySubsUsed, awaySubWindowsUsed, nextMin > 90, nextMin === 45);
+        // Tactical Sub: If player is on bench, bring them on around minute 60
+        if (!playerSubbedIn && !isInjured && !isDismissed && isBench && nextMin >= 60) {
+          if (isWorldMode && worldModel && userTeamSubState) {
+            const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
+            const onPitchUser = isPlayerHome ? onPitchHomeIds : onPitchAwayIds;
+            const outgoingId = selectOutgoingPlayerForUserEntry(
+              onPitchUser,
+              worldModel.userPlayer.position,
+              worldPosMap,
+              worldStateMap
+            ) ?? onPitchUser[0];
 
-        if (!playerSubbedIn && !isInjured && nextMin >= 60) {
-          const canPlayerSub = isPlayerHome ? homeCanSub.canSubstitute : awayCanSub.canSubstitute;
-          if (canPlayerSub) {
-            setPlayerSubbedIn(true);
-            setPlayerSubbedMinute(nextMin);
-            if (isPlayerHome) {
-              setHomeSubsUsed(s => s + 1);
-              setHomeSubWindowsUsed(w => w + 1);
-            } else {
-              setAwaySubsUsed(s => s + 1);
-              setAwaySubWindowsUsed(w => w + 1);
+            if (outgoingId) {
+              const request: SubstitutionRequest = {
+                id: `sub-user-entry-${nextMin}`,
+                fixtureId: worldModel.fixtureId,
+                teamId: userClubId,
+                competitionId: worldModel.competitionId,
+                seasonLabel: worldModel.seasonLabel,
+                windowId: nextMin === 45 ? 'HT' : `w-${nextMin}`,
+                phase: 'REGULATION',
+                stoppageType: nextMin === 45 ? 'HALF_TIME' : 'IN_PLAY',
+                changes: [{ playerOutId: outgoingId, playerInId: worldModel.userPlayer.playerId }],
+              };
+              const subRes = processSubstitutionRequest(userTeamSubState, request, worldModel.ruleSet);
+              if (subRes.accepted) {
+                setUserTeamSubState(subRes.state);
+                if (isPlayerHome) {
+                  setOnPitchHomeIds(subRes.state.onPitchPlayerIds);
+                  setHomeSubsUsed(s => s + 1);
+                  setHomeSubWindowsUsed(w => w + (subRes.state.records[subRes.state.records.length - 1]?.countedAsWindow ? 1 : 0));
+                } else {
+                  setOnPitchAwayIds(subRes.state.onPitchPlayerIds);
+                  setAwaySubsUsed(s => s + 1);
+                  setAwaySubWindowsUsed(w => w + (subRes.state.records[subRes.state.records.length - 1]?.countedAsWindow ? 1 : 0));
+                }
+                setWorldSubs(s => [
+                  ...s,
+                  {
+                    teamId: userClubId,
+                    playerOutId: outgoingId,
+                    playerInId: worldModel.userPlayer.playerId,
+                    minute: nextMin,
+                  },
+                ]);
+                setPlayerSubbedIn(true);
+                setPlayerSubbedMinute(nextMin);
+                sounds.playFanfare();
+                const allPlayers = [...worldModel.home.startingXI, ...worldModel.home.bench, ...worldModel.away.startingXI, ...worldModel.away.bench];
+                const outPlayerName = allPlayers.find(p => p.playerId === outgoingId)?.displayName ?? outgoingId;
+                setEvents(evts => [
+                  {
+                    minute: nextMin,
+                    text: `🔄 Tactical Substitution: Manager ${playerClub.managerName} brings ON #${player.jerseyNumber} ${player.firstName} ${player.lastName} (${player.position}) replacing ${outPlayerName}! (${worldModel.ruleSet.substitutions.maxSubsRegulation - (isPlayerHome ? homeSubsUsed + 1 : awaySubsUsed + 1)} subs remaining under ${competitionRules.shortName} regulations)`,
+                    type: 'commentary',
+                    isPlayerInvolved: true,
+                  },
+                  ...evts,
+                ]);
+              }
             }
-            sounds.playFanfare();
-            setEvents(evts => [
-              {
-                minute: nextMin,
-                text: `🔄 Tactical Substitution: Manager ${playerClub.managerName} brings ON #${player.jerseyNumber} ${player.firstName} ${player.lastName} (${player.position}) to inject energy! (${competitionRules.maxSubs90Min - (isPlayerHome ? homeSubsUsed + 1 : awaySubsUsed + 1)} subs remaining under ${competitionRules.shortName} regulations)`,
-                type: 'commentary',
-                isPlayerInvolved: true,
-              },
-              ...evts,
-            ]);
+          } else {
+            // Legacy mode fallback
+            const homeCanSub = validateCompetitionSubstitution(competitionRules, homeSubsUsed, homeSubWindowsUsed, nextMin > 90, nextMin === 45);
+            const awayCanSub = validateCompetitionSubstitution(competitionRules, awaySubsUsed, awaySubWindowsUsed, nextMin > 90, nextMin === 45);
+            const canPlayerSub = isPlayerHome ? homeCanSub.canSubstitute : awayCanSub.canSubstitute;
+            if (canPlayerSub) {
+              setPlayerSubbedIn(true);
+              setPlayerSubbedMinute(nextMin);
+              if (isPlayerHome) {
+                setHomeSubsUsed(s => s + 1);
+                setHomeSubWindowsUsed(w => w + 1);
+              } else {
+                setAwaySubsUsed(s => s + 1);
+                setAwaySubWindowsUsed(w => w + 1);
+              }
+              sounds.playFanfare();
+              setEvents(evts => [
+                {
+                  minute: nextMin,
+                  text: `🔄 Tactical Substitution: Manager ${playerClub.managerName} brings ON #${player.jerseyNumber} ${player.firstName} ${player.lastName} (${player.position}) to inject energy! (${competitionRules.maxSubs90Min - (isPlayerHome ? homeSubsUsed + 1 : awaySubsUsed + 1)} subs remaining under ${competitionRules.shortName} regulations)`,
+                  type: 'commentary',
+                  isPlayerInvolved: true,
+                },
+                ...evts,
+              ]);
+            }
           }
         }
 
         // Dynamic Match Fatigue Substitution Decision:
-        // If player started, is on the pitch, has not been subbed off, and fatigue reaches critical threshold (>65%)
         if (
           isStarting &&
           playerSubbedIn &&
           !playerSubbedOff &&
           !tacticalSubPrompt &&
+          !isDismissed &&
           nextMin >= 68 &&
           nextMin <= 78 &&
           fatiguePercent >= 65
         ) {
-          const canClubSub = isPlayerHome ? homeCanSub.canSubstitute : awayCanSub.canSubstitute;
-          if (canClubSub) {
-            clearInterval(timer);
-            const benchOptions = (isPlayerHome ? homeRoster : awayRoster).bench;
-            const replacement = benchOptions.find(b => b.position === player.position) || benchOptions[0];
-            setTacticalSubPrompt({
-              minute: nextMin,
-              replacement,
-            });
-            setMatchPhase('DECISION_PAUSED');
-            return nextMin;
+          if (isWorldMode && worldModel) {
+            const benchOptions = isPlayerHome ? worldModel.home.bench : worldModel.away.bench;
+            const usedInIds = new Set(worldSubs.map(s => s.playerInId));
+            const eligibleBench = benchOptions.filter(b => !usedInIds.has(b.playerId));
+            const chosen = eligibleBench.find(b => b.position === worldModel.userPlayer.position) || eligibleBench[0];
+            if (chosen) {
+              clearInterval(timer);
+              setTacticalSubPrompt({
+                minute: nextMin,
+                replacement: {
+                  number: chosen.number ?? 14,
+                  name: chosen.displayName,
+                  position: chosen.position,
+                } as SquadPlayer,
+              });
+              setMatchPhase('DECISION_PAUSED');
+              return nextMin;
+            }
+          } else {
+            const homeCanSub = validateCompetitionSubstitution(competitionRules, homeSubsUsed, homeSubWindowsUsed, nextMin > 90, nextMin === 45);
+            const awayCanSub = validateCompetitionSubstitution(competitionRules, awaySubsUsed, awaySubWindowsUsed, nextMin > 90, nextMin === 45);
+            const canClubSub = isPlayerHome ? homeCanSub.canSubstitute : awayCanSub.canSubstitute;
+            if (canClubSub) {
+              clearInterval(timer);
+              const benchOptions = (isPlayerHome ? homeRoster : awayRoster).bench;
+              const replacement = benchOptions.find(b => b.position === player.position) || benchOptions[0];
+              setTacticalSubPrompt({
+                minute: nextMin,
+                replacement,
+              });
+              setMatchPhase('DECISION_PAUSED');
+              return nextMin;
+            }
           }
         }
 
         // Granular event simulation based on tactical strength
-        // Rate-limited to prevent illogical high-scoring (typical football matches have 1-4 goals total)
         const totalGoalsSoFar = homeScore + awayScore;
         const goalProbability = totalGoalsSoFar >= 3 ? 0.04 : totalGoalsSoFar >= 2 ? 0.09 : 0.16;
 
@@ -313,12 +655,34 @@ export const MatchView: React.FC<MatchViewProps> = ({
               setAwayScore(s => s + 1);
             }
             sounds.playGoalRoar();
-            const scorers = attackingRoster.startingXI.filter(p => ['ST', 'LW', 'RW', 'CAM', 'CM'].includes(p.position));
-            const scorer = scorers[Math.floor(Math.random() * scorers.length)] || attackingRoster.startingXI[9];
+
+            let scorerName = '';
+            if (isWorldMode && worldModel) {
+              const attackingClubId = isHomeEvent ? worldModel.home.clubId : worldModel.away.clubId;
+              const attackingOnPitch = isHomeEvent ? onPitchHomeIds : onPitchAwayIds;
+              const scorerId = selectBackgroundGoalScorer(attackingOnPitch, worldPosMap, Math.random()) ?? attackingOnPitch[0];
+              const allPlayers = [...worldModel.home.startingXI, ...worldModel.home.bench, ...worldModel.away.startingXI, ...worldModel.away.bench];
+              const viewPlayer = allPlayers.find(p => p.playerId === scorerId);
+              scorerName = viewPlayer?.displayName ?? scorerId;
+              setWorldEvents(prev => [
+                ...prev,
+                {
+                  type: 'GOAL',
+                  teamId: attackingClubId,
+                  playerId: scorerId,
+                  minute: nextMin,
+                },
+              ]);
+            } else {
+              const scorers = attackingRoster.startingXI.filter(p => ['ST', 'LW', 'RW', 'CAM', 'CM'].includes(p.position));
+              const scorer = scorers[Math.floor(Math.random() * scorers.length)] || attackingRoster.startingXI[9];
+              scorerName = scorer.name;
+            }
+
             setEvents(evts => [
               { 
                 minute: nextMin, 
-                text: `⚽ GOAL! ${scorer.name} strikes for ${attackingClub.name}! Clinical finish into the corner.`, 
+                text: `⚽ GOAL! ${scorerName} strikes for ${attackingClub.name}! Clinical finish into the corner.`, 
                 type: 'goal' 
               },
               ...evts,
@@ -359,7 +723,8 @@ export const MatchView: React.FC<MatchViewProps> = ({
     matchPhase, currentMomentIndex, moments, homeClub, awayClub, homeScore, awayScore, 
     playerSubbedIn, playerSubbedOff, tacticalSubPrompt, isInjured, homeSubsUsed, awaySubsUsed, 
     homeSubWindowsUsed, awaySubWindowsUsed, leagueRuleSet, isPlayerHome, homeAttack, awayAttack, 
-    homeDefense, awayDefense, homeRoster, awayRoster, playerClub, player, fatiguePercent, isStarting
+    homeDefense, awayDefense, homeRoster, awayRoster, playerClub, player, fatiguePercent, isStarting,
+    isWorldMode, worldModel, userTeamSubState, onPitchHomeIds, onPitchAwayIds, isDismissed, isBench, isNotSelectedOrUnavailable
   ]);
 
   const handleDecision = (
@@ -368,12 +733,14 @@ export const MatchView: React.FC<MatchViewProps> = ({
     actionType: string
   ) => {
     sounds.playClick();
-    // Resolve moment taking into account match fatigue degradation on speed, agility, and composure
     const outcome = resolveMomentChoice(player, requiredAttrs, riskTier, actionType, {
       pace: -speedPenalty,
       agility: -agilityPenalty,
       composure: -composurePenalty,
     });
+
+    const currentMoment = moments[currentMomentIndex];
+    const momentMin = currentMoment?.minute || currentMinute;
 
     if (outcome.success) {
       if (outcome.scoreDelta === 'goal') {
@@ -382,15 +749,50 @@ export const MatchView: React.FC<MatchViewProps> = ({
         setPlayerGoals(g => g + 1);
         if (isPlayerHome) setHomeScore(s => s + 1);
         else setAwayScore(s => s + 1);
+
+        if (isWorldMode && worldModel) {
+          const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
+          setWorldEvents(prev => [
+            ...prev,
+            {
+              type: 'GOAL',
+              teamId: userClubId,
+              playerId: worldModel.userPlayer.playerId,
+              minute: momentMin,
+            },
+          ]);
+        }
       } else if (outcome.scoreDelta === 'assist') {
         sounds.playGoalRoar();
         setPlayerAssists(a => a + 1);
         if (isPlayerHome) setHomeScore(s => s + 1);
         else setAwayScore(s => s + 1);
+
+        if (isWorldMode && worldModel) {
+          const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
+          const userOnPitch = isPlayerHome ? onPitchHomeIds : onPitchAwayIds;
+          const teammateScorerId = selectTeammateScorerForUserAssist(
+            userOnPitch,
+            worldModel.userPlayer.playerId,
+            worldPosMap,
+            worldStateMap
+          ) ?? worldModel.userPlayer.playerId;
+
+          setWorldEvents(prev => [
+            ...prev,
+            {
+              type: 'GOAL',
+              teamId: userClubId,
+              playerId: teammateScorerId,
+              assistPlayerId: worldModel.userPlayer.playerId,
+              minute: momentMin,
+            },
+          ]);
+        }
       }
     }
 
-    // Disciplinary Card Logic: High-risk defensive challenges or failed tackles can incur bookings
+    // Disciplinary Card Logic
     let bookingCommentary = '';
     if (!outcome.success && (actionType === 'tackle' || riskTier === 'High Risk High Reward') && Math.random() < 0.32) {
       if (playerYellowCardsMatch === 0) {
@@ -400,21 +802,63 @@ export const MatchView: React.FC<MatchViewProps> = ({
         bookingCommentary = willTriggerSuspension
           ? ` 🟨 BOOKING: Referee shows a yellow card for a cynical foul! ${player.firstName} ${player.lastName} reaches ${leagueRuleSet.yellowCardSuspensionThreshold} yellow cards in ${leagueRuleSet.shortName} (Automatic 1-match suspension triggered!).`
           : ` 🟨 BOOKING: Referee shows a yellow card! Season total: ${currentTotalYellows + 1}/${leagueRuleSet.yellowCardSuspensionThreshold} yellow cards.`;
+
+        if (isWorldMode && worldModel) {
+          const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
+          setWorldEvents(prev => [
+            ...prev,
+            {
+              type: 'YELLOW_CARD',
+              teamId: userClubId,
+              playerId: worldModel.userPlayer.playerId,
+              minute: momentMin,
+            },
+          ]);
+        }
       } else if (playerYellowCardsMatch === 1) {
         setPlayerYellowCardsMatch(2);
         setPlayerRedCardsMatch(1);
+        setIsDismissed(true);
+        setDismissalMinute(momentMin);
         setPlayerSubbedOff(true);
-        setSubbedOffMinute(moments[currentMomentIndex]?.minute || 75);
+        setSubbedOffMinute(momentMin);
         sounds.playWhistle();
         bookingCommentary = ` 🟥 RED CARD! Second yellow card shown to ${player.firstName} ${player.lastName}! Dismissed under ${leagueRuleSet.suspensionPolicyName}! Down to 10 men!`;
+
+        if (isWorldMode && worldModel) {
+          const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
+          setWorldEvents(prev => [
+            ...prev,
+            {
+              type: 'SECOND_YELLOW_RED',
+              teamId: userClubId,
+              playerId: worldModel.userPlayer.playerId,
+              minute: momentMin,
+            },
+          ]);
+          setWorldDismissals(prev => [
+            ...prev,
+            {
+              teamId: userClubId,
+              playerId: worldModel.userPlayer.playerId,
+              minute: momentMin,
+            },
+          ]);
+          if (isPlayerHome) {
+            setOnPitchHomeIds(prev => prev.filter(id => id !== worldModel.userPlayer.playerId));
+          } else {
+            setOnPitchAwayIds(prev => prev.filter(id => id !== worldModel.userPlayer.playerId));
+          }
+        }
       }
     }
 
-    const currentMoment = moments[currentMomentIndex];
-    setResolvedMoments(prev => [
-      ...prev,
-      { momentId: currentMoment.id, success: outcome.success, scoreDelta: outcome.scoreDelta }
-    ]);
+    if (currentMoment) {
+      setResolvedMoments(prev => [
+        ...prev,
+        { momentId: currentMoment.id, success: outcome.success, scoreDelta: outcome.scoreDelta }
+      ]);
+    }
 
     setActiveMomentOutcome({
       text: outcome.commentary + bookingCommentary,
@@ -423,7 +867,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
 
     setEvents(evts => [
       {
-        minute: currentMoment.minute,
+        minute: momentMin,
         text: outcome.commentary + bookingCommentary,
         type: outcome.scoreDelta === 'goal' ? 'goal' : outcome.scoreDelta === 'assist' ? 'assist' : bookingCommentary ? 'card' : 'moment',
         isPlayerInvolved: true,
@@ -443,6 +887,46 @@ export const MatchView: React.FC<MatchViewProps> = ({
     sounds.playFanfare();
     const subMin = tacticalSubPrompt.minute;
     const replacement = tacticalSubPrompt.replacement;
+
+    if (isWorldMode && worldModel && userTeamSubState) {
+      const userClubId = isPlayerHome ? worldModel.home.clubId : worldModel.away.clubId;
+      const benchOptions = isPlayerHome ? worldModel.home.bench : worldModel.away.bench;
+      const usedInIds = new Set(worldSubs.map(s => s.playerInId));
+      const eligibleBench = benchOptions.filter(b => !usedInIds.has(b.playerId));
+      const repPlayer = eligibleBench.find(b => b.displayName === replacement.name) || eligibleBench[0];
+
+      if (repPlayer) {
+        const request: SubstitutionRequest = {
+          id: `sub-fatigue-${subMin}`,
+          fixtureId: worldModel.fixtureId,
+          teamId: userClubId,
+          competitionId: worldModel.competitionId,
+          seasonLabel: worldModel.seasonLabel,
+          windowId: `w-${subMin}`,
+          phase: 'REGULATION',
+          stoppageType: 'IN_PLAY',
+          changes: [{ playerOutId: worldModel.userPlayer.playerId, playerInId: repPlayer.playerId }],
+        };
+        const subRes = processSubstitutionRequest(userTeamSubState, request, worldModel.ruleSet);
+        if (subRes.accepted) {
+          setUserTeamSubState(subRes.state);
+          if (isPlayerHome) {
+            setOnPitchHomeIds(subRes.state.onPitchPlayerIds);
+          } else {
+            setOnPitchAwayIds(subRes.state.onPitchPlayerIds);
+          }
+          setWorldSubs(prev => [
+            ...prev,
+            {
+              teamId: userClubId,
+              playerOutId: worldModel.userPlayer.playerId,
+              playerInId: repPlayer.playerId,
+              minute: subMin,
+            },
+          ]);
+        }
+      }
+    }
 
     setPlayerSubbedOff(true);
     setSubbedOffMinute(subMin);
@@ -493,6 +977,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
     let simHomeScore = homeScore;
     let simAwayScore = awayScore;
     const additionalEvents: MatchLiveEvent[] = [];
+    const additionalWorldEvents: WorldMatchEvent[] = [];
     
     // Simulate remaining minutes in step chunks
     for (let min = Math.max(currentMinute + 3, 15); min <= 90; min += 8) {
@@ -510,11 +995,30 @@ export const MatchView: React.FC<MatchViewProps> = ({
         if (Math.random() < goalProbability) {
           if (isHomeEvent) simHomeScore++;
           else simAwayScore++;
-          const scorers = attackingRoster.startingXI.filter(p => ['ST', 'LW', 'RW', 'CAM', 'CM'].includes(p.position));
-          const scorer = scorers[Math.floor(Math.random() * scorers.length)] || attackingRoster.startingXI[9];
+
+          let scorerName = '';
+          if (isWorldMode && worldModel) {
+            const attackingClubId = isHomeEvent ? worldModel.home.clubId : worldModel.away.clubId;
+            const attackingOnPitch = isHomeEvent ? onPitchHomeIds : onPitchAwayIds;
+            const scorerId = selectBackgroundGoalScorer(attackingOnPitch, worldPosMap, Math.random()) ?? attackingOnPitch[0];
+            const allPlayers = [...worldModel.home.startingXI, ...worldModel.home.bench, ...worldModel.away.startingXI, ...worldModel.away.bench];
+            const viewPlayer = allPlayers.find(p => p.playerId === scorerId);
+            scorerName = viewPlayer?.displayName ?? scorerId;
+            additionalWorldEvents.push({
+              type: 'GOAL',
+              teamId: attackingClubId,
+              playerId: scorerId,
+              minute: min,
+            });
+          } else {
+            const scorers = attackingRoster.startingXI.filter(p => ['ST', 'LW', 'RW', 'CAM', 'CM'].includes(p.position));
+            const scorer = scorers[Math.floor(Math.random() * scorers.length)] || attackingRoster.startingXI[9];
+            scorerName = scorer.name;
+          }
+
           additionalEvents.push({
             minute: min,
-            text: `⚽ GOAL! ${scorer.name} finishes clinically for ${attackingClub.name}!`,
+            text: `⚽ GOAL! ${scorerName} finishes clinically for ${attackingClub.name}!`,
             type: 'goal'
           });
         }
@@ -530,20 +1034,28 @@ export const MatchView: React.FC<MatchViewProps> = ({
       });
     }
 
+    if (additionalWorldEvents.length > 0) {
+      setWorldEvents(prev => [...prev, ...additionalWorldEvents]);
+    }
+
     const allEvents = [...additionalEvents.reverse(), ...events];
     setEvents(allEvents);
     setHomeScore(simHomeScore);
     setAwayScore(simAwayScore);
     setCurrentMinute(90);
-    finishMatch(simHomeScore, simAwayScore);
+
+    const mergedWorldEvents = [...worldEvents, ...additionalWorldEvents];
+    finishMatch(simHomeScore, simAwayScore, mergedWorldEvents);
   };
 
   // Complete Match: UNIFIED SINGLE-SOURCE-OF-TRUTH SCORE!
-  const finishMatch = (exactHScore = homeScore, exactAScore = awayScore) => {
+  const finishMatch = (exactHScore = homeScore, exactAScore = awayScore, finalWorldEvents = worldEvents) => {
     sounds.playWhistle();
 
-    const minutesPlayed = isInjured || isSuspended
+    const minutesPlayed = (isInjured || isSuspended || isNotSelectedOrUnavailable)
       ? 0 
+      : isDismissed && dismissalMinute
+      ? dismissalMinute
       : playerSubbedOff && subbedOffMinute
       ? Math.max(10, subbedOffMinute - (isStarting ? 1 : playerSubbedMinute))
       : isStarting 
@@ -581,6 +1093,21 @@ export const MatchView: React.FC<MatchViewProps> = ({
     simResult.playerRedCards = playerRedCardsMatch;
     simResult.isSuspendedNextMatch = isSuspendedNext;
     simResult.suspensionReason = isSuspendedNext ? suspensionReason : undefined;
+
+    if (isWorldMode && worldModel) {
+      const outcome: WorldInteractiveMatchOutcome = {
+        fixtureId: worldModel.fixtureId,
+        homeGoals: exactHScore,
+        awayGoals: exactAScore,
+        events: finalWorldEvents,
+        substitutions: worldSubs,
+        dismissals: worldDismissals,
+      };
+      setWorldMatchOutcome(outcome);
+      if (onWorldMatchComplete) {
+        onWorldMatchComplete(outcome);
+      }
+    }
 
     setFinalResult(simResult);
     setMatchPhase('POST_MATCH');
@@ -720,9 +1247,9 @@ export const MatchView: React.FC<MatchViewProps> = ({
               club={playerClub}
               opponentClub={opponentClub}
               selectedFormation={selectedFormation}
-              onSelectFormation={setSelectedFormation}
+              onSelectFormation={isWorldMode ? () => {} : setSelectedFormation}
               tacticalMentality={tacticalMentality}
-              onSelectMentality={setTacticalMentality}
+              onSelectMentality={isWorldMode ? () => {} : setTacticalMentality}
               tacticalPressing={tacticalPressing}
               onSelectPressing={setTacticalPressing}
               onConfirmKickoff={startMatch}
@@ -731,6 +1258,7 @@ export const MatchView: React.FC<MatchViewProps> = ({
               isStarting={isStarting}
               isInjured={isInjured}
               isSuspended={isSuspended}
+              isTacticsLocked={isWorldMode}
             />
           )}
 
@@ -1479,7 +2007,14 @@ export const MatchView: React.FC<MatchViewProps> = ({
           {/* Complete Match and Return Button */}
           <div className="text-center pt-2">
             <button
-              onClick={() => onMatchComplete(finalResult)}
+              onClick={() => {
+                if (isWorldMode && worldMatchOutcome) {
+                  onWorldMatchComplete?.(worldMatchOutcome);
+                }
+                if (onMatchComplete && finalResult) {
+                  onMatchComplete(finalResult);
+                }
+              }}
               className="py-3.5 px-8 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-xl shadow-lg transition-all cursor-pointer"
             >
               Continue to Post-Match Debrief & Headquarters

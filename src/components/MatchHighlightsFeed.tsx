@@ -6,10 +6,16 @@ import {
 } from 'lucide-react';
 import { sounds } from '../utils/soundFx';
 
+export interface HighlightsFeedClubPresentation {
+  name?: string;
+  shortName?: string;
+  primaryColor?: string;
+}
+
 interface MatchHighlightsFeedProps {
   events: MatchLiveEvent[];
-  homeClub: Club;
-  awayClub: Club;
+  homeClub?: Club | HighlightsFeedClubPresentation;
+  awayClub?: Club | HighlightsFeedClubPresentation;
   player: Player;
   isLive?: boolean;
 }
